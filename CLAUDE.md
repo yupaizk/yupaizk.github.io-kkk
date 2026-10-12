@@ -10,11 +10,12 @@
 ## 生成器
 
 - `public/undertone/index.html` 是單一 HTML 檔（p5.js）。介面和生成邏輯由使用者決定，沒被要求就不要改。
-- `window.claude.use(...)` 由 `public/undertone/claude-shim.js` 提供，介面和 claude.ai 的一樣（sample.json、db.collection().doc()/add()/orderBy()、assets.upload/delete、downloads.save）。新功能需要新的介面時，加在 shim 和 `worker/index.js`，不要改生成器去配合後端。
-- 圖片網址是 `/_blob/<id>`，由 worker 從 D1 讀出來。
+- `window.claude.use(...)` 由 `public/undertone/claude-shim.js` 提供，介面和 claude.ai 的一樣（sample.json、db.collection().doc()/add()/orderBy()、assets.upload/delete、downloads.save）。新功能需要新的介面時，加在 shim 和 `server.mjs`，不要改生成器去配合後端。
+- p5.js 和 MediaPipe Hands 放在 `public/undertone/vendor/`，展場沒有穩定網路也能載入。
+- 圖片網址是 `/_blob/<id>`，由 `server.mjs` 從 `data/blobs/` 讀出來。
 
-## 後端
+## 執行方式
 
-- `worker/index.js`：Cloudflare Worker，資料存在 D1（`schema.sql`）。
-- 密碼、API 金鑰只放 Secret 或 `.dev.vars`，不能寫進 repo。
-- 這個 repo 是公開的：測試紀錄、使用者照片不要 commit。
+- 在使用者自己的 Windows 電腦上跑：點兩下 `啟動 Undertone.bat` → `server.mjs`（只聽 127.0.0.1:8787）。
+- 測試紀錄存在 `data/db/records/*.json`，圖片在 `data/blobs/`。API 金鑰在 `settings.txt`。
+- 這個 repo 是公開的：`data/`、`settings.txt`、`undertone-old-data/`、使用者照片都不要 commit。

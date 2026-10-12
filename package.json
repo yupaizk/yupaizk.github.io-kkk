@@ -3,16 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "db:init": "wrangler d1 execute undertone --remote --file=schema.sql",
-    "db:init:local": "wrangler d1 execute undertone --local --file=schema.sql",
-    "import-old": "node scripts/import-old-data.mjs"
+    "start": "node server.mjs --open"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0"
-  },
-  "devDependencies": {
-    "wrangler": "^4.149.0"
   }
 }

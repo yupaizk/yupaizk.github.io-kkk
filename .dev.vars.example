@@ -1,3 +1,0 @@
-# 本機測試用，複製成 .dev.vars 再填。不要 commit .dev.vars。
-APP_PASSWORD=換成你的密碼
-ANTHROPIC_API_KEY=sk-ant-...

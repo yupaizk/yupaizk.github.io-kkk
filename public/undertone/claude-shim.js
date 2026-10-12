@@ -1,54 +1,12 @@
-// 取代 claude.ai 的 window.claude.use(...)，改接自己的後端（worker/index.js）。
+// 取代 claude.ai 的 window.claude.use(...)，改接本機伺服器（server.mjs）。
 // 生成器本身的程式不用改：sample / db / assets / downloads 的介面和原本一樣。
 (function () {
   const API = '/api';
-
-  /* ---------- 登入 ---------- */
-  let ready = null;
-  function whenLoggedIn() {
-    if (!ready) ready = fetch(API + '/me', { credentials: 'same-origin' })
-      .then(r => r.ok ? true : askPassword())
-      .catch(() => askPassword());
-    return ready;
-  }
-
-  function askPassword() {
-    return new Promise(resolve => {
-      const wrap = document.createElement('div');
-      wrap.setAttribute('role', 'dialog');
-      wrap.setAttribute('aria-modal', 'true');
-      wrap.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55)';
-      wrap.innerHTML = `<form style="background:var(--panel,#F7F7F7);color:var(--ink,#161616);border-radius:18px;padding:22px;width:100%;max-width:340px;font:15px/1.6 -apple-system,'PingFang TC','Noto Sans TC',sans-serif">
-        <div style="font-family:'Noto Serif TC',serif;font-weight:700;font-size:20px;margin-bottom:6px">Undertone</div>
-        <p style="margin:0 0 12px;color:var(--soft,#6E6E6E);font-size:14px">輸入密碼才能使用 Claude 和測試紀錄。</p>
-        <input type="password" autocomplete="current-password" aria-label="密碼" required style="width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line,#CDCDCD);border-radius:12px;background:var(--chip,#fff);color:inherit">
-        <p class="err" style="margin:8px 0 0;color:#B3122E;font-size:13px" hidden></p>
-        <button type="submit" style="margin-top:14px;width:100%;font:inherit;font-weight:600;padding:12px;border-radius:12px;border:0;background:var(--lacquer,#161616);color:var(--lacquer-ink,#fff);cursor:pointer">進入</button>
-      </form>`;
-      const show = () => { document.body.appendChild(wrap); wrap.querySelector('input').focus(); };
-      document.body ? show() : document.addEventListener('DOMContentLoaded', show);
-      const form = wrap.querySelector('form'), err = wrap.querySelector('.err'), btn = wrap.querySelector('button');
-      form.addEventListener('submit', async e => {
-        e.preventDefault();
-        btn.disabled = true; err.hidden = true;
-        try {
-          const r = await fetch(API + '/login', {
-            method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: wrap.querySelector('input').value }),
-          });
-          if (r.ok) { wrap.remove(); resolve(true); return; }
-          err.textContent = r.status === 401 ? '密碼不對，再試一次。' : '登入失敗，請稍後再試。';
-        } catch (e2) { err.textContent = '連不上伺服器，請稍後再試。'; }
-        err.hidden = false; btn.disabled = false;
-      });
-    });
-  }
 
   function apiError(code, extra) { const e = new Error(code); e.code = code; Object.assign(e, extra || {}); return e; }
 
   async function call(path, opts) {
     const r = await fetch(API + path, Object.assign({ credentials: 'same-origin' }, opts));
-    if (r.status === 401) { ready = null; throw apiError('not_signed_in'); }
     const body = await r.json().catch(() => ({}));
     if (!r.ok) throw apiError(body.error || 'http_' + r.status, { status: r.status, detail: body.detail });
     return body;
@@ -56,7 +14,7 @@
   const sendJson = (method, data) => ({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
 
   /* ---------- 圖片縮小 ---------- */
-  // 送給 Claude 的圖長邊 1568px 就夠；存檔的圖要小於 D1 一列的上限。
+  // 送給 Claude 的圖長邊 1568px 就夠；存檔的圖也縮小一點，免得資料夾越來越大。
   async function shrink(blob, maxSide, maxBytes) {
     if (!/^image\//.test(blob.type || '')) return blob;
     let bmp;
@@ -165,7 +123,6 @@
   window.claude = {
     async use(name) {
       if (!caps[name]) throw apiError('not_granted');
-      if (name !== 'downloads') await whenLoggedIn();
       return caps[name];
     },
   };

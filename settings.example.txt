@@ -1,0 +1,12 @@
+# Undertone 設定。把這個檔案複製成 settings.txt，填好 API 金鑰後存檔。
+# settings.txt 不會被放上 GitHub。
+
+# Anthropic API 金鑰（https://console.anthropic.com/ → API Keys）
+ANTHROPIC_API_KEY=sk-ant-...
+
+# 用哪個 Claude 模型、思考深度（low / medium / high / xhigh / max）
+CLAUDE_MODEL=claude-opus-5-5
+CLAUDE_EFFORT=medium
+
+# 每天最多呼叫幾次 Claude，避免意外花太多錢
+DAILY_AI_LIMIT=300

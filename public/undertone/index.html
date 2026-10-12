@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Pinyon+Script&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+<script src="vendor/p5.min.js"></script>
 <script src="claude-shim.js"></script>
 <style>
 :root{
@@ -2640,7 +2640,7 @@ $('#exportCsv').onclick=async()=>{
 };
 
 /* ---------- 試戴 ---------- */
-const HANDS_VER='0.4.1675469240',HANDS_URL=`https://cdn.jsdelivr.net/npm/@mediapipe/hands@${HANDS_VER}/`;
+const HANDS_VER='0.4.1675469240',HANDS_URL='vendor/mediapipe-hands/';
 const TIP=[4,8,12,16,20],DIP=[3,7,11,15,19];
 const TRY={on:false,src:null,video:null,img:null,stream:null,hands:null,busy:false,lm:null,label:null,seen:0,invert:false,shots:[],selfie:true};
 function tryHint(t){const h=$('#tryHint');h.hidden=!t;if(t)h.textContent=t;}
