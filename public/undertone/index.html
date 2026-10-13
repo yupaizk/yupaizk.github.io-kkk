@@ -495,9 +495,9 @@ const MOODS={
 };
 const OCCS={'上課':{len:'mid'},'上班':{len:'short'},'約會':{len:'long'},'朋友聚會':{len:'long'},'在家':{len:'short'},'出去玩':{len:'mid'},'重要場合':{len:'long'}};
 const DIRS=['主流好看','日常可愛','低調耐看','酷帥俐落','有點怪','越華麗越好'];
-const FEELS={'酷酷的':['chromesym','stud','chain','cross'],'帥帥的':['chromeframe','bead','stud'],'金屬感的':['chromesym','chromeframe','drip','ripple','bead'],'軟軟的':['rose','bow','cloud','heart','carve'],'閃閃的':['stone','biggem','sparkle','pearl'],'冷冷的':['ripple','drip','chain','cross'],'自然的':['leaf','daisy','butterfly','flower'],'透明的':['bubble','pearl','swirl'],
+const FEELS={'酷酷的':['chromesym','fleurcross','spike','chain','stud'],'帥帥的':['chromeframe','bead','stud'],'金屬感的':['chromesym','chromeframe','chromebubble','drip','ripple','bead'],'軟軟的':['rose','bow','cloud','heart','carve'],'閃閃的':['stone','biggem','sparkle','pearl'],'冷冷的':['ripple','drip','chain','cross'],'自然的':['leaf','daisy','butterfly','flower'],'透明的':['bubble','chromebubble','pearl','swirl'],
   '刺刺的':['cross','star','chain','sparkle'],'圓圓的':['pearl','bubble','heart','dots'],'甜甜的':['cherry','heart','bow','rose'],'霧霧的':['carve','cloud','pearl'],'亮亮的':['stone','biggem','ripple'],
-  '毛毛的':['cloud','bow','carve'],'暗暗的':['cross','moon','drip','chain'],'亂亂的':['cherry','butterfly','star','drip'],'黏黏的':['drip','bubble','ripple'],'乾乾淨淨的':['pearl','stone']};
+  '毛毛的':['cloud','bow','carve'],'暗暗的':['cross','moon','drip','chain'],'亂亂的':['cherry','butterfly','star','drip'],'黏黏的':['drip','chromebubble','bubble','ripple'],'乾乾淨淨的':['pearl','stone']};
 const FEEL_MOTIF={'酷酷的':['velvet','chrome'],'帥帥的':['solid','velvet'],'金屬感的':['chrome','chromefull'],'軟軟的':['jelly','blush'],'閃閃的':['glitter','crushed'],'冷冷的':['chrome','magnet'],'自然的':['wash','cream'],'透明的':['jelly'],'刺刺的':['stripes'],'圓圓的':['dots'],'甜甜的':['dots','jelly'],
   '霧霧的':['cream','blush','milky'],'亮亮的':['chrome','aurora'],'毛毛的':['velvet'],'暗暗的':['velvet','magnet','smoky'],'亂亂的':['checker','glitch'],'黏黏的':['jelly','marble'],'乾乾淨淨的':['french','solid']};
 const AMOUNTS=['極簡','簡約','適中','豐富','極繁'];
@@ -508,17 +508,17 @@ const AES={
   '法式':{group:'地區流派',pal:['#F3DCD8','#FFFFFF','#E9C9C4','#F8EEEA','#D9DCE2'],motifs:['french','french','microfrench','vfrench','glitterfrench','outlinefrench'],els:['pearl','stone'],shape:'almond',len:'mid',stone:'#F4F6FA',plain:'jelly',perFinger:false,metal:'silver',dir:['低調耐看','主流好看'],feel:['乾乾淨淨的','霧霧的','透明的'],moods:['平靜','無感'],fin:['jelly','milky','nude','pearl'],desc:'透明或淡粉底加白甲尖，也有細線、V 字、亮片、描邊法式（R17）'},
   '韓系':{group:'地區流派',pal:['#F7D6DE','#FBEDEF','#EFC1CF','#FFF6F4','#E8D9EF'],motifs:['syrup','blush','blush','wavestroke','jelly'],els:['heart','bow','flower','drop','bubble','stone'],shape:'round',len:'short',stone:'#FFE3EE',plain:'jelly',perFinger:true,metal:'silver',dir:['主流好看','日常可愛'],feel:['軟軟的','甜甜的','透明的','閃閃的'],moods:['開心','期待','平靜'],fin:['jelly','glass','glazed'],desc:'糖漿果凍疊色、中間腮紅暈開、刷紋水波，配同色系立體小飾品和透明水滴（R18）'},
   '日系':{group:'地區流派',pal:['#D9D3E6','#EFE9DC','#B9C7D6','#D8BFC2','#4A3F55'],motifs:['stars','dotpair','jpdots','vstreak','loopline','sunstar','dot1','ticks','spiral','blurstar','raiseddots','tipline','washband','plaid','smoky','cateye'],els:['bead','gelripple'],shape:'round',len:'short',stone:'#FFFFFF',plain:'jelly',perFinger:true,multiBase:true,metal:'silver',dir:['低調耐看','主流好看'],feel:['霧霧的','自然的','乾乾淨淨的'],moods:['平靜','想舒壓','疲憊'],fin:['jelly','milky'],desc:'每根一個不同的低飽和果凍底，各配一個簡單的平面手繪：小星星、小點、波點、八芒星、放射短線、細線漩渦、捲圈線、模糊大星、細彩色甲尖、水彩帶、細格紋（R01、R28）'},
-  '歐美':{group:'地區流派',pal:['#FF5FA2','#FFC1DA','#111111','#F5F5F5','#FF9ACB'],motifs:['chrome','colorfrench','ombre','leopard2','glazed','glitter'],els:['stone','biggem','butterfly','pearl','chain','heart'],shape:'coffin',len:'xlong',stone:'#FFFFFF',plain:'glazed',perFinger:true,metal:'silver',dir:['越華麗越好','主流好看'],feel:['亮亮的','閃閃的','刺刺的'],moods:['期待','想鬧一下','開心'],fin:['chrome','mirror','glazed'],desc:'超長棺材、奢華粉配鏡面鉻，大量水鑽、珍珠、吊飾，變化法式、漸層、動物紋（R22）'},
+  '歐美':{group:'地區流派',pal:['#FF5FA2','#FFC1DA','#111111','#F5F5F5','#FF9ACB'],motifs:['chrome','colorfrench','ombre','leopard2','glazed','glitter'],els:['stone','biggem','butterfly','pearl','chain','heart'],shape:'coffin',len:'xlong',stone:'#FFFFFF',plain:'glazed',perFinger:true,metal:'silver',dir:['越華麗越好','主流好看'],feel:['亮亮的','閃閃的','刺刺的'],moods:['期待','想鬧一下','開心'],fin:['chrome','glazed'],desc:'超長棺材、奢華粉配鏡面鉻，大量水鑽、珍珠、吊飾，變化法式、漸層、動物紋（R22）'},
   '美式復古':{group:'地區流派',pal:['#B3122E','#EAD3C3','#6B3A1E','#0F4D3A','#F3E7DA'],motifs:['solid','tortoise2','halfmoon','dots','velvet','tortoise2'],els:['cherry','pearl','heart'],shape:'almond',len:'mid',stone:'#E8C27A',plain:'solid',perFinger:true,metal:'gold',dir:['低調耐看','有點怪'],feel:['暗暗的','霧霧的','毛毛的'],moods:['低落','無感','平靜'],fin:['nude','milky','chrome'],desc:'櫻桃紅亮面配玳瑁、白色波點、寶石色絲絨、黑金甲根半月，金色小配件（R23）'},
   '芭蕾風':{group:'風格氛圍',pal:['#F6D8DF','#FFF8F6','#EBC3CB','#FBEFF1','#E9D2D6'],motifs:['pearly','jelly','ribbonfrench','milky','lace2'],els:['bow','pearl','rose'],shape:'coffin',len:'mid',stone:'#FFFFFF',plain:'pearly',perFinger:false,metal:'silver',dir:['主流好看','日常可愛','低調耐看'],feel:['軟軟的','乾乾淨淨的','甜甜的'],moods:['平靜','開心','期待'],fin:['milky','jelly','pearl','glazed'],desc:'淡粉薄透加珍珠光，奶白法式配交叉緞帶，立體蝴蝶結中間放珍珠（R19）'},
   'Clean girl':{group:'風格氛圍',pal:['#EBD5CC','#F2DED6','#E3C4B8','#F6ECE6','#D9B8AE'],motifs:['jelly','glazed'],els:[],shape:'round',len:'short',stone:'#FFFFFF',plain:'jelly',perFinger:false,metal:'gold',dir:['低調耐看'],feel:['乾乾淨淨的','透明的'],moods:['平靜','無感','疲憊'],fin:['jelly','glazed'],desc:'接近膚色的透明裸色，只有光澤，不放裝飾（R20）'},
   '極簡':{group:'風格氛圍',pal:['#EDE6E1','#FFFFFF','#2B2B2B','#C9A45C','#D8C9BE'],motifs:['vlines','cuticlemoon','dots3','outlinefrench','halfhalf','celestial'],els:['stone'],shape:'square',len:'short',stone:'#FFFFFF',plain:'jelly',perFinger:false,metal:'gold',dir:['低調耐看'],feel:['乾乾淨淨的','霧霧的'],moods:['無感','平靜'],fin:['nude','milky','jelly'],desc:'透明裸底大量留白，細直線、甲根月牙、三個小點、描邊法式、半邊色塊、金色小星月（R21）'},
   'Y2K':{group:'風格氛圍',pal:['#FFFFFF','#FF4FA8','#141414','#F3D2CA','#FF9CCB'],motifs:['zebra','leopard2','ombre','frenchgem','frenchchain'],els:['gemstar','star','stone','bow','gothcross','bubbletxt','bead'],shape:'almond',len:'mid',stone:'#F4F6FA',plain:'jelly',perFinger:true,metal:'silver',dir:['日常可愛','越華麗越好','有點怪'],feel:['甜甜的','閃閃的','亮亮的','亂亂的'],moods:['開心','想鬧一下','期待'],fin:['jelly','glass','chrome'],desc:'兩個方向：辣妹動物紋（粉白黑配銀，斑馬紋、豹紋、法式水鑽線、鑽面銀星）、粉嫩<333（薄荷果凍、有色凝膠哥德十字、泡泡字、條紋法式）'},
 
-  '暗黑':{group:'風格氛圍',pal:['#141216','#5E0F1F','#3B1F45','#1E2A44','#9A9AA6'],motifs:['velvet','chrome','cateye','goldflake','lace2','darkfrench'],els:['stone','stud'],shape:'stiletto',len:'long',stone:'#3A1A2A',plain:'velvet',perFinger:true,metal:'silver',dir:['有點怪','越華麗越好','酷帥俐落'],feel:['暗暗的','刺刺的','毛毛的','酷酷的'],moods:['低落','焦躁'],fin:['mirror','chrome','glass'],desc:'黑、酒紅、深紫；絲絨霧面和鏡面交替，黑色蕾絲、深色法式、金色碎片、深色水鑽（R24）'},
-  '朋克':{group:'風格氛圍',pal:['#111111','#F2F2F2','#C8102E','#FF2E93','#555555'],motifs:['checker','stripes','tartan','solid','bolts'],els:['stud','chain','safetypin','star'],shape:'square',len:'mid',stone:'#E6E6E6',plain:'solid',perFinger:true,metal:'silver',dir:['有點怪','酷帥俐落'],feel:['刺刺的','冷冷的','亂亂的','酷酷的'],moods:['焦躁','想鬧一下'],fin:['nude','chrome','mirror'],desc:'黑白紅、螢光粉配黑；黑白格、條紋、格紋、閃電，鉚釘排成一列、鍊條、安全別針（R25）'},
-  '黑金屬':{group:'風格氛圍',pal:['#141414','#2A2C30','#C9CDD3','#6E7278','#EDEDED'],motifs:['velvet','chrome','smoky','chromefull','gridbead','negstar','darkfrench','cateye'],els:['chromesym','chromeframe','bead','stud','chain','drip','cross'],shape:'square',len:'short',stone:'#C9CDD3',plain:'velvet',perFinger:true,metal:'silver',dir:['酷帥俐落','低調耐看','有點怪'],feel:['酷酷的','帥帥的','金屬感的','冷冷的','暗暗的','刺刺的'],moods:['無感','焦躁','低落','期待','平靜'],fin:['chrome','mirror','nude'],desc:'霧黑、炭灰、煙燻黑底配銀色液態金屬：立體鉻飾、鉻線部落紋、鋼珠、鉚釘、鍊條；短方甲，中性俐落，霧面和鏡面交替（R03–R08 液態金屬做法）'},
-  '未來感':{group:'風格氛圍',pal:['#C9CDD5','#7F8894','#E9EEF4','#8FD3FF','#D7B8FF'],motifs:['chromeaura','chrome','cateye','chromeaura','magnet'],els:['chromesym','drip','bead','ripple'],shape:'almond',len:'long',stone:'#8FD3FF',plain:'chrome',perFinger:false,metal:'silver',dir:['有點怪','主流好看','越華麗越好','酷帥俐落'],feel:['冷冷的','亮亮的','黏黏的','金屬感的'],moods:['期待','焦躁','低落'],fin:['chrome','mirror','glass'],desc:'銀色鏡面配中間彩色暈開的鉻光暈，立體鉻飾、金屬滴落、鋼珠（R26）'}
+  '暗黑':{group:'風格氛圍',pal:['#141216','#5E0F1F','#3B1F45','#1E2A44','#9A9AA6'],motifs:['velvet','chrome','cateye','goldflake','lace2','darkfrench','aura','tribal'],els:['stone','stud','chromeframe','bead'],shape:'stiletto',len:'long',stone:'#3A1A2A',plain:'velvet',perFinger:true,metal:'silver',dir:['有點怪','越華麗越好','酷帥俐落'],feel:['暗暗的','刺刺的','毛毛的','酷酷的'],moods:['低落','焦躁'],fin:['chrome','glass'],desc:'黑、酒紅、深紫；絲絨霧面和鏡面交替，黑色蕾絲、深色法式、金色碎片、深色水鑽；酒紅暈染配銀色荊棘線、黑色部落紋、鋼珠（R24、R33）'},
+  '朋克':{group:'風格氛圍',pal:['#111111','#F2F2F2','#C8102E','#FF2E93','#555555'],motifs:['checker','stripes','tartan','solid','bolts'],els:['stud','chain','safetypin','star'],shape:'square',len:'mid',stone:'#E6E6E6',plain:'solid',perFinger:true,metal:'silver',dir:['有點怪','酷帥俐落'],feel:['刺刺的','冷冷的','亂亂的','酷酷的'],moods:['焦躁','想鬧一下'],fin:['nude','chrome'],desc:'黑白紅、螢光粉配黑；黑白格、條紋、格紋、閃電，鉚釘排成一列、鍊條、安全別針（R25）'},
+  '黑金屬':{group:'風格氛圍',pal:['#141414','#E8D7D0','#3A2C26','#C9CDD3','#6E7278'],motifs:['jelly','aura','tribal','chromefull','cellnet','velvet','chrome','negstar'],els:['fleurcross','chromebubble','chromesym','spike','chain','bead','chromeframe','stud'],shape:'squoval',len:'short',stone:'#C9CDD3',plain:'jelly',perFinger:true,metal:'silver',dir:['酷帥俐落','低調耐看','有點怪'],feel:['酷酷的','帥帥的','金屬感的','冷冷的','暗暗的','刺刺的'],moods:['無感','焦躁','低落','期待','平靜'],fin:['chrome','jelly','nude'],desc:'裸色果凍、黑亮面、煙燻棕黑暈染底，配銀色液態金屬：金屬花十字、錐形尖刺、鍊條、鉻網泡泡、熔融鉻、立體鉻飾、黑色部落紋；短方圓、短圓甲，中性俐落（R29–R34）'},
+  '未來感':{group:'風格氛圍',pal:['#C9CDD5','#7F8894','#E9EEF4','#8FD3FF','#D7B8FF'],motifs:['chromeaura','chrome','cateye','chromeaura','magnet'],els:['chromesym','drip','bead','ripple'],shape:'almond',len:'long',stone:'#8FD3FF',plain:'chrome',perFinger:false,metal:'silver',dir:['有點怪','主流好看','越華麗越好','酷帥俐落'],feel:['冷冷的','亮亮的','黏黏的','金屬感的'],moods:['期待','焦躁','低落'],fin:['chrome','glass'],desc:'銀色鏡面配中間彩色暈開的鉻光暈，立體鉻飾、金屬滴落、鋼珠（R26）'}
 };
 const Y2KV={
   spicy:{n:'辣妹動物紋',ref:'R09、R10',pal:['#FFFFFF','#FF4FA8','#141414','#F3D2CA','#FF9CCB'],shape:'stiletto',len:'xlong',motifs:['zebra','leopard2','ombre','frenchgem','frenchchain'],plain:'frenchgem',els:['gemstar','star','stone'],must:['gemstar','stone'],forms:['glitter','metal','outline'],desc:'熱粉、白、黑、裸配銀；斑馬紋、豹紋（黑底時變粉亮片紋）、粉白漸層、法式微笑線鑲水鑽或貼銀鍊；鑽面銀星當主角，大星旁邊配小星'},
@@ -541,7 +541,7 @@ const SIG={
   'Y2K':{mix:true,must:[],note:'分兩個方向：辣妹動物紋（R09、R10）、粉嫩<333（R11），每根都不一樣'},
   '暗黑':{dark:true,mix:true,must:[],note:'霧面亮面交替，銀色點綴（R24）'},
   '朋克':{accentMotif:'checker',mix:true,must:['stud'],note:'黑白格、閃電，鉚釘排成一列（R25）'},
-  '黑金屬':{dark:true,mix:true,must:['chromesym','bead'],note:'每根一個銀色主結構（立體鉻飾、鉻線框或整片鉻），霧黑和鏡面交替，鋼珠點綴；短甲也成立（R04、R07、R08）'},
+  '黑金屬':{dark:true,mix:true,must:['fleurcross','chromebubble'],note:'每根一個銀色主結構（金屬花十字、鉻網泡泡、熔融鉻、立體鉻飾），裸色果凍和黑亮面交替，部落紋和尖刺點綴；短甲（R29–R34）'},
   '未來感':{must:['chromesym'],note:'鉻光暈配立體鉻飾（R26）'}
 };
 const FINISH={
@@ -551,34 +551,58 @@ const FINISH={
   glass:{name:'玻璃感',plain:'glass',motifs:['glass','jelly','aurora'],desc:'透明底加細緻的光'},
   glazed:{name:'水光',plain:'glazed',motifs:['glazed','milky'],desc:'柔和的珍珠光，不是鏡面'},
   pearl:{name:'珍珠',plain:'pearly',motifs:['pearly','milky'],els:['pearl'],desc:'緞面珍珠光澤，配立體珍珠'},
-  chrome:{name:'金屬',plain:'chrome',motifs:['chrome','magnet'],forms:['metal','outline'],desc:'金屬鉻粉的光'},
-  mirror:{name:'鏡面',plain:'chrome',motifs:['chrome','smoky'],forms:['metal'],desc:'高反射的鏡面'}
+  chrome:{name:'金屬鏡面',plain:'chrome',motifs:['chrome','magnet','smoky'],forms:['metal','outline'],desc:'鏡面金屬鉻粉，高反射；銀、金，或疊在深色上'}
 };
-const FIN_FEEL={'酷酷的':['mirror','chrome'],'帥帥的':['chrome'],'金屬感的':['chrome','mirror'],'透明的':['jelly','glass'],'霧霧的':['milky'],'亮亮的':['chrome','mirror'],'閃閃的':['glazed','pearl'],'乾乾淨淨的':['nude','glazed'],'冷冷的':['chrome','mirror'],'軟軟的':['milky','pearl'],'甜甜的':['jelly'],'黏黏的':['jelly','glass'],'暗暗的':['mirror']};
-const EL_CAT={'花朵':['rose','carve','daisy','flower'],'自然':['leaf','butterfly','cherry','cloud','drop'],'甜美':['bow','heart','star','sparkle','moon','bubbletxt','gothcross'],'珠寶':['safetypin','gemstar','bead','pearl','stone','stud','biggem','chain'],'金屬':['ripple','chromesym','chromeframe','drip','swirl','cross'],'透明':['bubble','gelripple'],'平面圖案':['script','dots']};
-const EL_NAME={safetypin:'安全別針',gemstar:'鑽面銀星',gothcross:'哥德十字',bubbletxt:'泡泡字',ministar:'小星星',bead:'鋼珠',chromesym:'立體鉻飾',chromeframe:'鉻線線框',gelripple:'透明水波',stud:'金屬鉚釘',rose:'玫瑰',carve:'雕花浮雕',daisy:'小雛菊',flower:'五瓣花',leaf:'立體葉子',butterfly:'蝴蝶',cherry:'櫻桃',cloud:'雲朵',bow:'蝴蝶結',heart:'愛心',star:'星星',sparkle:'閃光星',pearl:'珍珠',stone:'水鑽',biggem:'大寶石',chain:'鍊條',ripple:'金屬水波',drip:'金屬滴落',swirl:'捲草線條',cross:'十字',bubble:'泡泡',moon:'月亮',drop:'水滴',script:'草寫字',dots:'波點'};
-const EL_WHY={safetypin:'銀色安全別針，朋克的小配件（R25）',gemstar:'銀色鉻星，表面鋪滿小水鑽或中間嵌一顆寶石，旁邊配小星（R09、R10）',gothcross:'花邊造型的立體十字，用有色凝膠堆高，有的用鋼珠描一圈（R11）',bubbletxt:'圓滾滾的粉色泡泡字，「<」和「3」放在相鄰兩根，並排組成 <3（R11）',ministar:'大星旁邊的小星星',bead:'鉻銀小圓球，單顆、成排或三顆一組',chromesym:'胖胖的立體鉻飾（圓角星、四芒星、漩渦、火焰），放在正中間',chromeframe:'細鉻線勾出的部落紋線框，末端收尖帶小刺',gelripple:'厚的透明凝膠攤開成水窪，邊緣圓鈍有厚度，有時包住一顆小愛心，旁邊配透明小泡泡（R02、R12、R14）',stud:'小小的金屬尖點，冷硬又俐落',rose:'有存在感但很柔軟',carve:'大朵同色雕花，看起來安靜又有份量',daisy:'小小的花，日常又有精神',flower:'比玫瑰輕盈，乾淨俐落',leaf:'有弧度的葉子讓畫面放鬆',butterfly:'輕盈、有一點自由感',cherry:'圓滾滾的，有點調皮',cloud:'軟軟的雲，像在放空',bow:'帶一點撒嬌和玩心',heart:'最直接的可愛',star:'一點點夢幻和運氣',sparkle:'小小的閃光，手一動就亮',pearl:'最溫和的亮點，什麼場合都不會出錯',stone:'切面水鑽，會反光',biggem:'一顆大寶石當主角，很華麗',chain:'金屬鍊條，酷又有重量',ripple:'液態金屬的凸起線條，有力量',drip:'像融化的金屬往下滴，有點怪',swirl:'細細的捲草線，優雅',cross:'帶點暗黑和個性',bubble:'透明的泡泡，清爽',moon:'安靜、有一點夜晚的感覺',drop:'像水珠一樣，清透',script:'一個單字寫在指甲上，像今天的關鍵字',dots:'規律的圓點，輕鬆可愛'};
+const finKey=k=>k==='mirror'?'chrome':k; // 舊紀錄和 Claude 回的「mirror」都當成金屬鏡面
+const FIN_FEEL={'酷酷的':['chrome'],'帥帥的':['chrome'],'金屬感的':['chrome'],'透明的':['jelly','glass'],'霧霧的':['milky'],'亮亮的':['chrome'],'閃閃的':['glazed','pearl'],'乾乾淨淨的':['nude','glazed'],'冷冷的':['chrome'],'軟軟的':['milky','pearl'],'甜甜的':['jelly'],'黏黏的':['jelly','glass'],'暗暗的':['chrome']};
+const EL_CAT={'花朵':['rose','carve','daisy','flower'],'自然':['leaf','butterfly','cherry','cloud','drop'],'甜美':['bow','heart','star','sparkle','moon','bubbletxt','gothcross'],'珠寶':['safetypin','gemstar','bead','pearl','stone','stud','biggem','chain'],'金屬':['fleurcross','spike','ripple','chromesym','chromeframe','drip','swirl','cross'],'透明':['bubble','gelripple','chromebubble'],'平面圖案':['script','dots']};
+const EL_NAME={fleurcross:'金屬花十字',spike:'錐形尖刺',chromebubble:'鉻網泡泡',safetypin:'安全別針',gemstar:'鑽面銀星',gothcross:'哥德十字',bubbletxt:'泡泡字',ministar:'小星星',bead:'鋼珠',chromesym:'立體鉻飾',chromeframe:'鉻線線框',gelripple:'透明水波',stud:'金屬鉚釘',rose:'玫瑰',carve:'雕花浮雕',daisy:'小雛菊',flower:'五瓣花',leaf:'立體葉子',butterfly:'蝴蝶',cherry:'櫻桃',cloud:'雲朵',bow:'蝴蝶結',heart:'愛心',star:'星星',sparkle:'閃光星',pearl:'珍珠',stone:'水鑽',biggem:'大寶石',chain:'鍊條',ripple:'金屬水波',drip:'金屬滴落',swirl:'捲草線條',cross:'十字',bubble:'泡泡',moon:'月亮',drop:'水滴',script:'草寫字',dots:'波點'};
+const EL_WHY={fleurcross:'哥德花十字的銀飾，中間一顆鋼珠，酷又有份量（R31、R34）',spike:'銀色錐形尖刺，像穿環，俐落帶點攻擊性（R31、R34）',chromebubble:'透明凝膠圓頂一顆顆擠在一起，外圈是液態銀，帶一點極光（R29）',safetypin:'銀色安全別針，朋克的小配件（R25）',gemstar:'銀色鉻星，表面鋪滿小水鑽或中間嵌一顆寶石，旁邊配小星（R09、R10）',gothcross:'花邊造型的立體十字，用有色凝膠堆高，有的用鋼珠描一圈（R11）',bubbletxt:'圓滾滾的粉色泡泡字，「<」和「3」放在相鄰兩根，並排組成 <3（R11）',ministar:'大星旁邊的小星星',bead:'鉻銀小圓球，單顆、成排或三顆一組',chromesym:'胖胖的立體鉻飾（圓角星、四芒星、漩渦、火焰），放在正中間',chromeframe:'細鉻線勾出的部落紋線框，末端收尖帶小刺',gelripple:'厚的透明凝膠攤開成水窪，邊緣圓鈍有厚度，有時包住一顆小愛心，旁邊配透明小泡泡（R02、R12、R14）',stud:'小小的金屬尖點，冷硬又俐落',rose:'有存在感但很柔軟',carve:'大朵同色雕花，看起來安靜又有份量',daisy:'小小的花，日常又有精神',flower:'比玫瑰輕盈，乾淨俐落',leaf:'有弧度的葉子讓畫面放鬆',butterfly:'輕盈、有一點自由感',cherry:'圓滾滾的，有點調皮',cloud:'軟軟的雲，像在放空',bow:'帶一點撒嬌和玩心',heart:'最直接的可愛',star:'一點點夢幻和運氣',sparkle:'小小的閃光，手一動就亮',pearl:'最溫和的亮點，什麼場合都不會出錯',stone:'切面水鑽，會反光',biggem:'一顆大寶石當主角，很華麗',chain:'金屬鍊條，酷又有重量',ripple:'液態金屬的凸起線條，有力量',drip:'像融化的金屬往下滴，有點怪',swirl:'細細的捲草線，優雅',cross:'帶點暗黑和個性',bubble:'透明的泡泡，清爽',moon:'安靜、有一點夜晚的感覺',drop:'像水珠一樣，清透',script:'一個單字寫在指甲上，像今天的關鍵字',dots:'規律的圓點，輕鬆可愛'};
 const EL_3D=Object.keys(EL_NAME).filter(k=>k!=='script'&&k!=='dots');
 const FORMABLE=['gothcross','heart','star','sparkle','moon','cross','flower','leaf','butterfly','cloud','bow','drop'];
 const FORM_NAME={clear:'純透明',gummy:'軟糖',gel:'立體凝膠',metal:'金屬飾品',emboss:'同色浮雕',jelly:'透明果凍',paint:'平面彩繪',outline:'金屬勾邊',glitter:'亮粉'};
 const AES_FORMS={'法式':['jelly','metal'],'韓系':['gel','jelly','clear'],'日系':['paint','paint','clear','gummy'],'歐美':['metal','glitter','gel'],'美式復古':['gel','metal'],'芭蕾風':['gel','jelly'],'Clean girl':['clear','jelly'],'極簡':['outline','metal'],'Y2K':['glitter','metal','outline','gel'],'暗黑':['metal','gel'],'朋克':['metal','paint'],'黑金屬':['metal','outline'],'未來感':['metal','outline','jelly']};
 const FREEDOM=['照我說的','可以小改','讓設計師發揮'];
 const DMOODS={'照常發揮':'照常發揮','想收斂':'今天想收斂一點','想玩色':'今天想多玩一點顏色','想加點立體':'今天想多加一點立體','想換個型態':'今天想換個做法'};
-const KIND={safetypin:'big',gemstar:'big',gothcross:'big',bubbletxt:'big',ministar:'small',rose:'big',carve:'big',daisy:'big',flower:'big',butterfly:'big',cherry:'big',bow:'big',heart:'big',star:'big',cloud:'big',biggem:'big',cross:'big',
+const KIND={fleurcross:'big',spike:'mid',chromebubble:'big',safetypin:'big',gemstar:'big',gothcross:'big',bubbletxt:'big',ministar:'small',rose:'big',carve:'big',daisy:'big',flower:'big',butterfly:'big',cherry:'big',bow:'big',heart:'big',star:'big',cloud:'big',biggem:'big',cross:'big',
   leaf:'leaf',swirl:'mid',gelripple:'mid',bead:'small',chromesym:'big',chromeframe:'line',pearl:'small',stud:'small',stone:'small',sparkle:'small',bubble:'small',ripple:'line',drip:'line',chain:'line',moon:'big',drop:'small'};
-const SIZE={safetypin:.42,gemstar:.36,gothcross:.4,bubbletxt:.44,ministar:.1,bead:.075,chromesym:.5,chromeframe:.5,gelripple:.5,rose:.42,carve:.5,daisy:.42,flower:.42,butterfly:.46,cherry:.4,bow:.44,heart:.32,star:.32,cloud:.36,biggem:.3,cross:.34,leaf:.3,swirl:.32,pearl:.07,stone:.08,stud:.08,sparkle:.13,bubble:.08,moon:.3,drop:.1};
-const SHAPE_NAME={square:'方',round:'圓',almond:'杏仁',coffin:'棺材',stiletto:'尖錐'};
+const SIZE={fleurcross:.44,spike:.17,chromebubble:.62,safetypin:.42,gemstar:.36,gothcross:.4,bubbletxt:.44,ministar:.1,bead:.075,chromesym:.5,chromeframe:.5,gelripple:.5,rose:.42,carve:.5,daisy:.42,flower:.42,butterfly:.46,cherry:.4,bow:.44,heart:.32,star:.32,cloud:.36,biggem:.3,cross:.34,leaf:.3,swirl:.32,pearl:.07,stone:.08,stud:.08,sparkle:.13,bubble:.08,moon:.3,drop:.1};
+const SHAPE_NAME={square:'方',squoval:'方圓',round:'圓',oval:'橢圓',almond:'杏仁',coffin:'棺材',stiletto:'尖錐'};
 const LEN_NAME={short:'短',mid:'中',long:'長',xlong:'超長'};
 const LEN_VAL={short:.8,mid:1,long:1.2,xlong:1.45};
 const KW=[
   {k:['面試','報告','上班','開會','簡報'],m:'french'},{k:['約會','喜歡','見面'],m:'jelly'},{k:['下雨','雨'],m:'dots'},
   {k:['考試','死線','趕'],m:'glitch'},{k:['生日','派對','演唱會','慶祝','聚會'],m:'glitter'},{k:['睡','累','懶'],m:'wash'},{k:['好笑','廢','爛','哈','崩潰'],m:'smiley'}
 ];
-const MOTIF_NAME={dotpair:'上下小黑點',jpdots:'日系波點',vstreak:'直向細紋',blurstar:'模糊大星',raiseddots:'同色凸點',tipline:'細彩色甲尖',microfrench:'細線法式',vfrench:'V 字法式',glitterfrench:'亮片法式',outlinefrench:'描邊法式',colorfrench:'彩色法式',darkfrench:'深色法式',ribbonfrench:'緞帶法式',syrup:'糖漿果凍',wavestroke:'刷紋水波',vlines:'細直線',cuticlemoon:'甲根月牙',dots3:'三個小點',halfhalf:'半邊色塊',celestial:'金色小星月',halfmoon:'黑金半月',tortoise2:'玳瑁',goldflake:'金色碎片',lace2:'手繪蕾絲',chromeaura:'鉻光暈',bolts:'閃電',tartan:'暈染格紋',cateyedots:'貓眼＋亮片波點',jellydots:'果凍＋亮片波點',zebra:'斑馬紋',leopard2:'豹紋',ombre:'粉白漸層',frenchgem:'法式＋水鑽線',frenchchain:'法式＋銀鍊',stripefrench:'條紋法式',solid:'素色',wash:'漸層',french:'法式',dots:'波點',stripes:'斜條紋',glitch:'故障條',blob:'色塊',marble:'大理石',glitter:'亮片',chrome:'鏡面',checker:'格紋',smiley:'笑臉',jelly:'果凍',script:'草寫字',cateye:'貓眼',velvet:'絨面',aurora:'極光',smoky:'煙燻暈染',milky:'奶白半透',bruise:'瘀青暈染',skin:'霧面膚色',muscle:'肌肉纖維',cells:'流動細胞',gridbead:'格線＋鋼珠',negstar:'留白四芒星',bwblock:'黑白色塊',chromefull:'整片鉻銀＋鋼珠',blush:'暈染',cream:'奶油霧面',magnet:'磁石',crushed:'碎鑽',glazed:'水光',pearly:'珍珠光',glass:'玻璃光'};
+const MOTIF_NAME={aura:'暈染外框',cellnet:'手繪細胞網',tribal:'黑色部落紋',dotpair:'上下小黑點',jpdots:'日系波點',vstreak:'直向細紋',blurstar:'模糊大星',raiseddots:'同色凸點',tipline:'細彩色甲尖',microfrench:'細線法式',vfrench:'V 字法式',glitterfrench:'亮片法式',outlinefrench:'描邊法式',colorfrench:'彩色法式',darkfrench:'深色法式',ribbonfrench:'緞帶法式',syrup:'糖漿果凍',wavestroke:'刷紋水波',vlines:'細直線',cuticlemoon:'甲根月牙',dots3:'三個小點',halfhalf:'半邊色塊',celestial:'金色小星月',halfmoon:'黑金半月',tortoise2:'玳瑁',goldflake:'金色碎片',lace2:'手繪蕾絲',chromeaura:'鉻光暈',bolts:'閃電',tartan:'暈染格紋',cateyedots:'貓眼＋亮片波點',jellydots:'果凍＋亮片波點',zebra:'斑馬紋',leopard2:'豹紋',ombre:'粉白漸層',frenchgem:'法式＋水鑽線',frenchchain:'法式＋銀鍊',stripefrench:'條紋法式',solid:'素色',wash:'漸層',french:'法式',dots:'波點',stripes:'斜條紋',glitch:'故障條',blob:'色塊',marble:'大理石',glitter:'亮片',chrome:'鏡面',checker:'格紋',smiley:'笑臉',jelly:'果凍',script:'草寫字',cateye:'貓眼',velvet:'絨面',aurora:'極光',smoky:'煙燻暈染',milky:'奶白半透',bruise:'瘀青暈染',skin:'霧面膚色',muscle:'肌肉纖維',cells:'流動細胞',gridbead:'格線＋鋼珠',negstar:'留白四芒星',bwblock:'黑白色塊',chromefull:'整片鉻銀＋鋼珠',blush:'暈染',cream:'奶油霧面',magnet:'磁石',crushed:'碎鑽',glazed:'水光',pearly:'珍珠光',glass:'玻璃光'};
 /* ---------- 平面圖樣（貼圖） ---------- */
 const TW=200, TH=400;
 const WORDS=['Beauty','Muse','Darling','Mine','Bonita','Who?','Dream','Sweet'];
 const DRAW={
+  // 暈染外框（R31、R33）：中間透亮、邊緣深色暈開
+  aura(g,c){const x=g.drawingContext,b=c[0],light=lerpColor(b,color(0,0,100),.5),deep=lerpColor(b,color(0,0,0),.55);
+    const gr=x.createRadialGradient(TW*.5,TH*.48,8,TW*.5,TH*.5,TH*.62);gr.addColorStop(0,css(light));gr.addColorStop(.42,css(b));gr.addColorStop(1,css(deep));x.fillStyle=gr;x.fillRect(0,0,TW,TH);
+    x.save();x.filter='blur(10px)';x.fillStyle=css(deep,.45);for(let i=0;i<3;i++){x.beginPath();x.ellipse(random(TW),random(TH),random(30,60),random(60,120),random(TAU),0,TAU);x.fill();}x.restore();},
+  // 手繪細胞網（R30）：黑色的網，網眼是底色
+  cellnet(g,c){const x=g.drawingContext,lum=q=>.3*red(q)+.59*green(q)+.11*blue(q);const base=lum(c[0])>110?c[0]:color('#E6D5CE'),ink=[...c].sort((a,b)=>lum(a)-lum(b))[0];
+    g.background(lum(ink)<90?ink:color('#141414'));const cs=[];for(let t=0;t<2500&&cs.length<80;t++){const r=random(10,40),px=random(-14,TW+14),py=random(-14,TH+14);if(cs.every(([a,b,q])=>Math.hypot(px-a,py-b)>r+q+2.5))cs.push([px,py,r]);}
+    for(let it=0;it<3;it++)cs.forEach(q=>{let m=60;cs.forEach(o=>{if(o!==q)m=Math.min(m,Math.hypot(q[0]-o[0],q[1]-o[1])-o[2]-3);});q[2]=Math.max(q[2],m);}); // 網眼長大到幾乎碰到旁邊，只留細黑線
+    cs.forEach(([px,py,r])=>{x.fillStyle=css(base);x.beginPath();x.arc(px,py,r,0,TAU);x.fill();});},
+  // 黑色部落紋（R31、R33、R34）：左右對稱、從粗到尖的鉤狀刺
+  tribal(g,c){const x=g.drawingContext,lum=q=>.3*red(q)+.59*green(q)+.11*blue(q);g.background(c[0]);x.fillStyle=lum(c[0])<90?'#ECECEC':'#121212';
+    const bz=(p0,p1,p2,p3)=>{const o=[];for(let i=0;i<=28;i++){const t=i/28,u=1-t;o.push([u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]]);}return o;};
+    // 從起點粗、到尖端收成一點
+    const hook=(pts,w)=>{const L=pts.length,l=[],r=[];pts.forEach((p,i)=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(L-1,i+1)],dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy)||1,k=w*Math.pow(1-i/(L-1),.85);l.push([p[0]-dy/d*k,p[1]+dx/d*k]);r.push([p[0]+dy/d*k,p[1]-dx/d*k]);});
+      x.beginPath();l.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));r.reverse().forEach(q=>x.lineTo(q[0],q[1]));x.closePath();x.fill();};
+    const cx0=TW/2,cy0=TH*random(.42,.52),sc=random(.85,1.05);const P=(dx,dy)=>[cx0+dx*sc,cy0+dy*sc];
+    [1,-1].forEach(sg=>{const Q=(dx,dy)=>P(dx*sg,dy);
+      hook(bz(Q(4,-20),Q(70,-30),Q(92,40),Q(46,92)),11);        // 主鉤：往外再往下捲
+      hook(bz(Q(52,-24),Q(70,-60),Q(64,-96),Q(40,-128)),7);      // 往上的長刺
+      hook(bz(Q(80,4),Q(102,-6),Q(112,-26),Q(118,-48)),5);       // 外側小刺
+      hook(bz(Q(78,46),Q(100,52),Q(110,70),Q(112,96)),5);        // 下方小刺
+      hook(bz(Q(6,30),Q(30,60),Q(26,100),Q(8,140)),6);});        // 下方往中間收的鉤
+    hook(bz(P(0,-10),P(-6,-60),P(6,-110),P(0,-150)),8);          // 中線往上
+    hook(bz(P(0,10),P(5,50),P(-5,90),P(0,120)),6);},             // 中線往下
   solid(g,c){g.background(c[0]);},
   french(g,c){const x=g.drawingContext,base=frBase(c);g.background(base);const d=y2kDepth(),A=y2kAmp(d);frTip(x,d,A,'#FFFFFF');},
   microfrench(g,c){const x=g.drawingContext,base=frBase(c);g.background(base);frTip(x,22,10,'#FFFFFF');},
@@ -943,11 +967,13 @@ Object.keys(IL).forEach(k=>{DRAW[k]=(g,c,d)=>IL[k](g.drawingContext,c,d);MOTIF_N
 /* ---------- 2D 動態渲染 ---------- */
 function profile(v,s){
   const base=v<.12?.62+.38*Math.sqrt(1-Math.pow((.12-v)/.12,2)):1;
-  const t0={almond:.48,round:.7,coffin:.55,square:.8,stiletto:.3}[s];
+  const t0={almond:.48,round:.7,oval:.5,coffin:.55,square:.8,squoval:.72,stiletto:.3}[s];
   let tip=1;
   if(v>t0){const k=(v-t0)/(1-t0);
     if(s==='almond')tip=Math.pow(Math.max(0,1-Math.pow(k,1.8)),.75);
     else if(s==='round')tip=Math.sqrt(Math.max(0,1-k*k));
+    else if(s==='oval')tip=Math.pow(Math.max(0,1-k*k),.62);
+    else if(s==='squoval')tip=.5+.5*Math.sqrt(Math.max(0,1-Math.pow(k,3)));
     else if(s==='coffin')tip=1-.45*k;
     else if(s==='stiletto')tip=Math.pow(1-k,.9);
     else tip=1-.22*Math.pow(k,3);}
@@ -986,6 +1012,29 @@ function chromeFill(c,pth,R,m,fillRule){fillRule=fillRule||'nonzero';
   c.save();c.clip(pth,fillRule);c.translate(R*.05,R*.07);c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=R*.12;c.stroke(pth);c.translate(-R*.11,-R*.15);c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=R*.06;c.stroke(pth);c.restore();}
 function tubePath(pts,k){const p=new Path2D();stampLine(smoothPts(pts),k,p);return p;}
 const DECO={
+  // 金屬花十字（R31、R34）：哥德花十字輪廓做成鏡面銀，中間一顆鋼珠
+  fleurcross(R,e,T,P){const c=cx(),m=METAL[P.metal]||METAL.silver;const pts=gothPts(R),n=pts.length,mid=i=>{const a=pts[i%n],b=pts[(i+1)%n];return [(a[0]+b[0])/2,(a[1]+b[1])/2];};
+    const p=new Path2D();const m0=mid(n-1);p.moveTo(m0[0],m0[1]);for(let i=0;i<n;i++){const q=mid(i);p.quadraticCurveTo(pts[i][0],pts[i][1],q[0],q[1]);}p.closePath();chromeFill(c,p,R,m);
+    c.save();c.strokeStyle='rgba(0,0,0,.28)';c.lineWidth=Math.max(.5,R*.035);[0,1,2,3].forEach(k=>{c.save();c.translate(0,-R*.1);c.rotate(k*Math.PI/2);c.beginPath();c.moveTo(0,-R*.22);c.lineTo(0,-R*.62);c.stroke();c.restore();});c.restore();
+    const b=new Path2D();b.arc(0,-R*.1,R*.17,0,TAU);chromeFill(c,b,R*.4,m);},
+  // 錐形尖刺（R31、R34）
+  spike(R,e,T,P){const c=cx(),m=METAL[P.metal]||METAL.silver;shade(R*.35,R*.06,R*.18,.3);
+    const p=new Path2D();p.moveTo(0,-R*1.15);p.lineTo(R*.46,R*.32);p.quadraticCurveTo(0,R*.62,-R*.46,R*.32);p.closePath();
+    const g=c.createLinearGradient(-R*.46,0,R*.46,0);[[0,m[2]],[.3,m[0]],[.45,'#FFFFFF'],[.62,m[1]],[1,m[2]]].forEach(([o,col])=>g.addColorStop(o,col));c.fillStyle=g;c.fill(p);noShade();
+    c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=Math.max(.4,R*.04);c.stroke(p);},
+  // 鉻網泡泡（R29）：一顆大的透明凝膠圓頂配幾顆小的，外圈和縫隙是液態銀，圓頂帶一點極光
+  chromebubble(R,e,T,P){const c=cx(),m=METAL[P.metal]||METAL.silver;let st=Math.floor((e.ph||1)*1e4)+11;const Rn=()=>{st=(st*16807)%2147483647;return st/2147483647;};
+    const cs=[[R*(.08-Rn()*.16),R*(.08-Rn()*.16),R*(.46+Rn()*.1)]];
+    for(let t=0;t<60&&cs.length<7;t++){const a=Rn()*TAU,d=R*(.62+Rn()*.38),r=R*(.14+Rn()*.18),x=Math.cos(a)*d,y=Math.sin(a)*d*1.15;
+      if(cs.every(([x2,y2,r2])=>Math.hypot(x-x2,y-y2)>r+r2+R*.07))cs.push([x,y,r]);}
+    const tint='#E9DDE6',bw=R*.085;
+    cs.forEach(([x,y,r],i)=>{const d=new Path2D();d.arc(x,y,r,0,TAU);glassy(c,d,tint,Math.max(.4,r*.06),r*.3);
+      c.save();c.clip(d);const ir=c.createRadialGradient(x+r*.25,y+r*.2,r*.1,x,y,r);ir.addColorStop(0,i%2?'rgba(160,230,170,.35)':'rgba(240,180,220,.35)');ir.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=ir;c.fill(d);c.restore();
+      c.fillStyle='rgba(255,255,255,.95)';c.beginPath();c.ellipse(x-r*.35,y-r*.38,r*.2,r*.11,-.6,0,TAU);c.fill();});
+    const net=new Path2D();cs.forEach(([x,y,r])=>{net.moveTo(x+r+bw,y);net.arc(x,y,r+bw,0,TAU);net.moveTo(x+r,y);net.arc(x,y,r,0,TAU,true);});
+    for(let i=1;i<cs.length;i++){const [x1,y1,r1]=cs[0],[x2,y2,r2]=cs[i],dd=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/dd,uy=(y2-y1)/dd;const ax=x1+ux*r1,ay=y1+uy*r1,bx=x2-ux*r2,by=y2-uy*r2;
+      if(Math.hypot(bx-ax,by-ay)>R*.55)continue;net.moveTo(ax-uy*bw*.6,ay+ux*bw*.6);net.lineTo(bx-uy*bw*.6,by+ux*bw*.6);net.lineTo(bx+uy*bw*.6,by-ux*bw*.6);net.lineTo(ax+uy*bw*.6,ay-ux*bw*.6);net.closePath();}
+    chromeFill(c,net,R*.55,m,'nonzero');},
   safetypin(R,e,T,P){const c=cx(),m=safeMetal(P.metal).m;c.save();c.rotate(-.5);const L=R*1.1,W=R*.16;
     const p=new Path2D();p.moveTo(-L*.75,-W);p.lineTo(L*.7,-W);p.moveTo(-L*.75,W);p.lineTo(L*.55,W*.2);p.moveTo(-L*.75,-W);p.arc(-L*.75,0,W,-Math.PI/2,Math.PI/2,true);
     chromeStroke(p,R*.07,m);const coil=new Path2D();coil.arc(-L*.75-W*.2,0,W*.9,0,TAU);chromeStroke(coil,R*.06,m);
@@ -1342,7 +1391,7 @@ function drawSurf(g,sv){const x=g.drawingContext;x.save();x.setTransform(1,0,0,1
 [0,1,2].forEach(i=>{DRAW['surf'+i]=(g,c)=>SURF[i]?drawSurf(g,SURF[i]):DRAW.solid(g,c);});
 Object.assign(MOTIF_NAME,{surf0:'即時甲面・滿版',surf1:'即時甲面・局部',surf2:'即時甲面・呼應'});
 /* ---------- 後台風格（取自素材庫・風格走向） ---------- */
-const TREND_CATS={'地區流派':['法式','韓系','日系','歐美','美式復古'],'風格氛圍':['芭蕾風','Clean girl','極簡','Y2K','暗黑','朋克','黑金屬','未來感'],'質感材質':['裸色','奶油肌','透明感','玻璃感','水光','珍珠','金屬','鏡面']};
+const TREND_CATS={'地區流派':['法式','韓系','日系','歐美','美式復古'],'風格氛圍':['芭蕾風','Clean girl','極簡','Y2K','暗黑','朋克','黑金屬','未來感'],'質感材質':['裸色','奶油肌','透明感','玻璃感','水光','珍珠','金屬']};
 const TREND={
  '法式':{pal:'透明或淡粉底＋白甲尖；也有彩色、雙色、亮片甲尖',shape:'杏仁、短方圓',mat:'亮面、透明感',els:'極簡～簡約；經典、細線、V 字、亮片、描邊法式；甲尖可加珍珠（R17）'},
  '韓系':{pal:'透明果凍疊色、裸底配中間粉色暈染',shape:'短甲',mat:'糖漿果凍、刷紋水波、透明凝膠水滴',els:'同色系立體小飾品、透明泡泡；每根做法不同（R18）'},
@@ -1356,7 +1405,7 @@ const TREND={
 
  '暗黑':{pal:'黑、酒紅、深紫、墨藍、炭灰',shape:'尖錐、杏仁',mat:'絲絨霧面、黑底鏡面、深紫貓眼、金色碎片',els:'黑色蕾絲、深色法式、深色小水鑽、金屬鉚釘、銀色細線（R24）'},
  '朋克':{pal:'黑白紅、螢光粉配黑',shape:'方、短方',mat:'霧面配金屬',els:'黑白格、條紋、格紋、閃電；鉚釘排成一列、鍊條、安全別針（R25）'},
- '黑金屬':{pal:'霧黑、炭灰、煙燻黑、銀',shape:'短方、短圓',mat:'霧黑絨面配鏡面鉻、液態金屬',els:'立體鉻飾、鉻線部落紋、鋼珠、鉚釘、鍊條（R03–R08）'},
+ '黑金屬':{pal:'裸色果凍、黑、煙燻棕黑、銀',shape:'短方圓、短圓',mat:'黑亮面、裸色果凍、熔融鉻、液態金屬',els:'金屬花十字、錐形尖刺、鍊條、鉻網泡泡、立體鉻飾、黑色部落紋（R29–R34）'},
  '未來感':{pal:'銀、鉻光暈、混搭金屬',shape:'杏仁',mat:'鏡面鉻、貓眼光暈',els:'立體鉻飾、金屬滴落、鋼珠（R26）'},
  '裸色':{pal:'貼近膚色的米、粉、棕',shape:'短～中',mat:'亮面或霧面',els:'極簡'},
  '奶油肌':{pal:'奶白、奶粉、奶米',shape:'短甲最適合',mat:'介於不透明與半透明的雲霧感，不靠鉻粉',els:'極簡；可做奶白法式'},
@@ -1367,7 +1416,7 @@ const TREND={
  '金屬':{pal:'銀、金、玫瑰金，或疊在深色上',shape:'杏仁、長甲常見',mat:'鏡面金屬鉻粉',els:'簡約～適中；鉻法式、金屬立體花'},
  '鏡面':{pal:'銀、金、玫瑰金，或疊在深色上',shape:'杏仁、長甲常見',mat:'鏡面鉻粉，整片像鏡子',els:'簡約～適中'}
 };
-const TREND_MORE={'法式':['透明感','奶油肌、裸色、珍珠','4+1 重點指或漸層排列'],'韓系':['透明感','玻璃感、水光','3+2 集中或每根不同'],'日系':['奶油肌','透明感、珍珠','3+1+1 或全手統一'],'歐美':['金屬','鏡面、水光','雙重點指或拇指主角'],'美式復古':['裸色','奶油肌、金屬','全手統一'],'芭蕾風':['奶油肌','透明感、珍珠、水光','3+1+1'],'Clean girl':['裸色','透明感、水光、奶油肌','4+1 重點指'],'極簡':['裸色','奶油肌、金屬','4+1 重點指'],'Y2K':['透明感','玻璃感、金屬','3+2 集中或每根不同'],'暗黑':['鏡面','金屬、玻璃感','跨指連續'],'朋克':['裸色','金屬、鏡面','每根不同'],'黑金屬':['金屬','鏡面、裸色','3+2 穿插或每根不同'],'未來感':['金屬','鏡面、玻璃感','全手統一或跨指連續'],'透明感':[null,null,'漸層排列']};
+const TREND_MORE={'法式':['透明感','奶油肌、裸色、珍珠','4+1 重點指或漸層排列'],'韓系':['透明感','玻璃感、水光','3+2 集中或每根不同'],'日系':['奶油肌','透明感、珍珠','3+1+1 或全手統一'],'歐美':['金屬','水光','雙重點指或拇指主角'],'美式復古':['裸色','奶油肌、金屬','全手統一'],'芭蕾風':['奶油肌','透明感、珍珠、水光','3+1+1'],'Clean girl':['裸色','透明感、水光、奶油肌','4+1 重點指'],'極簡':['裸色','奶油肌、金屬','4+1 重點指'],'Y2K':['透明感','玻璃感、金屬','3+2 集中或每根不同'],'暗黑':['金屬','玻璃感','跨指連續'],'朋克':['裸色','金屬','每根不同'],'黑金屬':['金屬','裸色、透明感','3+2 穿插或每根不同'],'未來感':['金屬','玻璃感','全手統一或跨指連續'],'透明感':[null,null,'漸層排列']};
 const AVOID='不搭的組合（後台素材庫）：Clean girl、極簡不放大寶石或滿鑽，最多一個小飾品；暗黑不配高明度粉彩，粉彩只能小面積點綴；裸色質感不配霓虹色；金屬、鏡面的指甲不放霧面圖樣，霧面留給其他指；每根不同時配色控制在 3 色內；短甲每片最多 1 到 2 個大飾品；透明感不用大面積深色，深色只用在暈染或甲尖；上班或在家不用尖錐、超長，改杏仁或中長。';
 /* ---------- 狀態 ---------- */
 let TUNE_OPEN=false;
@@ -1425,7 +1474,7 @@ ${an.desc?`客人自己的描述（優先）：「${an.desc}」`:''}
 ${AVOID}
 規則：客人要的元素一定要保留，但元素的造型、配色、材質、底色和甲型都要明顯改成「${name}」的做法，風格差異要強烈，不要停留在原圖的樣子。可以加入這個風格常見的元素，但不能蓋過客人要的。
 只回傳一個 JSON 物件，不要其他文字：
-{"name":"整體名稱，繁體中文 2 到 6 字，要看得出是${name}","desc":"一句話描述","colors":["依這個風格重新配的 3 到 5 個 #RRGGBB"],"arrangement":"alternate|accent|gradient","shape":"square|round|almond|coffin|stiletto","len":"short|mid|long|xlong",
+{"name":"整體名稱，繁體中文 2 到 6 字，要看得出是${name}","desc":"一句話描述","colors":["依這個風格重新配的 3 到 5 個 #RRGGBB"],"arrangement":"alternate|accent|gradient","shape":"square|squoval|round|oval|almond|coffin|stiletto","len":"short|mid|long|xlong",
 "themes":[{"name":"主題名稱，2 到 6 字","base":"${BASES.join('|')} 其中一個（底色材質）","cols":["底色 #RRGGBB","第二色","第三色"],"surface":"甲面上要畫的平面圖樣，一句話，要寫出客人要的元素用${name}的方式畫成什麼樣子；沒有就填 null","sculpt":"大型立體雕塑或立體線條，一句話，沒有就填 null","finish":"matte|glossy（底色是霧面還是亮面）","sculptKind":"shape|piped（雕塑是一整塊輪廓造型，還是像擠出來的立體線條：脊椎、肋骨、纖維、血管、水滴線）","sculptMat":"metal|flesh|wet|gel|bone（雕塑材質：金屬、霧面肉感、濕潤半透的肉感、透明凝膠、骨白）","sculptColor":"#RRGGBB 雕塑本身的顏色（金屬可略）","metal":"silver|gold|color","accent":"#RRGGBB","elements":["小元素 key，從 ${Object.keys(EL_NAME).filter(k=>!k.startsWith('u')).join(', ')} 選 0 到 3 個"]}]}
 themes 拆成 1 到 3 個。`;
   try{const r=await SAMPLE.json(prompt,{});if(!r||!r.name)return null;an.restyled[name]=r;return r;}
@@ -1597,7 +1646,7 @@ function renderAiBox(){
   if(S.analyzeFailed){box.textContent='⚠ 這次沒有解析成功，只抓了顏色。可以在下面描述後按「完成」，會再試一次。';return;}
   box.textContent='已經先抓出主要顏色，馬上開始解析…';
 }
-const BASES=['dotpair','jpdots','vstreak','blurstar','raiseddots','tipline','microfrench','vfrench','glitterfrench','outlinefrench','colorfrench','darkfrench','ribbonfrench','syrup','wavestroke','vlines','cuticlemoon','dots3','halfhalf','celestial','halfmoon','tortoise2','goldflake','lace2','chromeaura','bolts','tartan','cateyedots','jellydots','zebra','leopard2','ombre','frenchgem','frenchchain','stripefrench','smoky','milky','solid','jelly','chrome','cream','velvet','cateye','marble','glitter','aurora','bruise','skin','muscle','cells','gridbead','negstar','bwblock','chromefull'];
+const BASES=['aura','cellnet','tribal','dotpair','jpdots','vstreak','blurstar','raiseddots','tipline','microfrench','vfrench','glitterfrench','outlinefrench','colorfrench','darkfrench','ribbonfrench','syrup','wavestroke','vlines','cuticlemoon','dots3','halfhalf','celestial','halfmoon','tortoise2','goldflake','lace2','chromeaura','bolts','tartan','cateyedots','jellydots','zebra','leopard2','ombre','frenchgem','frenchchain','stripefrench','smoky','milky','solid','jelly','chrome','cream','velvet','cateye','marble','glitter','aurora','bruise','skin','muscle','cells','gridbead','negstar','bwblock','chromefull'];
 async function analyze(textOnly){
   if(!SAMPLE)return false;
   const desc=$('#imgDesc').value.trim();
@@ -1611,8 +1660,8 @@ colors 只取主體（指甲、作品本身、客人要的東西）的顏色；�
 {"summary":"用繁體中文一到兩句描述這張圖給人的感覺，像美甲師跟客人聊天","colors":["3到5個主體顏色的 #RRGGBB，由多到少"],"bgColors":["背景的顏色 #RRGGBB，0 到 3 個"],"aes":"從 ${base.join('、')} 選最接近的一個","fits":true 或 false（這張圖的風格能不能被上面的風格好好代表；像電路板、金屬部落紋、萬聖節血肉、特定主題這種明顯不同的風格就是 false）,
 "elements":["圖上『看得到』的東西，對應到這些 key：${Object.keys(EL_NAME).filter(k=>!k.startsWith('u')).join(', ')}，0 到 4 個"],
 "others":["圖上看得到、但上面沒有的東西，繁體中文 2 到 5 字，0 到 3 個"],
-"special":{"name":"整體風格名稱，繁體中文 2 到 6 字","desc":"一句話描述","arrangement":"alternate|accent|gradient（五根指甲怎麼分配主題：交替／只有重點指不同／漸變）","shape":"square|round|almond|coffin|stiletto","len":"short|mid|long|xlong",
- "themes":[{"name":"主題名稱，2 到 6 字","base":"${BASES.join('|')} 其中一個（底色材質；煙燻暈染=smoky，奶白半透=milky，肌肉纖維=muscle，瘀青=bruise，霧面膚色=skin，流體畫的圓形細胞=cells，白底細黑格線交叉點放鋼珠=gridbead，深色底留白四芒星=negstar，黑白大色塊=bwblock，整片鉻銀加一排鋼珠=chromefull）","cols":["底色 #RRGGBB","第二色","第三色"],"surface":"甲面上要畫的平面圖樣，一句話描述，沒有就填 null","sculpt":"甲面上的大型立體雕塑或立體線條（例如金屬部落紋、肉感脊椎肋骨、纖維網、肉的增生團塊、凝膠水滴），一句話描述形狀，沒有就填 null","finish":"matte|glossy（底色是霧面還是亮面）","sculptKind":"shape|piped（雕塑是一整塊輪廓造型，還是像擠出來的立體線條：脊椎、肋骨、纖維、血管、水滴線）","sculptMat":"metal|flesh|wet|gel|bone（雕塑材質：金屬、霧面肉感、濕潤半透的肉感、透明凝膠、骨白）","sculptColor":"#RRGGBB 雕塑本身的顏色（金屬可略）","metal":"silver|gold|color","accent":"#RRGGBB 金屬部分的顏色","elements":["這個主題用到的小元素 key，從上面的清單選，0 到 3 個（例如鉚釘=stud）"]}]},
+"special":{"name":"整體風格名稱，繁體中文 2 到 6 字","desc":"一句話描述","arrangement":"alternate|accent|gradient（五根指甲怎麼分配主題：交替／只有重點指不同／漸變）","shape":"square|squoval|round|oval|almond|coffin|stiletto","len":"short|mid|long|xlong",
+ "themes":[{"name":"主題名稱，2 到 6 字","base":"${BASES.join('|')} 其中一個（底色材質；煙燻暈染=smoky，奶白半透=milky，肌肉纖維=muscle，瘀青=bruise，霧面膚色=skin，流體畫的圓形細胞=cells，白底細黑格線交叉點放鋼珠=gridbead，深色底留白四芒星=negstar，黑白大色塊=bwblock，整片鉻銀加一排鋼珠=chromefull，中間透亮邊緣深色的暈染=aura，手繪黑色細胞網=cellnet，黑色部落紋或荊棘線=tribal）","cols":["底色 #RRGGBB","第二色","第三色"],"surface":"甲面上要畫的平面圖樣，一句話描述，沒有就填 null","sculpt":"甲面上的大型立體雕塑或立體線條（例如金屬部落紋、肉感脊椎肋骨、纖維網、肉的增生團塊、凝膠水滴），一句話描述形狀，沒有就填 null","finish":"matte|glossy（底色是霧面還是亮面）","sculptKind":"shape|piped（雕塑是一整塊輪廓造型，還是像擠出來的立體線條：脊椎、肋骨、纖維、血管、水滴線）","sculptMat":"metal|flesh|wet|gel|bone（雕塑材質：金屬、霧面肉感、濕潤半透的肉感、透明凝膠、骨白）","sculptColor":"#RRGGBB 雕塑本身的顏色（金屬可略）","metal":"silver|gold|color","accent":"#RRGGBB 金屬部分的顏色","elements":["這個主題用到的小元素 key，從上面的清單選，0 到 3 個（例如鉚釘=stud）"]}]},
 "keywords":["2到4個繁體中文形容詞"],"basis":["依據的後台條目或參考圖編號"],"newTry":["後台沒有、這次新嘗試的做法"]}
 多張圖時，不同圖的東西通常是不同主題；客人描述裡指定的位置或分配也要反映在 arrangement 和主題裡。themes 請拆成 1 到 3 個：如果這組指甲是由幾種不同做法的指甲組成（例如一種是煙燻底加金屬雕塑、一種是奶白底加電路線），每一種就是一個主題。${kbText('special','')}`;
   try{
@@ -1815,14 +1864,14 @@ ${illList}
 規則：照片裡看得到的元素要優先放進 elements；依據後台的參考圖和常見搭配選，例如星星、愛心、鉻飾常配鋼珠（bead）。風格清單中「特殊：」開頭的是依照片風格建立的，照片風格明顯特別時選它。
 規則：依「想要多繁複」決定元素數量：極簡只選 1 個小元素（pearl、stone、sparkle、drop 之一），顏色偏裸色；簡約 1 到 2 個；適中 2 到 3 個；豐富 3 到 4 個；極繁 5 到 6 個，可以混搭不同類別。極簡到適中要簡潔有質感、留白。
 格式：
-{"say":"用繁體中文兩到三句，像美甲師直接對客人說話，說明為什麼這樣配，要提到客人說過的具體內容","aes":"其中一個風格名稱","finish":"其中一個質感 key","elements":[{"key":"元素key","why":"繁體中文一句，說明這個元素跟客人今天的關係"}],"illus":["插畫key"],"shape":"square|round|almond|coffin|stiletto","len":"short|mid|long|xlong","accent":0到4的整數（0拇指 1食指 2中指 3無名指 4小指，放最多裝飾的那根）,"palette":["5個 #RRGGBB；有指定配色時一定照指定配色（可以調整順序），否則有照片顏色時以照片顏色為主"],"basis":["你依據的後台條目，例如 後台・日系、R01、客人用語・冷冷的、不搭的組合・短甲多飾品"],"newTry":["用到後台沒有的東西就寫在這裡，沒有就空陣列"]}${kbText('rec')}`;
+{"say":"用繁體中文兩到三句，像美甲師直接對客人說話，說明為什麼這樣配，要提到客人說過的具體內容","aes":"其中一個風格名稱","finish":"其中一個質感 key","elements":[{"key":"元素key","why":"繁體中文一句，說明這個元素跟客人今天的關係"}],"illus":["插畫key"],"shape":"square|squoval|round|oval|almond|coffin|stiletto","len":"short|mid|long|xlong","accent":0到4的整數（0拇指 1食指 2中指 3無名指 4小指，放最多裝飾的那根）,"palette":["5個 #RRGGBB；有指定配色時一定照指定配色（可以調整順序），否則有照片顏色時以照片顏色為主"],"basis":["你依據的後台條目，例如 後台・日系、R01、客人用語・冷冷的、不搭的組合・短甲多飾品"],"newTry":["用到後台沒有的東西就寫在這裡，沒有就空陣列"]}${kbText('rec')}`;
     try{
       const r=await SAMPLE.json(prompt,{cache:false});
       const els=(r.elements||[]).filter(e=>e&&EL_NAME[e.key]).slice(0,5);
       const why={};els.forEach(e=>why[e.key]=String(e.why||EL_WHY[e.key]).slice(0,80));
       const pal=(r.palette||[]).filter(isHex).slice(0,5);while(pal.length<5)pal.push(base.pal[pal.length]);
       const ill=Array.isArray(r.illus)?r.illus.filter(k=>ILLUS_NAME[k]&&(AES_ILLUS[AES[r.aes]?r.aes:base.aes]||[]).includes(k)).slice(0,4):base.illus;
-      rec={illus:ill,focus:A.focus,aes:AES[r.aes]?r.aes:base.aes,finish:FINISH[r.finish]?r.finish:base.finish,els:els.length?els.map(e=>e.key):base.els,why:els.length?why:base.why,
+      rec={illus:ill,focus:A.focus,aes:AES[r.aes]?r.aes:base.aes,finish:FINISH[finKey(r.finish)]?finKey(r.finish):base.finish,els:els.length?els.map(e=>e.key):base.els,why:els.length?why:base.why,
         shape:SHAPE_NAME[r.shape]?r.shape:base.shape,len:LEN_NAME[r.len]?r.len:base.len,
         accent:Number.isInteger(r.accent)&&r.accent>=0&&r.accent<5?r.accent:3,amount:A.amount,pal,
         say:String(r.say||base.say).slice(0,300),by:'Claude',basis:(r.basis||[]).map(String).slice(0,6),newTry:(r.newTry||[]).map(String).slice(0,4)};
