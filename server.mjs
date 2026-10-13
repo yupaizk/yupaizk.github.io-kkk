@@ -318,11 +318,12 @@ server.on("error", e => {
   } else throw e;
 });
 server.listen(PORT, "127.0.0.1", () => {
+  // 先開瀏覽器再印訊息：Windows 的命令視窗被點到進入「選取」模式時，印字會卡住整個程式。
+  if (process.argv.includes("--open")) openBrowser();
   const link = `http://localhost:${PORT}/undertone/`;
   console.log(`\nUndertone 已啟動：${link}`);
   console.log(client ? `Claude 模型：${MODEL}（思考深度 ${EFFORT}，每天最多 ${DAILY_LIMIT} 次）` : "⚠ 還沒設定 API 金鑰（settings.txt），AI 功能不能用。");
   console.log("要關掉時，直接關這個視窗。\n");
-  if (process.argv.includes("--open")) openBrowser();
 });
 
 function openBrowser() {

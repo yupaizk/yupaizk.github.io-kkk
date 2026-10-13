@@ -28,5 +28,7 @@ if not exist "settings.txt" (
   notepad "settings.txt"
 )
 
-"%NODE%" server.mjs --open
-pause
+rem 關掉這個視窗的「快速編輯」，點到視窗時程式才不會暫停（只影響標題叫 Undertone 的視窗）。
+reg add "HKCU\Console\Undertone" /v QuickEdit /t REG_DWORD /d 0 /f >nul 2>&1
+start "Undertone" cmd /k ""%NODE%" server.mjs --open"
+exit /b 0
