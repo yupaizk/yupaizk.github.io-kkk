@@ -557,7 +557,7 @@ const finKey=k=>k==='mirror'?'chrome':k; // 舊紀錄和 Claude 回的「mirror�
 const FIN_FEEL={'酷酷的':['chrome'],'帥帥的':['chrome'],'金屬感的':['chrome'],'透明的':['jelly','glass'],'霧霧的':['milky'],'亮亮的':['chrome'],'閃閃的':['glazed','pearl'],'乾乾淨淨的':['nude','glazed'],'冷冷的':['chrome'],'軟軟的':['milky','pearl'],'甜甜的':['jelly'],'黏黏的':['jelly','glass'],'暗暗的':['chrome']};
 const EL_CAT={'花朵':['rose','carve','daisy','flower'],'自然':['leaf','butterfly','cherry','cloud','drop'],'甜美':['bow','heart','star','sparkle','moon','bubbletxt','gothcross'],'珠寶':['safetypin','gemstar','bead','pearl','stone','stud','biggem','chain'],'金屬':['fleurcross','spike','ripple','chromesym','chromeframe','drip','swirl','cross'],'透明':['bubble','gelripple','chromebubble'],'平面圖案':['script','dots']};
 const EL_NAME={fleurcross:'金屬花十字',spike:'錐形尖刺',chromebubble:'鉻網泡泡',safetypin:'安全別針',gemstar:'鑽面銀星',gothcross:'哥德十字',bubbletxt:'泡泡字',ministar:'小星星',bead:'鋼珠',chromesym:'立體鉻飾',chromeframe:'鉻線線框',gelripple:'透明水波',stud:'金屬鉚釘',rose:'玫瑰',carve:'雕花浮雕',daisy:'小雛菊',flower:'五瓣花',leaf:'立體葉子',butterfly:'蝴蝶',cherry:'櫻桃',cloud:'雲朵',bow:'蝴蝶結',heart:'愛心',star:'星星',sparkle:'閃光星',pearl:'珍珠',stone:'水鑽',biggem:'大寶石',chain:'鍊條',ripple:'金屬水波',drip:'金屬滴落',swirl:'捲草線條',cross:'十字',bubble:'泡泡',moon:'月亮',drop:'水滴',script:'草寫字',dots:'波點'};
-const EL_WHY={fleurcross:'哥德花十字的銀飾，中間一顆鋼珠，酷又有份量（R31、R34）',spike:'銀色錐形尖刺，像穿環，俐落帶點攻擊性（R31、R34）',chromebubble:'透明凝膠圓頂一顆顆擠在一起，外圈是液態銀，帶一點極光（R29）',safetypin:'銀色安全別針，朋克的小配件（R25）',gemstar:'銀色鉻星，表面鋪滿小水鑽或中間嵌一顆寶石，旁邊配小星（R09、R10）',gothcross:'花邊造型的立體十字，用有色凝膠堆高，有的用鋼珠描一圈（R11）',bubbletxt:'圓滾滾的粉色泡泡字，「<」和「3」放在相鄰兩根，並排組成 <3（R11）',ministar:'大星旁邊的小星星',bead:'鉻銀小圓球，單顆、成排或三顆一組',chromesym:'胖胖的立體鉻飾（圓角星、四芒星、漩渦、火焰），放在正中間',chromeframe:'細鉻線勾出的部落紋線框，末端收尖帶小刺',gelripple:'厚的透明凝膠攤開成水窪，邊緣圓鈍有厚度，有時包住一顆小愛心，旁邊配透明小泡泡（R02、R12、R14）',stud:'小小的金屬尖點，冷硬又俐落',rose:'有存在感但很柔軟',carve:'大朵同色雕花，看起來安靜又有份量',daisy:'小小的花，日常又有精神',flower:'比玫瑰輕盈，乾淨俐落',leaf:'有弧度的葉子讓畫面放鬆',butterfly:'輕盈、有一點自由感',cherry:'圓滾滾的，有點調皮',cloud:'軟軟的雲，像在放空',bow:'帶一點撒嬌和玩心',heart:'最直接的可愛',star:'一點點夢幻和運氣',sparkle:'小小的閃光，手一動就亮',pearl:'最溫和的亮點，什麼場合都不會出錯',stone:'切面水鑽，會反光',biggem:'一顆大寶石當主角，很華麗',chain:'金屬鍊條，酷又有重量',ripple:'液態金屬的凸起線條，有力量',drip:'像融化的金屬往下滴，有點怪',swirl:'細細的捲草線，優雅',cross:'帶點暗黑和個性',bubble:'透明的泡泡，清爽',moon:'安靜、有一點夜晚的感覺',drop:'像水珠一樣，清透',script:'一個單字寫在指甲上，像今天的關鍵字',dots:'規律的圓點，輕鬆可愛'};
+const EL_WHY={fleurcross:'哥德花十字的銀飾，中間一顆鋼珠，酷又有份量（R31、R34）',spike:'銀色錐形尖刺，像穿環，俐落帶點攻擊性（R31、R34）',chromebubble:'透明凝膠圓頂一顆顆擠在一起，外圈是液態銀，帶一點極光（R29）',safetypin:'銀色安全別針，朋克的小配件（R25）',gemstar:'銀色鉻星，表面鋪滿小水鑽或中間嵌一顆寶石，旁邊配小星（R09、R10）',gothcross:'花邊造型的立體十字，用有色凝膠堆高，有的用鋼珠描一圈（R11）',bubbletxt:'圓滾滾的粉色泡泡字，「<」和「3」放在相鄰兩根，並排組成 <3（R11）',ministar:'大星旁邊的小星星',bead:'鉻銀小圓球，單顆、成排或三顆一組',chromesym:'胖胖的立體鉻飾（圓角星、四芒星、漩渦、熔融銀團），放在正中間',chromeframe:'細鉻線勾出的部落紋線框，末端收尖帶小刺',gelripple:'厚的透明凝膠攤開成水窪，邊緣圓鈍有厚度，有時包住一顆小愛心，旁邊配透明小泡泡（R02、R12、R14）',stud:'小小的金屬尖點，冷硬又俐落',rose:'有存在感但很柔軟',carve:'大朵同色雕花，看起來安靜又有份量',daisy:'小小的花，日常又有精神',flower:'比玫瑰輕盈，乾淨俐落',leaf:'有弧度的葉子讓畫面放鬆',butterfly:'輕盈、有一點自由感',cherry:'圓滾滾的，有點調皮',cloud:'軟軟的雲，像在放空',bow:'帶一點撒嬌和玩心',heart:'最直接的可愛',star:'一點點夢幻和運氣',sparkle:'小小的閃光，手一動就亮',pearl:'最溫和的亮點，什麼場合都不會出錯',stone:'切面水鑽，會反光',biggem:'一顆大寶石當主角，很華麗',chain:'金屬鍊條，酷又有重量',ripple:'液態金屬的凸起線條，有力量',drip:'像融化的金屬往下滴，有點怪',swirl:'細細的捲草線，優雅',cross:'帶點暗黑和個性',bubble:'透明的泡泡，清爽',moon:'安靜、有一點夜晚的感覺',drop:'像水珠一樣，清透',script:'一個單字寫在指甲上，像今天的關鍵字',dots:'規律的圓點，輕鬆可愛'};
 const EL_3D=Object.keys(EL_NAME).filter(k=>k!=='script'&&k!=='dots');
 const FORMABLE=['gothcross','heart','star','sparkle','moon','cross','flower','leaf','butterfly','cloud','bow','drop'];
 const FORM_NAME={clear:'純透明',gummy:'軟糖',gel:'立體凝膠',metal:'金屬飾品',emboss:'同色浮雕',jelly:'透明果凍',paint:'平面彩繪',outline:'金屬勾邊',glitter:'亮粉'};
@@ -1005,12 +1005,29 @@ function sparklePath(R){const c=cx();c.beginPath();c.moveTo(0,-R);c.quadraticCur
 const TAU=Math.PI*2;
 function twinkle(x,y,R,a){return;if(a<=0)return;const c=cx();c.save();c.translate(x,y);c.globalAlpha=a;c.shadowColor='rgba(255,255,255,.9)';c.shadowBlur=R*1.5;c.fillStyle='#fff';sparklePath(R);c.fill();c.restore();}
 
+// 液態鉻：上方反射天空（亮）、下方反射地面（暗），中間一條銳利的地平線；邊緣壓暗做出厚度，左上一道亮邊
 function chromeFill(c,pth,R,m,fillRule){fillRule=fillRule||'nonzero';
-  c.save();c.shadowColor='rgba(0,0,0,.3)';c.shadowBlur=R*.25;c.shadowOffsetX=R*.04;c.shadowOffsetY=R*.12;c.fillStyle=m[2];c.fill(pth,fillRule);c.restore();
-  const gr=c.createLinearGradient(-R,-R,R,R);[[0,m[1]],[.18,m[0]],[.32,m[2]],[.47,'#FFFFFF'],[.6,m[1]],[.78,m[2]],[1,m[0]]].forEach(([o,col])=>gr.addColorStop(o,col));
-  c.save();c.translate(-R*.02,-R*.03);c.fillStyle=gr;c.fill(pth,fillRule);c.restore();
-  c.save();c.clip(pth,fillRule);c.translate(R*.05,R*.07);c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=R*.12;c.stroke(pth);c.translate(-R*.11,-R*.15);c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=R*.06;c.stroke(pth);c.restore();}
+  const sky=mixHex(m[0],'#FFFFFF',.5),deep=mixHex(m[2],'#000000',.5);
+  c.save();c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=R*.28;c.shadowOffsetX=R*.05;c.shadowOffsetY=R*.14;c.fillStyle=m[2];c.fill(pth,fillRule);c.restore();
+  c.save();c.clip(pth,fillRule);
+  const g=c.createLinearGradient(-R*.25,-R,R*.25,R);[[0,sky],[.3,m[0]],[.44,m[1]],[.49,'#FFFFFF'],[.52,deep],[.64,m[2]],[.82,m[1]],[1,m[0]]].forEach(([o,col])=>g.addColorStop(o,col));
+  c.fillStyle=g;c.fillRect(-R*3,-R*3,R*6,R*6);
+  c.shadowColor='rgba(0,0,0,.6)';c.shadowBlur=R*.22;c.strokeStyle=hexA(deep,.6);c.lineWidth=R*.16;c.stroke(pth);
+  c.shadowColor='transparent';c.shadowBlur=0;c.translate(-R*.045,-R*.065);c.strokeStyle='rgba(255,255,255,.9)';c.lineWidth=R*.045;c.stroke(pth);
+  c.restore();
+  c.strokeStyle=hexA(deep,.55);c.lineWidth=Math.max(.5,R*.02);c.stroke(pth);}
 function tubePath(pts,k){const p=new Path2D();stampLine(smoothPts(pts),k,p);return p;}
+// 管狀液態鉻：整條暗色→縮細的反光層→最細的高光，像一條圓滾滾的銀
+function tubeChrome(c,pts,R,m){const full=tubePath(pts,1),mid=tubePath(pts,.74),hi=tubePath(pts,.26),deep=mixHex(m[2],'#000000',.45);
+  c.save();c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=R*.2;c.shadowOffsetX=R*.04;c.shadowOffsetY=R*.1;c.fillStyle=deep;c.fill(full);c.restore();
+  const g=c.createLinearGradient(-R,-R,R,R);[[0,m[1]],[.2,'#FFFFFF'],[.35,m[2]],[.5,m[0]],[.62,deep],[.78,m[1]],[1,'#FFFFFF']].forEach(([o,col])=>g.addColorStop(o,col));
+  c.save();c.translate(-R*.012,-R*.018);c.fillStyle=g;c.fill(mid);c.restore();
+  c.save();c.translate(-R*.03,-R*.045);c.fillStyle='rgba(255,255,255,.85)';c.fill(hi);c.restore();}
+// 幾個圓融成一整團：從中心往外取樣外輪廓，再平滑，看起來像熔化的銀
+function blobPath(lobes,n=96){const cxm=lobes.reduce((a,l)=>a+l[0],0)/lobes.length,cym=lobes.reduce((a,l)=>a+l[1],0)/lobes.length,rs=[];
+  for(let i=0;i<n;i++){const a=i/n*TAU,dx=Math.cos(a),dy=Math.sin(a);let r=0;lobes.forEach(([x,y,R])=>{const ox=x-cxm,oy=y-cym,b=ox*dx+oy*dy,cc=ox*ox+oy*oy-R*R,d=b*b-cc;if(d>=0)r=Math.max(r,b+Math.sqrt(d));});rs.push(r);}
+  const sm=rs.map((_,i)=>{let t=0;for(let k=-3;k<=3;k++)t+=rs[(i+k+n)%n];return t/7;});
+  const p=new Path2D();sm.forEach((r,i)=>{const a=i/n*TAU,x=cxm+Math.cos(a)*r,y=cym+Math.sin(a)*r;i?p.lineTo(x,y):p.moveTo(x,y);});p.closePath();return p;}
 const DECO={
   // 金屬花十字（R31、R34）：哥德花十字輪廓做成鏡面銀，中間一顆鋼珠
   fleurcross(R,e,T,P){const c=cx(),m=METAL[P.metal]||METAL.silver;const pts=gothPts(R),n=pts.length,mid=i=>{const a=pts[i%n],b=pts[(i+1)%n];return [(a[0]+b[0])/2,(a[1]+b[1])/2];};
@@ -1058,15 +1075,17 @@ const DECO={
     pos.forEach(([x,y,k])=>{const r=R*.62*k;shade(r*.6,r*.1,r*.3,.35);const g=c.createRadialGradient(x-r*.35,y-r*.4,r*.05,x,y,r);g.addColorStop(0,'#FFFFFF');g.addColorStop(.35,m[0]);g.addColorStop(.75,m[1]);g.addColorStop(1,m[2]);
       c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,TAU);c.fill();noShade();c.fillStyle='rgba(255,255,255,.95)';c.beginPath();c.ellipse(x-r*.35,y-r*.38,r*.22,r*.14,-.6,0,TAU);c.fill();
       c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=Math.max(.4,r*.06);c.beginPath();c.arc(x+r*.08,y+r*.1,r*.9,.2,1.8);c.stroke();});},
-  chromesym(R,e,T,P){const c=cx(),m=METAL[P.metal]||METAL.silver;const kinds=['star','sparkle','spiral','flame'];const sub=kinds[Math.floor(((e.ph||0)/TWO_PI)*4)%4];
+  chromesym(R,e,T,P){const c=cx(),m=METAL[P.metal]||METAL.silver;const kinds=['star','sparkle','spiral','blob'];const sub=kinds[Math.floor(((e.ph||0)/TWO_PI)*4)%4];
     if(sub==='star'||sub==='sparkle'){const p=new Path2D();const tmp=c.getTransform();(sub==='star'?SHAPES.starRound:SHAPES.sparkle)(R);const pts=[];
       if(sub==='star'){for(let i=0;i<=90;i++){const a=i/90*TAU;const t=(a+Math.PI/2)*5/TAU;const f=t-Math.floor(t);const k=Math.abs(f-.5)*2;const r=R*(.5+.5*Math.pow(k,1.6));i?p.lineTo(Math.cos(a)*r,Math.sin(a)*r):p.moveTo(Math.cos(a)*r,Math.sin(a)*r);}}
       else{p.moveTo(0,-R*1.15);p.quadraticCurveTo(R*.14,-R*.14,R*.7,0);p.quadraticCurveTo(R*.14,R*.14,0,R*1.15);p.quadraticCurveTo(-R*.14,R*.14,-R*.7,0);p.quadraticCurveTo(-R*.14,-R*.14,0,-R*1.15);}
       p.closePath();chromeFill(c,p,R,m);return;}
     if(sub==='spiral'){const pts=[];for(let i=0;i<=60;i++){const t=i/60,a=t*2.6*TAU,r=R*(.12+.9*t);pts.push([Math.cos(a)*r,Math.sin(a)*r*1.1,R*(.12+.1*Math.sin(t*Math.PI))*(t>.9?(1-t)*10:1)+R*.04]);}
-      chromeFill(c,tubePath(pts,1),R,m);return;}
-    const pts=[[0,R*1.05,R*.34],[R*.15,R*.5,R*.36],[-R*.05,0,R*.28],[R*.22,-R*.45,R*.2],[-R*.02,-R*1.1,R*.05]];
-    const p=tubePath(pts,1);const s2=tubePath([[-R*.25,R*.6,R*.16],[-R*.42,R*.1,R*.12],[-R*.35,-R*.35,R*.04]],1);p.addPath(s2);chromeFill(c,p,R,m);},
+      tubeChrome(c,pts,R,m);return;}
+    // 熔融銀團（R31）：三葉形或花生形，圓胖、像熔化的銀滴
+    const lobes=((e.ph||0)*7|0)%2?[[0,-R*.42,R*.42],[0,R*.38,R*.52],[R*.12,-R*.02,R*.3]]:[[0,-R*.46,R*.38],[-R*.44,R*.3,R*.38],[R*.44,R*.3,R*.38],[0,R*.06,R*.34]];
+    chromeFill(c,blobPath(lobes),R,m);
+    c.fillStyle='rgba(255,255,255,.9)';lobes.forEach(([x,y,r])=>{c.beginPath();c.ellipse(x-r*.32,y-r*.38,r*.2,r*.1,-.6,0,TAU);c.fill();});},
   gelripple(R,e,T,P){const c=cx();let st=Math.floor((e.ph||1)*1e4)+7;const Rn=()=>{st=(st*16807)%2147483647;return st/2147483647;};
     const lobes=[];for(let k=0;k<3;k++)lobes.push([Rn()*TAU,.04+Rn()*.07,2+Math.floor(Rn()*2)]);
     const mk=(sc,dx=0,dy=0)=>{const p=new Path2D();for(let i=0;i<=90;i++){const a=i/90*TAU;const r=R*sc*(1+lobes.reduce((s_,[ph,am,f])=>s_+am*Math.cos(a*f+ph),0));const x=Math.cos(a)*r*1.12+dx,y=Math.sin(a)*r*.82+dy;i?p.lineTo(x,y):p.moveTo(x,y);}p.closePath();return p;};
@@ -1174,9 +1193,11 @@ function drawLines(f,g,P,T){
   const {w,L}=g,pt=q=>[q[0]*w/2*profile(q[1],P.shp),-q[1]*L];
   f.els.forEach(e=>{
     if(e.t==='chromeframe'){const c=cx(),m=METAL[P.metal]||METAL.silver;const L1=e.path.map((q,i,a)=>{const t=i/(a.length-1);const [x,y]=pt(q);return [x,y,w*(.018+.03*Math.pow(Math.sin(Math.PI*t),.6))+.8];});
-      const p=new Path2D();stampLine(smoothPts(L1),1,p);stampLine(smoothPts(L1.map(([x,y,ww])=>[-x,y,ww])),1,p);
-      e.thorns.forEach((tv,k)=>{const idx=Math.min(L1.length-2,Math.floor(tv*(L1.length-1)));const [x,y,ww]=L1[idx];[1,-1].forEach(sg=>{const xx=x*sg;const tip=[xx+sg*(-w*.16),y-w*(.08+.05*k)];stampLine([[xx,y,ww*1.4],[(xx+tip[0])/2,(y+tip[1])/2,ww*.8],[tip[0],tip[1],.6]],1,p);});});
-      chromeFill(c,p,w*.25,m);
+      const mk=kk=>{const p=new Path2D();stampLine(smoothPts(L1),kk,p);stampLine(smoothPts(L1.map(([x,y,ww])=>[-x,y,ww])),kk,p);
+        e.thorns.forEach((tv,k)=>{const idx=Math.min(L1.length-2,Math.floor(tv*(L1.length-1)));const [x,y,ww]=L1[idx];[1,-1].forEach(sg=>{const xx=x*sg;const tip=[xx+sg*(-w*.16),y-w*(.08+.05*k)];stampLine([[xx,y,ww*1.4],[(xx+tip[0])/2,(y+tip[1])/2,ww*.8],[tip[0],tip[1],.6]],kk,p);});});return p;};
+      {const R=w*.25,deep=mixHex(m[2],'#000000',.45);c.save();c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=R*.15;c.shadowOffsetX=R*.03;c.shadowOffsetY=R*.08;c.fillStyle=deep;c.fill(mk(1));c.restore();
+        const g=c.createLinearGradient(-w*.4,-L*.5,w*.4,0);[[0,m[1]],[.2,'#FFFFFF'],[.35,m[2]],[.5,m[0]],[.62,deep],[.78,m[1]],[1,'#FFFFFF']].forEach(([o,col])=>g.addColorStop(o,col));
+        c.save();c.translate(-w*.004,-w*.006);c.fillStyle=g;c.fill(mk(.72));c.restore();c.save();c.translate(-w*.008,-w*.012);c.fillStyle='rgba(255,255,255,.85)';c.fill(mk(.28));c.restore();}
       if(e.bead){const [bx,by]=pt([0,(e.path[0][1]+e.path[e.path.length-1][1])/2]);const b=new Path2D();b.arc(bx,by,w*.06,0,TAU);chromeFill(c,b,w*.06,m);c.fillStyle='rgba(255,255,255,.95)';c.beginPath();c.arc(bx-w*.02,by-w*.022,w*.015,0,TAU);c.fill();}}
     if(e.t==='ripple'){const pts=e.path.map(pt),c=cx(),m=METAL[P.metal]||METAL.silver;let st=Math.floor((e.k||1)*9973+pts.length*31+(pts[0][0]*7|0));const Rn=()=>{st=(st*16807+11)%2147483647;return st/2147483647;};
       const mid0=Math.floor(pts.length*.32),mid1=Math.ceil(pts.length*.66);const sub=pts.slice(mid0,mid1);
@@ -1191,15 +1212,13 @@ function drawLines(f,g,P,T){
       c.save();c.translate(-w*.008,-w*.012);c.fillStyle=gr;c.fill(mid);c.restore();
       c.save();c.translate(-w*.022,-w*.03);c.fillStyle='rgba(255,255,255,.85)';c.fill(hi);c.restore();
       c.fillStyle='rgba(255,255,255,.95)';blobs.forEach(([x,y,r])=>{c.beginPath();c.ellipse(x-r*.35,y-r*.4,r*.28,r*.12,-.6,0,TAU);c.fill();});}
-    else if(e.t==='drip'&&String(P.metal).startsWith('th')){const m=METAL[P.metal],c=cx(),base=e.path.map(pt);
+    else if(e.t==='drip'){const m=METAL[P.metal]||METAL.silver,c=cx(),base=e.path.map(pt);
       const one=(pts,sc,ph)=>{const n=pts.length;const ws=pts.map((_,i)=>{const t=i/(n-1);return w*sc*(.13-.07*t+.022*Math.sin(t*9+ph));});
         metalLine(pts,ws,P.metal);const b=pts[n-1],r=w*sc*.085;shade(r,1,2,.3);c.fillStyle=rad(b[0]-r*.3,b[1]-r*.3,r*1.3,[[0,m[0]],[.45,m[1]],[1,m[2]]]);
         c.beginPath();c.ellipse(b[0],b[1]+r*.2,r,r*1.25,0,0,TAU);c.fill();noShade();c.fillStyle='rgba(255,255,255,.7)';c.beginPath();c.ellipse(b[0]-r*.35,b[1]-r*.2,r*.22,r*.32,-.4,0,TAU);c.fill();};
       const p0=base[0];shade(w*.1,1,2,.25);c.fillStyle=rad(p0[0],p0[1],w*.2,[[0,m[1]],[1,m[2]]]);c.beginPath();c.ellipse(p0[0],p0[1],w*.24,w*.08,0,0,TAU);c.fill();noShade();
       one(base,1,e.ph);
       [[-.16,.55],[.15,.75]].forEach(([du,len],k)=>{const n=Math.max(4,Math.round(base.length*len));one(base.slice(0,n).map(q=>[q[0]+du*w,q[1]]),.75,e.ph+k+1);});}
-    else if(e.t==='drip'){const pts=e.path.map(pt);metalLine(pts,pts.map((_,i)=>w*(.07+.05*i/pts.length)),P.metal);
-      const b=pts[pts.length-1],r=w*.1*(1+.08*Math.sin(T*2+e.ph));const c=cx();shade(r,1,2,.3);c.fillStyle=rad(b[0],b[1],r,[[0,METAL[P.metal][0]],[.5,METAL[P.metal][1]],[1,METAL[P.metal][2]]]);circ(b[0],b[1],r);c.fill();noShade();}
     else if(e.t==='chain'){const pts=e.path.map(pt),c=cx();
       for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[Math.min(i+1,pts.length-1)],pr=pts[Math.max(i-1,0)];const a=Math.atan2(q[1]-pr[1],q[0]-pr[0]);
         c.save();c.translate(p[0],p[1]);c.rotate(a);shade(3,1,2,.3);c.strokeStyle=metalFill(w*.1,P.metal);c.lineWidth=w*.035;c.beginPath();c.ellipse(0,0,w*.075,i%2?w*.022:w*.045,0,0,TAU);c.stroke();noShade();c.restore();}}
@@ -2249,11 +2268,15 @@ function planSpecial(){
     const f=cand.find(f=>!f.acc&&!f.sculpt&&!f.els.some(e=>KIND[e.t]==='big'||KIND[e.t]==='mid'))||cand.find(f=>!f.els.some(e=>KIND[e.t]==='big'))||cand[0];if(!f)return;
     let add=placeEls(true,true,[k],2,pal,stoneCol,f.cols[0],forms);if(!add.length){add=[{t:k,u:0,v:.45,s:KIND[k]==='small'?1:.8,base:f.cols[0],ph:random(TWO_PI),pn:6,sx:1,sy:1,live:LIVE[k]&&LIVE[k].length?random(LIVE[k]):null,a:0,form:FORMABLE.includes(k)?random(forms):null,dots:Array.from({length:22},()=>[random(-1,1),random(-1,1),random(.03,.08)]),col:elColors(k,pal,stoneCol,f.cols[0])}];}
     f.els.push(...add);have.add(k);});
+  spreadLines(fingers);
   const unplaced=want.filter(k=>!have.has(k)).map(k=>elLabel(k));
   const kbRules=[...spKb];oneSpiral(fingers,false);
   if((forms.includes('metal')||forms.includes('outline'))&&safeMetal(a.metal).ch)kbRules.push(safeMetal(a.metal).ch==='silver'?'主題的金屬色接近黑色，金屬飾品和勾邊改用銀色':'主題的金屬色太暗，金屬飾品和勾邊調亮一點');
   return {fingers,shp:c.shape,len:LEN_VAL[c.len],metal:a.metal,dmood,changes,fr,arr,unplaced,kbRules};
 }
+// 線條類（金屬框、滴落、鍊條、水波）一隻指頭只放一種，多的移到沒有線條的指頭
+function spreadLines(fingers){const lt=f=>[...new Set(f.els.filter(e=>KIND[e.t]==='line').map(e=>e.t))];
+  fingers.forEach(f=>{const ts=lt(f);ts.slice(1).forEach(t=>{const tgt=fingers.find(g=>g!==f&&!lt(g).length&&!g.sculpt);if(!tgt)return;const mv=f.els.filter(e=>e.t===t);f.els=f.els.filter(e=>e.t!==t);tgt.els.push(...mv.map(e=>({...e,base:tgt.cols[0]})));});});}
 function oneSpiral(fingers,already){let sp=!!already;fingers.forEach(f=>f.els.forEach(e=>{if(e.t==='chromesym'){const sub=Math.floor(((e.ph||0)/TWO_PI)*4)%4;if(sub===2){if(sp)e.ph=((e.ph||0)+Math.PI/2)%TWO_PI;sp=true;}}}));}
 function sculptPal(mat,hx){
   if(mat==='bone')hx=mixHex(hx||'#EFE6D6','#F2EADB',.5);
@@ -2415,6 +2438,7 @@ function plan(){
         form:FORMABLE.includes(k)?random(forms):(String(k).startsWith('u')&&CUSTOM[k]&&CUSTOM[k].form?CUSTOM[k].form:null),dots:Array.from({length:22},()=>[random(-1,1),random(-1,1),random(.03,.08)]),col:elColors(k,pal,stoneCol,f.cols[0])}];}
       f.els.push(...add);have.add(k);});
     var unplaced=want.filter(k=>!have.has(k)).map(k=>EL_NAME[k]||k);}
+  spreadLines(fingers);
   if(S._shrink)fingers.forEach(f=>f.els.forEach(e=>{if(KIND[e.t]!=='small'&&e.s)e.s*=.8;}));
   {const twin=(f,e)=>{const re=SIMILAR[f.motif];return re&&String(e.t).startsWith('u')&&CUSTOM[e.t]&&re.test(CUSTOM[e.t].name+(CUSTOM[e.t].ask||''));};
     fingers.forEach((f,i)=>{const bad=f.els.filter(e=>twin(f,e));bad.forEach(e=>{const tgt=fingers.find(g=>g!==f&&!g.els.some(x=>KIND[x.t]==='big'||String(x.t).startsWith('u'))&&!twin(g,e));if(tgt){f.els.splice(f.els.indexOf(e),1);tgt.els.push(e);}});});}
