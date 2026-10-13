@@ -33,7 +33,9 @@ function loadSettings() {
   return out;
 }
 const settings = loadSettings();
-const API_KEY = settings.ANTHROPIC_API_KEY && !settings.ANTHROPIC_API_KEY.includes("...") ? settings.ANTHROPIC_API_KEY : "";
+// 貼上時常多了引號、空白或換行，先清掉
+const rawKey = (settings.ANTHROPIC_API_KEY || "").replace(/["'“”‘’\s]/g, "");
+const API_KEY = rawKey && !rawKey.includes("...") ? rawKey : "";
 const MODEL = settings.CLAUDE_MODEL || "claude-opus-5-5";
 const EFFORT = settings.CLAUDE_EFFORT || "medium";
 const DAILY_LIMIT = parseInt(settings.DAILY_AI_LIMIT || "300", 10);
@@ -331,6 +333,13 @@ server.listen(PORT, "127.0.0.1", () => {
   const link = `http://localhost:${PORT}/undertone/`;
   console.log(`\nUndertone 已啟動：${link}`);
   console.log(client ? `Claude 模型：${MODEL}（思考深度 ${EFFORT}，每天最多 ${DAILY_LIMIT} 次）` : "⚠ 還沒設定 API 金鑰（settings.txt），AI 功能不能用。");
+  // 開啟時先確認金鑰能不能用（查模型資料，不花錢）
+  if (client) client.models.retrieve(MODEL).then(
+    () => console.log("✓ API 金鑰可以用"),
+    e => console.error(e instanceof Anthropic.AuthenticationError
+      ? `✗ API 金鑰不對或已失效（開頭 ${API_KEY.slice(0, 10)}…，共 ${API_KEY.length} 個字）。到 https://console.anthropic.com/settings/keys 重新建立一把，貼進 settings.txt 後重新啟動。`
+      : e instanceof Anthropic.NotFoundError ? `✗ 找不到模型 ${MODEL}，檢查 settings.txt 的 CLAUDE_MODEL。`
+      : `✗ 檢查金鑰時出錯：${e.message}`));
   console.log("要關掉時，直接關這個視窗。\n");
 });
 

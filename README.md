@@ -13,7 +13,9 @@
 3. 第一次會跳出記事本：在 `ANTHROPIC_API_KEY=` 後面貼上 API 金鑰，存檔、關掉記事本。
 4. 瀏覽器會自動打開生成器。鏡頭試戴可以直接用。
 
-要關掉時，關掉那個黑色視窗就好。下次只要再點兩下 `啟動 Undertone.bat`。
+要關掉時，關掉那個黑色視窗就好。
+
+啟動時黑色視窗會檢查金鑰：出現「✓ API 金鑰可以用」就沒問題；出現「✗ API 金鑰不對或已失效」就到 https://console.anthropic.com/settings/keys 重新建立一把金鑰，貼進 `settings.txt`（整串 `sk-ant-` 開頭、不要加引號），存檔後重新啟動。下次只要再點兩下 `啟動 Undertone.bat`。
 
 - 測試紀錄和圖片都存在 `data/` 資料夾裡。換電腦時把整個資料夾一起帶走。
 - 資料夾裡有 `undertone-old-data/` 的話，第一次啟動會自動搬入 claude.ai 舊的測試紀錄，只會搬一次。
