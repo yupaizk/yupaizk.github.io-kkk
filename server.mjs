@@ -95,30 +95,38 @@ async function ai(req, res) {
   }
   content.push({ type: "text", text: body.prompt });
 
-  let msg;
-  try {
-    msg = await client.beta.messages.create({
-      model: MODEL,
-      max_tokens: 16000,
-      output_config: { effort: EFFORT },
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      messages: [{ role: "user", content }],
-    });
-  } catch (e) {
-    console.error("Claude API:", e.message);
-    if (e instanceof Anthropic.RateLimitError) return json(res, { error: "rate_limited" }, 429);
-    if (e instanceof Anthropic.AuthenticationError) return json(res, { error: "bad_api_key" }, 500);
-    if (e instanceof Anthropic.BadRequestError) return json(res, { error: "bad_request", detail: e.message }, 400);
-    if (e instanceof Anthropic.APIError) return json(res, { error: "api_error", detail: e.message }, 502);
-    return json(res, { error: "network", detail: e.message }, 502);
-  }
+  // 用串流接收：圖多、想得久的時候不會因為連線太久被切斷。
+  // 回覆被截斷或不是 JSON 時自動再試一次。
+  const ask = () => client.beta.messages.stream({
+    model: MODEL,
+    max_tokens: 32000,
+    output_config: { effort: EFFORT },
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    messages: [{ role: "user", content }],
+  }).finalMessage();
 
-  if (msg.stop_reason === "refusal") return json(res, { error: "refused" }, 422);
-  const text = msg.content.filter(b => b.type === "text").map(b => b.text).join("");
-  const result = parseJson(text);
-  if (result === undefined) return json(res, { error: "bad_json", text: text.slice(0, 2000) }, 502);
-  return json(res, { result, stop_reason: msg.stop_reason });
+  let last = null;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    let msg;
+    try {
+      msg = await ask();
+    } catch (e) {
+      console.error(`Claude API 錯誤（第 ${attempt} 次）：`, e.message);
+      if (e instanceof Anthropic.AuthenticationError) return json(res, { error: "bad_api_key", detail: e.message }, 500);
+      if (e instanceof Anthropic.PermissionDeniedError) return json(res, { error: "no_permission", detail: e.message }, 500);
+      if (e instanceof Anthropic.BadRequestError) return json(res, { error: "bad_request", detail: e.message }, 400);
+      last = { error: e instanceof Anthropic.RateLimitError ? "rate_limited" : e instanceof Anthropic.APIConnectionError || !(e instanceof Anthropic.APIError) ? "network" : "api_error", detail: e.message };
+      continue;
+    }
+    if (msg.stop_reason === "refusal") { console.error("Claude 拒絕回答這個請求"); return json(res, { error: "refused" }, 422); }
+    const text = msg.content.filter(b => b.type === "text").map(b => b.text).join("");
+    const result = parseJson(text);
+    if (result !== undefined) return json(res, { result, stop_reason: msg.stop_reason });
+    console.error(`Claude 回覆不是完整的 JSON（第 ${attempt} 次，stop_reason=${msg.stop_reason}）：`, text.slice(0, 300));
+    last = { error: msg.stop_reason === "max_tokens" ? "too_long" : "bad_json", detail: text.slice(0, 500) };
+  }
+  return json(res, last, last.error === "rate_limited" ? 429 : 502);
 }
 
 // 回覆應該只有一個 JSON；容許前後多了說明文字或 ``` 圍起來。

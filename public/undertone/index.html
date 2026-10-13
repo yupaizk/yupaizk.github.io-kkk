@@ -1643,6 +1643,11 @@ function pickColor(item,ev){
   const d=x.getImageData(0,0,5,5).data;let r=0,g=0,b=0;for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];}const n=d.length/4;
   addCol('#'+[r/n,g/n,b/n].map(v=>Math.round(v).toString(16).padStart(2,'0')).join(''));
 }
+// 呼叫 Claude 失敗的原因（server.mjs 回的錯誤代碼）
+const AI_ERR={no_api_key:'settings.txt 裡還沒填 API 金鑰',bad_api_key:'API 金鑰不對或已失效',no_permission:'這把金鑰沒有權限用這個模型',
+  daily_limit:'今天的呼叫次數用完了，可以在 settings.txt 調高 DAILY_AI_LIMIT',rate_limited:'Claude 那邊太忙或額度用完，等一下再試',
+  api_error:'Claude 那邊出錯，等一下再試',network:'連不上 Claude，檢查網路',refused:'Claude 不處理這組圖',
+  too_long:'回覆太長被截斷',bad_json:'回覆格式不對',bad_request:'請求被 Claude 退回，黑色視窗裡有詳細原因',too_large:'圖片太大'};
 function renderAiBox(){
   const box=$('#aiBox'),dw=$('#descWrap');
   if(!S.imgs.length){
@@ -1667,7 +1672,7 @@ function renderAiBox(){
   box.className='note quiet';
   if(!SAMPLE){box.textContent='⚠ 沒有開放使用 Claude，只從照片抓了顏色，沒有讀懂圖上的風格和元素。';dw.hidden=true;return;}
   if(mustDesc){box.textContent='⚠ 目前沒辦法讓 Claude 看圖，只抓了顏色。請在下面用一兩句話描述，按「完成」。';return;}
-  if(S.analyzeFailed){box.textContent='⚠ 這次沒有解析成功，只抓了顏色。可以在下面描述後按「完成」，會再試一次。';return;}
+  if(S.analyzeFailed){const why=AI_ERR[S.analyzeErr];box.textContent='⚠ 這次沒有解析成功，只抓了顏色。'+(why?`（${why}）`:'')+'可以在下面描述後按「完成」，會再試一次。';return;}
   box.textContent='已經先抓出主要顏色，馬上開始解析…';
 }
 const BASES=['aura','cellnet','tribal','dotpair','jpdots','vstreak','blurstar','raiseddots','tipline','microfrench','vfrench','glitterfrench','outlinefrench','colorfrench','darkfrench','ribbonfrench','syrup','wavestroke','vlines','cuticlemoon','dots3','halfhalf','celestial','halfmoon','tortoise2','goldflake','lace2','chromeaura','bolts','tartan','cateyedots','jellydots','zebra','leopard2','ombre','frenchgem','frenchchain','stripefrench','smoky','milky','solid','jelly','chrome','cream','velvet','cateye','marble','glitter','aurora','bruise','skin','muscle','cells','gridbead','negstar','bwblock','chromefull'];
@@ -1705,7 +1710,7 @@ colors 只取主體（指甲、作品本身、客人要的東西）的顏色；�
     S.analysis.basis=(r.basis||[]).map(String).slice(0,6);S.analysis.newTry=(r.newTry||[]).map(String).slice(0,4);
     S.analysis.withAdd=S.addCols.length>0;S.analysis.colorsOrig=[...S.analysis.colors];
     if(S.mode==='B'&&r.special&&r.special.name){S.analysis.rawSpecial=r.special;S.analysis.rawSpecialOrig=JSON.parse(JSON.stringify(r.special));S.analysis.specialKey=registerSpecial(r.special,S.analysis);}
-  }catch(e){S.analyzeFailed=true;if(e&&e.code==='not_granted')SAMPLE=null;}
+  }catch(e){console.warn('analyze',e);S.analyzeFailed=true;S.analyzeErr=e&&e.code||'';if(e&&e.code==='not_granted')SAMPLE=null;}
   S.analyzing=false;renderAiBox();
   return !!S.analysis;
 }
