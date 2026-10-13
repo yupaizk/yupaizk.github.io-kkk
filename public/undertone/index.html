@@ -153,6 +153,9 @@ details.more{margin-top:12px}details.more summary{cursor:pointer;color:var(--lac
 #tryStage canvas{display:block}
 #tryHint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(22,22,22,.72);color:#fff;font-size:13px;padding:6px 14px;border-radius:999px;white-space:nowrap;pointer-events:none}
 #tryHint[hidden]{display:none}
+.trysize{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:14px}
+.trysize input{flex:1;accent-color:var(--ink)}
+.trysize span{min-width:3em;text-align:right;color:var(--soft);font-variant-numeric:tabular-nums}
 .shots{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
 .shots img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;display:block;border:1px solid var(--line)}
 .shots button{appearance:none;border:0;padding:0;background:none;cursor:pointer}
@@ -447,7 +450,7 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
 
   <section class="screen" data-step="try">
     <h2>戴上看看</h2>
-    <p class="lead">把手放進畫面，指甲會跟著手指移動。左手、右手、兩隻手一起都可以。</p>
+    <p class="lead">手背朝鏡頭放進畫面，指甲會跟著手指移動。左手、右手、兩隻手一起都可以。</p>
     <div class="split tryon"><div class="split-main">
     <div id="tryStage"><div id="tryHint">準備鏡頭…</div></div>
     </div><div class="split-side">
@@ -459,6 +462,8 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
       <label class="linkbtn" style="position:relative;overflow:hidden">改用手的照片<input type="file" id="tryFile" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer"></label>
       <button class="linkbtn" id="tryCam" hidden>改回鏡頭</button>
     </div>
+    <label class="trysize">指甲大小 <input type="range" id="trySize" min="60" max="130" step="5" value="100"><span id="trySizeV">100%</span></label>
+    <p class="stat" id="tryTip">手背朝鏡頭，離鏡頭遠一點，讓整隻手連手腕都在畫面裡，比較容易抓到。</p>
     <p class="stat" id="tryMsg" style="margin-top:10px"></p>
     <div class="shots" id="tryShots"></div>
     </div></div>
@@ -2895,7 +2900,7 @@ $('#exportCsv').onclick=async()=>{
 /* ---------- 試戴 ---------- */
 const HANDS_VER='0.4.1675469240',HANDS_URL='vendor/mediapipe-hands/';
 const TIP=[4,8,12,16,20],DIP=[3,7,11,15,19];
-const TRY={on:false,src:null,video:null,img:null,stream:null,hands:null,busy:false,lm:null,shots:[],selfie:true};
+const TRY={size:(()=>{try{return +localStorage.getItem('ut-trysize')||100;}catch(e){return 100;}})(),on:false,src:null,video:null,img:null,stream:null,hands:null,busy:false,lm:null,shots:[],selfie:true};
 function tryHint(t){const h=$('#tryHint');h.hidden=!t;if(t)h.textContent=t;}
 function loadHandsLib(){
   if(window.Hands)return Promise.resolve();
@@ -2905,7 +2910,7 @@ async function initHands(){
   if(TRY.hands)return TRY.hands;
   await loadHandsLib();
   const h=new Hands({locateFile:f=>HANDS_URL+f});
-  h.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:.5,minTrackingConfidence:.4,selfieMode:true});
+  h.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:.3,minTrackingConfidence:.3,selfieMode:true});
   h.onResults(onHands);
   await h.initialize();
   TRY.hands=h;return h;
@@ -2916,7 +2921,8 @@ function fitRect(){const s=srcSize();if(!s)return null;const k=Math.max(width/s.
 // 偵測到的每一隻手都戴上（左右手、手心手背都算，最多兩隻）。TRY.lm 是陣列，一隻手一組點。
 function onHands(r){
   const all=r.multiHandLandmarks||[];
-  if(!all.length){TRY.lm=null;return;}
+  if(!all.length){if(TRY.src!==TRY.video||Date.now()-(TRY.seen||0)>400)TRY.lm=null;return;}
+  TRY.seen=Date.now();
   const f=fitRect();if(!f)return;
   const prev=TRY.lm||[],live=TRY.src===TRY.video;
   TRY.lm=all.map((L,h)=>{
@@ -2949,7 +2955,7 @@ function drawTry(P){
     const t=lm[TIP[i]],d=lm[DIP[i]];
     const dx=t.x-d.x,dy=t.y-d.y,seg=Math.hypot(dx,dy);if(seg<2)return;
     const ux=dx/seg,uy=dy/seg;
-    const wN=Math.max(span*.2,seg*(i?0.7:0.62))*FINGERS[i].w;
+    const wN=Math.max(span*.15,seg*(i?0.54:0.48))*FINGERS[i].w*TRY.size/100;
     const k=i?0.4:0.36,bx=d.x+dx*k,by=d.y+dy*k;
     const g=G[i],s=wN/g.w;
     push();c.translate(bx,by);c.rotate(Math.atan2(ux,-uy));c.scale(s,s);
@@ -3026,6 +3032,8 @@ function closeTry(){
   document.querySelector('nav.steps').style.display='';$('#openLog').style.visibility='';
   go(4);
 }
+{const r=$('#trySize'),show=()=>{$('#trySizeV').textContent=TRY.size+'%';};r.value=TRY.size;show();
+  r.addEventListener('input',()=>{TRY.size=+r.value;show();try{localStorage.setItem('ut-trysize',TRY.size);}catch(e){}});}
 $('#toTry').onclick=openTry;$('#tryBack').onclick=closeTry;$('#tryShot').onclick=tryShot;
 $('#tryFile').addEventListener('change',e=>{usePhoto(e.target.files[0]);e.target.value='';});
 $('#tryCam').onclick=()=>{TRY.img=null;startCam();};
