@@ -2918,7 +2918,7 @@ async function initHands(){
 /* 把偵測結果換成畫布座標，並做平滑 */
 function srcSize(){const v=TRY.src;if(!v)return null;const w=v.videoWidth||v.naturalWidth,h=v.videoHeight||v.naturalHeight;return w&&h?{w,h}:null;}
 function fitRect(){const s=srcSize();if(!s)return null;const k=Math.max(width/s.w,height/s.h);const dw=s.w*k,dh=s.h*k;return {x:(width-dw)/2,y:(height-dh)/2,w:dw,h:dh};}
-// 偵測到的每一隻手都戴上（左右手、手心手背都算，最多兩隻）。TRY.lm 是陣列，一隻手一組點。
+// 偵測到的每一隻手都戴上（左右手、最多兩隻）。TRY.lm 是陣列，一隻手一組點；手心朝鏡頭的手不畫指甲。
 function onHands(r){
   const all=r.multiHandLandmarks||[];
   if(!all.length){if(TRY.src!==TRY.video||Date.now()-(TRY.seen||0)>400)TRY.lm=null;return;}
@@ -2929,8 +2929,13 @@ function onHands(r){
     const pts=L.map(p=>({x:f.x+p.x*f.w,y:f.y+p.y*f.h}));
     // 平滑：跟上一幀最近的那隻手對齊，避免兩隻手的點互相拉扯
     let old=null,bd=1e9;prev.forEach(q=>{const d=Math.hypot(q[0].x-pts[0].x,q[0].y-pts[0].y);if(d<bd){bd=d;old=q;}});
-    if(!live||!old||bd>f.w*.25)return pts;
-    return pts.map((p,i)=>({x:old[i].x+(p.x-old[i].x)*.55,y:old[i].y+(p.y-old[i].y)*.55}));
+    pts.forEach((p,i)=>{p.z=L[i].z||0;});
+    const lab=r.multiHandedness&&r.multiHandedness[h]?r.multiHandedness[h].label:null;
+    let out=pts;
+    if(live&&old&&bd<=f.w*.25)out=pts.map((p,i)=>({x:old[i].x+(p.x-old[i].x)*.55,y:old[i].y+(p.y-old[i].y)*.55,z:p.z}));
+    // 手背／手心：側著拿看不太出來時沿用上一幀，避免一直閃
+    const sd=backSide(out,L,f.h/f.w,lab);out.back=sd===null?(old&&bd<=f.w*.25?old.back:true):sd;
+    return out;
   });
 }
 async function pump(){
@@ -2938,6 +2943,33 @@ async function pump(){
   const v=TRY.video;
   if(TRY.hands&&!TRY.busy&&v.readyState>=2){TRY.busy=true;try{await TRY.hands.send({image:v});}catch(e){console.warn(e);}TRY.busy=false;}
   requestAnimationFrame(pump);
+}
+// 手背朝鏡頭？左右手標籤常常猜錯，改用立體形狀判斷：
+// 1. 大拇指和彎起來的手指都在掌心那一側（t），配合手腕→食指根→小指根在畫面上的轉向（cr），就知道哪一面朝鏡頭
+// 2. 手側著拿、上面看不準時，看指尖比指根近還是遠（d）：手指往掌心彎，指尖比較近就是手心朝鏡頭
+function backSide(lm,L,ar,label){
+  const w=lm[0],a=lm[5],b=lm[17];
+  const n2=Math.hypot(a.x-w.x,a.y-w.y)*Math.hypot(b.x-w.x,b.y-w.y);if(!n2)return null;
+  const cr=((a.x-w.x)*(b.y-w.y)-(a.y-w.y)*(b.x-w.x))/n2;
+  const P=i=>[L[i].x-L[0].x,(L[i].y-L[0].y)*ar,(L[i].z||0)-(L[0].z||0)];
+  const u=P(5),v=P(17),n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],nn=Math.hypot(...n)||1;
+  const t=[3,4,6,8,10,12,14,16,18,20].reduce((s,i)=>{const q=P(i);return s+(n[0]*q[0]+n[1]*q[1]+n[2]*q[2])/nn;},0)/10;
+  if(Math.abs(cr)>=.1&&Math.abs(t)>.03)return cr*t>0;
+  const Z=i=>L[i].z||0,m=(Z(5)+Z(9)+Z(13)+Z(17))/4,d=[4,8,12,16,20].reduce((s,i)=>s+Z(i)-m,0)/5;
+  if(Math.abs(d)>.04)return d>0;
+  if(label&&Math.abs(cr)>=.12)return label==='Left'?cr>0:cr<0;
+  return null;
+}
+// 手指彎下去、指尖朝鏡頭或被其他手指擋住時不畫這隻指甲
+function fingerShown(lm,i,span){
+  const m=lm[i?4*i+1:2],p=lm[i?4*i+2:3],t=lm[TIP[i]];
+  const a={x:p.x-m.x,y:p.y-m.y},b={x:t.x-p.x,y:t.y-p.y};
+  const cos=(a.x*b.x+a.y*b.y)/((Math.hypot(a.x,a.y)*Math.hypot(b.x,b.y))||1);
+  if(cos<(i?.35:-.1))return false;
+  if(Math.hypot(t.x-lm[DIP[i]].x,t.y-lm[DIP[i]].y)<span*.07)return false;
+  // 整根手指在畫面上變很短：往掌心折下去或直直指著鏡頭，指甲看不到
+  if(i&&Math.hypot(t.x-m.x,t.y-m.y)<span*.55)return false;
+  return true;
 }
 function drawTry(P){
   const c=cx(),f=fitRect();
@@ -2947,17 +2979,21 @@ function drawTry(P){
     c.restore();}
   if(!TRY.hands){return;}
   if(!TRY.lm){tryHint(TRY.src===TRY.img?'這張照片找不到手，換一張手比較清楚的照片':'把手放進畫面');$('#tryShot').disabled=true;return;}
-  tryHint('');$('#tryShot').disabled=false;
+  const backs=TRY.lm.filter(lm=>lm.back);
+  $('#tryShot').disabled=false;
+  if(!backs.length){tryHint('把手背朝向鏡頭');return;}
+  tryHint('');
   const G=layout(P);FLIP=false;
-  TRY.lm.forEach(lm=>{
+  backs.forEach(lm=>{
   const span=Math.hypot(lm[5].x-lm[17].x,lm[5].y-lm[17].y);
   P.fingers.forEach((fg,i)=>{
+    if(!fingerShown(lm,i,span))return;
     const t=lm[TIP[i]],d=lm[DIP[i]];
     const dx=t.x-d.x,dy=t.y-d.y,seg=Math.hypot(dx,dy);if(seg<2)return;
     const ux=dx/seg,uy=dy/seg;
     const wN=Math.max(span*.15,seg*(i?0.54:0.48))*FINGERS[i].w*TRY.size/100;
     const k=i?0.4:0.36,bx=d.x+dx*k,by=d.y+dy*k;
-    const g=G[i],s=wN/g.w;
+    const g={...G[i],L:G[i].L*1.22},s=wN/g.w;
     push();c.translate(bx,by);c.rotate(Math.atan2(ux,-uy));c.scale(s,s);
     drawNail2D(fg,g,P,0,i);drawLines(fg,g,P,0);if(fg.sculpt)drawSculpt(fg,g);drawDecos(fg,g,P,0);
     pop();
