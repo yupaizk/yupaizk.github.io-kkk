@@ -589,10 +589,17 @@ const DRAW={
     const gr=x.createRadialGradient(TW*.5,TH*.48,8,TW*.5,TH*.5,TH*.62);gr.addColorStop(0,css(light));gr.addColorStop(.42,css(b));gr.addColorStop(1,css(deep));x.fillStyle=gr;x.fillRect(0,0,TW,TH);
     x.save();x.filter='blur(10px)';x.fillStyle=css(deep,.45);for(let i=0;i<3;i++){x.beginPath();x.ellipse(random(TW),random(TH),random(30,60),random(60,120),random(TAU),0,TAU);x.fill();}x.restore();},
   // 手繪細胞網（R30）：黑色的網，網眼是底色
-  cellnet(g,c){const x=g.drawingContext,lum=q=>.3*red(q)+.59*green(q)+.11*blue(q);const base=lum(c[0])>110?c[0]:color('#E6D5CE'),ink=[...c].sort((a,b)=>lum(a)-lum(b))[0];
-    g.background(lum(ink)<90?ink:color('#141414'));const cs=[];for(let t=0;t<2500&&cs.length<80;t++){const r=random(10,40),px=random(-14,TW+14),py=random(-14,TH+14);if(cs.every(([a,b,q])=>Math.hypot(px-a,py-b)>r+q+2.5))cs.push([px,py,r]);}
-    for(let it=0;it<3;it++)cs.forEach(q=>{let m=60;cs.forEach(o=>{if(o!==q)m=Math.min(m,Math.hypot(q[0]-o[0],q[1]-o[1])-o[2]-3);});q[2]=Math.max(q[2],m);}); // 網眼長大到幾乎碰到旁邊，只留細黑線
-    cs.forEach(([px,py,r])=>{x.fillStyle=css(base);x.beginPath();x.arc(px,py,r,0,TAU);x.fill();});},
+  cellnet(g,c){const lum=q=>.3*red(q)+.59*green(q)+.11*blue(q);
+    // 淺色底上用細深色線畫連在一起的細胞網（像植物細胞、龜裂），線粗細有點手繪感；不要變成深底挖洞
+    const light=[...c].sort((a,b)=>lum(b)-lum(a))[0],dark=[...c].sort((a,b)=>lum(a)-lum(b))[0];
+    const base=lum(light)>150?light:color('#E9DCD5'),ink=lum(dark)<80?dark:color('#1A1A1A');
+    const sd=[];for(let t=0;t<3000&&sd.length<34;t++){const px=random(-10,TW+10),py=random(-10,TH+10);if(sd.every(([a,b])=>Math.hypot(px-a,py-b)>30))sd.push([px,py,random(.85,1.15)]);}
+    g.pixelDensity(1);g.loadPixels();const W=g.width,H=g.height,kx=TW/W,ky=TH/H,b0=[red(base),green(base),blue(base)],i0=[red(ink),green(ink),blue(ink)];
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const X=x*kx,Y=y*ky;let d1=1e9,d2=1e9;
+      for(const [a,b,wt] of sd){const d=Math.hypot(X-a,Y-b)*wt;if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d;}
+      const th=1.1+.9*noise(X*.03,Y*.03),e=d2-d1,k=e<th?1:e<th+1.2?1-(e-th)/1.2:0,o=4*(y*W+x);
+      for(let j=0;j<3;j++)g.pixels[o+j]=b0[j]+(i0[j]-b0[j])*k*.92;g.pixels[o+3]=255;}
+    g.updatePixels();},
   // 黑色部落紋（R31、R33、R34）：左右對稱、從粗到尖的鉤狀刺
   tribal(g,c){const x=g.drawingContext,lum=q=>.3*red(q)+.59*green(q)+.11*blue(q);g.background(c[0]);x.fillStyle=lum(c[0])<90?'#ECECEC':'#121212';
     const bz=(p0,p1,p2,p3)=>{const o=[];for(let i=0;i<=28;i++){const t=i/28,u=1-t;o.push([u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]]);}return o;};
@@ -1217,13 +1224,39 @@ function drawLines(f,g,P,T){
       c.save();c.translate(-w*.008,-w*.012);c.fillStyle=gr;c.fill(mid);c.restore();
       c.save();c.translate(-w*.022,-w*.03);c.fillStyle='rgba(255,255,255,.85)';c.fill(hi);c.restore();
       c.fillStyle='rgba(255,255,255,.95)';blobs.forEach(([x,y,r])=>{c.beginPath();c.ellipse(x-r*.35,y-r*.4,r*.28,r*.12,-.6,0,TAU);c.fill();});}
-    else if(e.t==='drip'){const m=METAL[P.metal]||METAL.silver,c=cx(),base=e.path.map(pt);
-      const one=(pts,sc,ph)=>{const n=pts.length;const ws=pts.map((_,i)=>{const t=i/(n-1);return w*sc*(.13-.07*t+.022*Math.sin(t*9+ph));});
-        metalLine(pts,ws,P.metal);const b=pts[n-1],r=w*sc*.085;shade(r,1,2,.3);c.fillStyle=rad(b[0]-r*.3,b[1]-r*.3,r*1.3,[[0,m[0]],[.45,m[1]],[1,m[2]]]);
-        c.beginPath();c.ellipse(b[0],b[1]+r*.2,r,r*1.25,0,0,TAU);c.fill();noShade();c.fillStyle='rgba(255,255,255,.7)';c.beginPath();c.ellipse(b[0]-r*.35,b[1]-r*.2,r*.22,r*.32,-.4,0,TAU);c.fill();};
-      const p0=base[0];shade(w*.1,1,2,.25);c.fillStyle=rad(p0[0],p0[1],w*.2,[[0,m[1]],[1,m[2]]]);c.beginPath();c.ellipse(p0[0],p0[1],w*.24,w*.08,0,0,TAU);c.fill();noShade();
-      one(base,1,e.ph);
-      [[-.16,.55],[.15,.75]].forEach(([du,len],k)=>{const n=Math.max(4,Math.round(base.length*len));one(base.slice(0,n).map(q=>[q[0]+du*w,q[1]]),.75,e.ph+k+1);});}
+    // 液態金屬滴落：甲根積一攤熔融銀，往下垂 2～3 滴長短不同、頸細尾圓的水滴，整塊連在一起上色
+    else if(e.t==='drip'){const m=METAL[P.metal]||METAL.silver,c=cx(),pt=q=>[q[0]*w/2*Math.max(.8,profile(q[1],P.shp)),-q[1]*L];
+      let st=Math.floor((e.ph||1)*7919)%2147483647||7;const Rn=()=>{st=(st*16807)%2147483647;return st/2147483647;};for(let i=0;i<5;i++)Rn();
+      const u0=Math.max(-.12,Math.min(.12,e.path[0][0])),vEnd=e.path[e.path.length-1][1],vb=.11,hw=.9;
+      const polys=[];
+      // 一攤：從甲根邊緣往下鼓的扁圓
+      {const top=[],bot=[];for(let i=0;i<=24;i++){const t=i/24,u=u0-hw+2*hw*t;top.push([u,0]);bot.push([u,(vb+.02*Math.sin(t*9+(e.ph||0)))*Math.pow(Math.sin(Math.PI*t),.4)]);}
+        polys.push([...top,...bot.reverse()].map(pt));}
+      const n=Rn()<.3?2:3,bulbs=[];
+      for(let k=0;k<n;k++){const uc=u0+hw*(n===2?(k?.42:-.5):(-.66+.64*k))+(Rn()-.5)*.08,dw=.15+Rn()*.06,len=Math.min(vEnd,.12+Rn()*.3)*(k===1?1:.65);
+        // 圓頭的滴：上面跟一攤圓順接起來，往下寬度差不多，尾端圓圓的稍微鼓一點
+        const q=(p0,p1,p2,t)=>[(1-t)*(1-t)*p0[0]+2*(1-t)*t*p1[0]+t*t*p2[0],(1-t)*(1-t)*p0[1]+2*(1-t)*t*p1[1]+t*t*p2[1]];
+        const side=sg=>{const o=[];for(let i=0;i<=8;i++)o.push(q([uc+sg*dw*1.8,vb*.5],[uc+sg*dw*.95,vb+.01],[uc+sg*dw*.95,vb+.05],i/8));
+          for(let i=1;i<=6;i++){const t=i/6;o.push([uc+sg*dw*(.95+.12*t*t),vb+.05+(len-.05)*t]);}return o.map(pt);};
+        const [bx,by]=pt([uc,vb+len]),[ex]=pt([uc+dw*1.07,vb+len]),r=Math.abs(ex-bx),cap=[];
+        for(let i=1;i<16;i++){const a2=Math.PI+i/16*Math.PI;cap.push([bx+Math.cos(a2)*r,by+Math.sin(a2)*r*1.1]);}
+        const L2=side(-1),R2=side(1);polys.push([...L2,...(L2[L2.length-1][0]<R2[R2.length-1][0]?cap:cap.slice().reverse()),...R2.reverse()]);
+        bulbs.push([bx,by-r*.5,r,pt([uc,0])]);}
+      // 每塊都轉成同一個方向，疊在一起才會合成一整塊
+      const area=q=>q.reduce((s2,p2,i)=>{const n2=q[(i+1)%q.length];return s2+p2[0]*n2[1]-n2[0]*p2[1];},0);
+      const xs=polys.flat().map(q=>q[0]),ys=polys.flat().map(q=>q[1]),cx0=(Math.min(...xs)+Math.max(...xs))/2,cy0=(Math.min(...ys)+Math.max(...ys))/2,R=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys))/2;
+      const path=new Path2D();polys.forEach(q=>{if(area(q)<0)q=q.slice().reverse();q.forEach(([x,y],i)=>i?path.lineTo(x-cx0,y-cy0):path.moveTo(x-cx0,y-cy0));path.closePath();});
+      c.save();c.translate(cx0,cy0);
+      c.save();c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=R*.2;c.shadowOffsetX=R*.04;c.shadowOffsetY=R*.1;c.fillStyle=m[2];c.fill(path);c.restore();
+      c.save();c.clip(path);
+      // 一攤：上亮下暗
+      const gb=c.createLinearGradient(0,-R,0,R);[[0,'#FFFFFF'],[.25,m[0]],[.55,m[1]],[1,m[2]]].forEach(([o2,col])=>gb.addColorStop(o2,col));c.fillStyle=gb;c.fillRect(-R*3,-R*3,R*6,R*6);
+      // 每一滴：兩側暗、中間一道亮光，像圓柱狀的液態銀
+      bulbs.forEach(([x,y,r,top])=>{const X=x-cx0,T=top[1]-cy0+R*.12,Y=y-cy0,g2=c.createLinearGradient(X-r*1.3,0,X+r*1.3,0);
+        [[0,m[2]],[.22,m[1]],[.4,'#FFFFFF'],[.52,m[0]],[.72,m[1]],[1,m[2]]].forEach(([o2,col])=>g2.addColorStop(o2,col));c.fillStyle=g2;c.fillRect(X-r*1.6,Math.min(T,Y),r*3.2,Math.abs(Y-T)+r*1.5);});
+      c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=R*.06;c.shadowColor='rgba(0,0,0,.5)';c.shadowBlur=R*.08;c.stroke(path);c.restore();
+      c.restore();
+      c.fillStyle='rgba(255,255,255,.92)';bulbs.forEach(([x,y,r])=>{c.beginPath();c.ellipse(x-r*.32,y-r*.3,r*.26,r*.16,-.7,0,TAU);c.fill();});}
     else if(e.t==='chain'){const pts=e.path.map(pt),c=cx();
       for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[Math.min(i+1,pts.length-1)],pr=pts[Math.max(i-1,0)];const a=Math.atan2(q[1]-pr[1],q[0]-pr[0]);
         c.save();c.translate(p[0],p[1]);c.rotate(a);shade(3,1,2,.3);c.strokeStyle=metalFill(w*.1,P.metal);c.lineWidth=w*.035;c.beginPath();c.ellipse(0,0,w*.075,i%2?w*.022:w*.045,0,0,TAU);c.stroke();noShade();c.restore();}}
@@ -2286,7 +2319,9 @@ function planSpecial(){
 }
 // 線條類（金屬框、滴落、鍊條、水波）一隻指頭只放一種，多的移到沒有線條的指頭
 function spreadLines(fingers){const lt=f=>[...new Set(f.els.filter(e=>KIND[e.t]==='line').map(e=>e.t))];
-  fingers.forEach(f=>{const ts=lt(f);ts.slice(1).forEach(t=>{const tgt=fingers.find(g=>g!==f&&!lt(g).length&&!g.sculpt);if(!tgt)return;const mv=f.els.filter(e=>e.t===t);f.els=f.els.filter(e=>e.t!==t);tgt.els.push(...mv.map(e=>({...e,base:tgt.cols[0]})));});});}
+  fingers.forEach(f=>{const ts=lt(f);ts.slice(1).forEach(t=>{const tgt=fingers.find(g=>g!==f&&!lt(g).length&&!g.sculpt);if(!tgt)return;const mv=f.els.filter(e=>e.t===t);f.els=f.els.filter(e=>e.t!==t);tgt.els.push(...mv.map(e=>({...e,base:tgt.cols[0]})));});});
+  // 同一種線條最多出現在兩隻指頭，不然整手都是滴落
+  const cnt={};fingers.forEach(f=>{lt(f).forEach(t=>{cnt[t]=(cnt[t]||0)+1;if(cnt[t]>2)f.els=f.els.filter(e=>e.t!==t);});});}
 function oneSpiral(fingers,already){let sp=!!already;fingers.forEach(f=>f.els.forEach(e=>{if(e.t==='chromesym'){const sub=Math.floor(((e.ph||0)/TWO_PI)*4)%4;if(sub===2){if(sp)e.ph=((e.ph||0)+Math.PI/2)%TWO_PI;sp=true;}}}));}
 function sculptPal(mat,hx){
   if(mat==='bone')hx=mixHex(hx||'#EFE6D6','#F2EADB',.5);
