@@ -328,7 +328,7 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
     <p class="lead">兩條路都會走到同一個地方：一組只屬於今天的指甲，最後還能用說的修改。</p>
     <div class="modes">
       <button class="mode" data-mode="A"><b>交給感覺</b><span>還沒有想法也沒關係。說說今天的心情，設計師替你想。</span><em>可以拍一張今天的穿搭，當作配色參考</em></button>
-      <button class="mode" data-mode="B"><b>我有想要的</b><span>心裡已經有元素或圖樣，像草莓、星星、某張圖。給我圖，或直接寫下來。</span><em>可以忠於原圖，也可以換成某種風格</em></button>
+      <button class="mode" data-mode="B"><b>我有想要的</b><span>心裡已經有元素或圖樣，像星星、鍊條、某張圖。給我圖，或直接寫下來。</span><em>可以忠於原圖，也可以換成某種風格</em></button>
     </div>
   </section>
 
@@ -379,8 +379,8 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
     </div>
     <div class="q" data-q="1">
       <div class="qcount"></div>
-      <h2>這次想走哪個方向？</h2>
-      <p class="lead">直覺選一個就好。</p>
+      <h2>想要什麼氣質？</h2>
+      <p class="lead">直覺選一個。這題影響最大，決定設計師往哪個方向走。</p>
       <div class="chips" id="dir"></div>
     </div>
     <div class="q" data-q="2">
@@ -447,7 +447,7 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
 
   <section class="screen" data-step="try">
     <h2>戴上看看</h2>
-    <p class="lead">手背朝向鏡頭，指甲會跟著手指移動；翻到手心時會先藏起來。</p>
+    <p class="lead">把手放進畫面，指甲會跟著手指移動。左手、右手、兩隻手一起都可以。</p>
     <div class="split tryon"><div class="split-main">
     <div id="tryStage"><div id="tryHint">準備鏡頭…</div></div>
     </div><div class="split-side">
@@ -456,9 +456,8 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
       <button class="btn ghost" id="tryBack">回到成品</button>
     </div>
     <div class="actions" style="margin-top:8px">
-      <label class="linkbtn" style="position:relative;overflow:hidden">改用手背照片<input type="file" id="tryFile" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer"></label>
+      <label class="linkbtn" style="position:relative;overflow:hidden">改用手的照片<input type="file" id="tryFile" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer"></label>
       <button class="linkbtn" id="tryCam" hidden>改回鏡頭</button>
-      <button class="linkbtn" id="tryFlip">手背、手心判斷反了</button>
     </div>
     <p class="stat" id="tryMsg" style="margin-top:10px"></p>
     <div class="shots" id="tryShots"></div>
@@ -495,11 +494,11 @@ const MOODS={
   '想鬧一下':{motifs:['smiley','checker','script'],els:['cherry','bow']}
 };
 const OCCS={'上課':{len:'mid'},'上班':{len:'short'},'約會':{len:'long'},'朋友聚會':{len:'long'},'在家':{len:'short'},'出去玩':{len:'mid'},'重要場合':{len:'long'}};
-const DIRS=['主流好看','日常可愛','低調耐看','有點怪','越華麗越好'];
-const FEELS={'軟軟的':['rose','bow','cloud','heart','carve'],'閃閃的':['stone','biggem','sparkle','pearl'],'冷冷的':['ripple','drip','chain','cross'],'自然的':['leaf','daisy','butterfly','flower'],'透明的':['bubble','pearl','swirl'],
+const DIRS=['主流好看','日常可愛','低調耐看','酷帥俐落','有點怪','越華麗越好'];
+const FEELS={'酷酷的':['chromesym','stud','chain','cross'],'帥帥的':['chromeframe','bead','stud'],'金屬感的':['chromesym','chromeframe','drip','ripple','bead'],'軟軟的':['rose','bow','cloud','heart','carve'],'閃閃的':['stone','biggem','sparkle','pearl'],'冷冷的':['ripple','drip','chain','cross'],'自然的':['leaf','daisy','butterfly','flower'],'透明的':['bubble','pearl','swirl'],
   '刺刺的':['cross','star','chain','sparkle'],'圓圓的':['pearl','bubble','heart','dots'],'甜甜的':['cherry','heart','bow','rose'],'霧霧的':['carve','cloud','pearl'],'亮亮的':['stone','biggem','ripple'],
   '毛毛的':['cloud','bow','carve'],'暗暗的':['cross','moon','drip','chain'],'亂亂的':['cherry','butterfly','star','drip'],'黏黏的':['drip','bubble','ripple'],'乾乾淨淨的':['pearl','stone']};
-const FEEL_MOTIF={'軟軟的':['jelly','blush'],'閃閃的':['glitter','crushed'],'冷冷的':['chrome','magnet'],'自然的':['wash','cream'],'透明的':['jelly'],'刺刺的':['stripes'],'圓圓的':['dots'],'甜甜的':['dots','jelly'],
+const FEEL_MOTIF={'酷酷的':['velvet','chrome'],'帥帥的':['solid','velvet'],'金屬感的':['chrome','chromefull'],'軟軟的':['jelly','blush'],'閃閃的':['glitter','crushed'],'冷冷的':['chrome','magnet'],'自然的':['wash','cream'],'透明的':['jelly'],'刺刺的':['stripes'],'圓圓的':['dots'],'甜甜的':['dots','jelly'],
   '霧霧的':['cream','blush','milky'],'亮亮的':['chrome','aurora'],'毛毛的':['velvet'],'暗暗的':['velvet','magnet','smoky'],'亂亂的':['checker','glitch'],'黏黏的':['jelly','marble'],'乾乾淨淨的':['french','solid']};
 const AMOUNTS=['極簡','簡約','適中','豐富','極繁'];
 const AMOUNT_DESC=['裸色加一點點小裝飾','只有一兩根有裝飾','幾根有裝飾，其他留白','大部分都有裝飾','每一根都塞滿'];
@@ -516,9 +515,10 @@ const AES={
   '極簡':{group:'風格氛圍',pal:['#EDE6E1','#FFFFFF','#2B2B2B','#C9A45C','#D8C9BE'],motifs:['vlines','cuticlemoon','dots3','outlinefrench','halfhalf','celestial'],els:['stone'],shape:'square',len:'short',stone:'#FFFFFF',plain:'jelly',perFinger:false,metal:'gold',dir:['低調耐看'],feel:['乾乾淨淨的','霧霧的'],moods:['無感','平靜'],fin:['nude','milky','jelly'],desc:'透明裸底大量留白，細直線、甲根月牙、三個小點、描邊法式、半邊色塊、金色小星月（R21）'},
   'Y2K':{group:'風格氛圍',pal:['#FFFFFF','#FF4FA8','#141414','#F3D2CA','#FF9CCB'],motifs:['zebra','leopard2','ombre','frenchgem','frenchchain'],els:['gemstar','star','stone','bow','gothcross','bubbletxt','bead'],shape:'almond',len:'mid',stone:'#F4F6FA',plain:'jelly',perFinger:true,metal:'silver',dir:['日常可愛','越華麗越好','有點怪'],feel:['甜甜的','閃閃的','亮亮的','亂亂的'],moods:['開心','想鬧一下','期待'],fin:['jelly','glass','chrome'],desc:'兩個方向：辣妹動物紋（粉白黑配銀，斑馬紋、豹紋、法式水鑽線、鑽面銀星）、粉嫩<333（薄荷果凍、有色凝膠哥德十字、泡泡字、條紋法式）'},
 
-  '暗黑':{group:'風格氛圍',pal:['#141216','#5E0F1F','#3B1F45','#1E2A44','#9A9AA6'],motifs:['velvet','chrome','cateye','goldflake','lace2','darkfrench'],els:['stone','stud'],shape:'stiletto',len:'long',stone:'#3A1A2A',plain:'velvet',perFinger:true,metal:'silver',dir:['有點怪','越華麗越好'],feel:['暗暗的','刺刺的','毛毛的'],moods:['低落','焦躁'],fin:['mirror','chrome','glass'],desc:'黑、酒紅、深紫；絲絨霧面和鏡面交替，黑色蕾絲、深色法式、金色碎片、深色水鑽（R24）'},
-  '朋克':{group:'風格氛圍',pal:['#111111','#F2F2F2','#C8102E','#FF2E93','#555555'],motifs:['checker','stripes','tartan','solid','bolts'],els:['stud','chain','safetypin','star'],shape:'square',len:'mid',stone:'#E6E6E6',plain:'solid',perFinger:true,metal:'silver',dir:['有點怪'],feel:['刺刺的','冷冷的','亂亂的'],moods:['焦躁','想鬧一下'],fin:['nude','chrome','mirror'],desc:'黑白紅、螢光粉配黑；黑白格、條紋、格紋、閃電，鉚釘排成一列、鍊條、安全別針（R25）'},
-  '未來感':{group:'風格氛圍',pal:['#C9CDD5','#7F8894','#E9EEF4','#8FD3FF','#D7B8FF'],motifs:['chromeaura','chrome','cateye','chromeaura','magnet'],els:['chromesym','drip','bead','ripple'],shape:'almond',len:'long',stone:'#8FD3FF',plain:'chrome',perFinger:false,metal:'silver',dir:['有點怪','主流好看','越華麗越好'],feel:['冷冷的','亮亮的','黏黏的'],moods:['期待','焦躁','低落'],fin:['chrome','mirror','glass'],desc:'銀色鏡面配中間彩色暈開的鉻光暈，立體鉻飾、金屬滴落、鋼珠（R26）'}
+  '暗黑':{group:'風格氛圍',pal:['#141216','#5E0F1F','#3B1F45','#1E2A44','#9A9AA6'],motifs:['velvet','chrome','cateye','goldflake','lace2','darkfrench'],els:['stone','stud'],shape:'stiletto',len:'long',stone:'#3A1A2A',plain:'velvet',perFinger:true,metal:'silver',dir:['有點怪','越華麗越好','酷帥俐落'],feel:['暗暗的','刺刺的','毛毛的','酷酷的'],moods:['低落','焦躁'],fin:['mirror','chrome','glass'],desc:'黑、酒紅、深紫；絲絨霧面和鏡面交替，黑色蕾絲、深色法式、金色碎片、深色水鑽（R24）'},
+  '朋克':{group:'風格氛圍',pal:['#111111','#F2F2F2','#C8102E','#FF2E93','#555555'],motifs:['checker','stripes','tartan','solid','bolts'],els:['stud','chain','safetypin','star'],shape:'square',len:'mid',stone:'#E6E6E6',plain:'solid',perFinger:true,metal:'silver',dir:['有點怪','酷帥俐落'],feel:['刺刺的','冷冷的','亂亂的','酷酷的'],moods:['焦躁','想鬧一下'],fin:['nude','chrome','mirror'],desc:'黑白紅、螢光粉配黑；黑白格、條紋、格紋、閃電，鉚釘排成一列、鍊條、安全別針（R25）'},
+  '黑金屬':{group:'風格氛圍',pal:['#141414','#2A2C30','#C9CDD3','#6E7278','#EDEDED'],motifs:['velvet','chrome','smoky','chromefull','gridbead','negstar','darkfrench','cateye'],els:['chromesym','chromeframe','bead','stud','chain','drip','cross'],shape:'square',len:'short',stone:'#C9CDD3',plain:'velvet',perFinger:true,metal:'silver',dir:['酷帥俐落','低調耐看','有點怪'],feel:['酷酷的','帥帥的','金屬感的','冷冷的','暗暗的','刺刺的'],moods:['無感','焦躁','低落','期待','平靜'],fin:['chrome','mirror','nude'],desc:'霧黑、炭灰、煙燻黑底配銀色液態金屬：立體鉻飾、鉻線部落紋、鋼珠、鉚釘、鍊條；短方甲，中性俐落，霧面和鏡面交替（R03–R08 液態金屬做法）'},
+  '未來感':{group:'風格氛圍',pal:['#C9CDD5','#7F8894','#E9EEF4','#8FD3FF','#D7B8FF'],motifs:['chromeaura','chrome','cateye','chromeaura','magnet'],els:['chromesym','drip','bead','ripple'],shape:'almond',len:'long',stone:'#8FD3FF',plain:'chrome',perFinger:false,metal:'silver',dir:['有點怪','主流好看','越華麗越好','酷帥俐落'],feel:['冷冷的','亮亮的','黏黏的','金屬感的'],moods:['期待','焦躁','低落'],fin:['chrome','mirror','glass'],desc:'銀色鏡面配中間彩色暈開的鉻光暈，立體鉻飾、金屬滴落、鋼珠（R26）'}
 };
 const Y2KV={
   spicy:{n:'辣妹動物紋',ref:'R09、R10',pal:['#FFFFFF','#FF4FA8','#141414','#F3D2CA','#FF9CCB'],shape:'stiletto',len:'xlong',motifs:['zebra','leopard2','ombre','frenchgem','frenchchain'],plain:'frenchgem',els:['gemstar','star','stone'],must:['gemstar','stone'],forms:['glitter','metal','outline'],desc:'熱粉、白、黑、裸配銀；斑馬紋、豹紋（黑底時變粉亮片紋）、粉白漸層、法式微笑線鑲水鑽或貼銀鍊；鑽面銀星當主角，大星旁邊配小星'},
@@ -541,6 +541,7 @@ const SIG={
   'Y2K':{mix:true,must:[],note:'分兩個方向：辣妹動物紋（R09、R10）、粉嫩<333（R11），每根都不一樣'},
   '暗黑':{dark:true,mix:true,must:[],note:'霧面亮面交替，銀色點綴（R24）'},
   '朋克':{accentMotif:'checker',mix:true,must:['stud'],note:'黑白格、閃電，鉚釘排成一列（R25）'},
+  '黑金屬':{dark:true,mix:true,must:['chromesym','bead'],note:'每根一個銀色主結構（立體鉻飾、鉻線框或整片鉻），霧黑和鏡面交替，鋼珠點綴；短甲也成立（R04、R07、R08）'},
   '未來感':{must:['chromesym'],note:'鉻光暈配立體鉻飾（R26）'}
 };
 const FINISH={
@@ -553,14 +554,14 @@ const FINISH={
   chrome:{name:'金屬',plain:'chrome',motifs:['chrome','magnet'],forms:['metal','outline'],desc:'金屬鉻粉的光'},
   mirror:{name:'鏡面',plain:'chrome',motifs:['chrome','smoky'],forms:['metal'],desc:'高反射的鏡面'}
 };
-const FIN_FEEL={'透明的':['jelly','glass'],'霧霧的':['milky'],'亮亮的':['chrome','mirror'],'閃閃的':['glazed','pearl'],'乾乾淨淨的':['nude','glazed'],'冷冷的':['chrome','mirror'],'軟軟的':['milky','pearl'],'甜甜的':['jelly'],'黏黏的':['jelly','glass'],'暗暗的':['mirror']};
+const FIN_FEEL={'酷酷的':['mirror','chrome'],'帥帥的':['chrome'],'金屬感的':['chrome','mirror'],'透明的':['jelly','glass'],'霧霧的':['milky'],'亮亮的':['chrome','mirror'],'閃閃的':['glazed','pearl'],'乾乾淨淨的':['nude','glazed'],'冷冷的':['chrome','mirror'],'軟軟的':['milky','pearl'],'甜甜的':['jelly'],'黏黏的':['jelly','glass'],'暗暗的':['mirror']};
 const EL_CAT={'花朵':['rose','carve','daisy','flower'],'自然':['leaf','butterfly','cherry','cloud','drop'],'甜美':['bow','heart','star','sparkle','moon','bubbletxt','gothcross'],'珠寶':['safetypin','gemstar','bead','pearl','stone','stud','biggem','chain'],'金屬':['ripple','chromesym','chromeframe','drip','swirl','cross'],'透明':['bubble','gelripple'],'平面圖案':['script','dots']};
 const EL_NAME={safetypin:'安全別針',gemstar:'鑽面銀星',gothcross:'哥德十字',bubbletxt:'泡泡字',ministar:'小星星',bead:'鋼珠',chromesym:'立體鉻飾',chromeframe:'鉻線線框',gelripple:'透明水波',stud:'金屬鉚釘',rose:'玫瑰',carve:'雕花浮雕',daisy:'小雛菊',flower:'五瓣花',leaf:'立體葉子',butterfly:'蝴蝶',cherry:'櫻桃',cloud:'雲朵',bow:'蝴蝶結',heart:'愛心',star:'星星',sparkle:'閃光星',pearl:'珍珠',stone:'水鑽',biggem:'大寶石',chain:'鍊條',ripple:'金屬水波',drip:'金屬滴落',swirl:'捲草線條',cross:'十字',bubble:'泡泡',moon:'月亮',drop:'水滴',script:'草寫字',dots:'波點'};
 const EL_WHY={safetypin:'銀色安全別針，朋克的小配件（R25）',gemstar:'銀色鉻星，表面鋪滿小水鑽或中間嵌一顆寶石，旁邊配小星（R09、R10）',gothcross:'花邊造型的立體十字，用有色凝膠堆高，有的用鋼珠描一圈（R11）',bubbletxt:'圓滾滾的粉色泡泡字，「<」和「3」放在相鄰兩根，並排組成 <3（R11）',ministar:'大星旁邊的小星星',bead:'鉻銀小圓球，單顆、成排或三顆一組',chromesym:'胖胖的立體鉻飾（圓角星、四芒星、漩渦、火焰），放在正中間',chromeframe:'細鉻線勾出的部落紋線框，末端收尖帶小刺',gelripple:'厚的透明凝膠攤開成水窪，邊緣圓鈍有厚度，有時包住一顆小愛心，旁邊配透明小泡泡（R02、R12、R14）',stud:'小小的金屬尖點，冷硬又俐落',rose:'有存在感但很柔軟',carve:'大朵同色雕花，看起來安靜又有份量',daisy:'小小的花，日常又有精神',flower:'比玫瑰輕盈，乾淨俐落',leaf:'有弧度的葉子讓畫面放鬆',butterfly:'輕盈、有一點自由感',cherry:'圓滾滾的，有點調皮',cloud:'軟軟的雲，像在放空',bow:'帶一點撒嬌和玩心',heart:'最直接的可愛',star:'一點點夢幻和運氣',sparkle:'小小的閃光，手一動就亮',pearl:'最溫和的亮點，什麼場合都不會出錯',stone:'切面水鑽，會反光',biggem:'一顆大寶石當主角，很華麗',chain:'金屬鍊條，酷又有重量',ripple:'液態金屬的凸起線條，有力量',drip:'像融化的金屬往下滴，有點怪',swirl:'細細的捲草線，優雅',cross:'帶點暗黑和個性',bubble:'透明的泡泡，清爽',moon:'安靜、有一點夜晚的感覺',drop:'像水珠一樣，清透',script:'一個單字寫在指甲上，像今天的關鍵字',dots:'規律的圓點，輕鬆可愛'};
 const EL_3D=Object.keys(EL_NAME).filter(k=>k!=='script'&&k!=='dots');
 const FORMABLE=['gothcross','heart','star','sparkle','moon','cross','flower','leaf','butterfly','cloud','bow','drop'];
 const FORM_NAME={clear:'純透明',gummy:'軟糖',gel:'立體凝膠',metal:'金屬飾品',emboss:'同色浮雕',jelly:'透明果凍',paint:'平面彩繪',outline:'金屬勾邊',glitter:'亮粉'};
-const AES_FORMS={'法式':['jelly','metal'],'韓系':['gel','jelly','clear'],'日系':['paint','paint','clear','gummy'],'歐美':['metal','glitter','gel'],'美式復古':['gel','metal'],'芭蕾風':['gel','jelly'],'Clean girl':['clear','jelly'],'極簡':['outline','metal'],'Y2K':['glitter','metal','outline','gel'],'暗黑':['metal','gel'],'朋克':['metal','paint'],'未來感':['metal','outline','jelly']};
+const AES_FORMS={'法式':['jelly','metal'],'韓系':['gel','jelly','clear'],'日系':['paint','paint','clear','gummy'],'歐美':['metal','glitter','gel'],'美式復古':['gel','metal'],'芭蕾風':['gel','jelly'],'Clean girl':['clear','jelly'],'極簡':['outline','metal'],'Y2K':['glitter','metal','outline','gel'],'暗黑':['metal','gel'],'朋克':['metal','paint'],'黑金屬':['metal','outline'],'未來感':['metal','outline','jelly']};
 const FREEDOM=['照我說的','可以小改','讓設計師發揮'];
 const DMOODS={'照常發揮':'照常發揮','想收斂':'今天想收斂一點','想玩色':'今天想多玩一點顏色','想加點立體':'今天想多加一點立體','想換個型態':'今天想換個做法'};
 const KIND={safetypin:'big',gemstar:'big',gothcross:'big',bubbletxt:'big',ministar:'small',rose:'big',carve:'big',daisy:'big',flower:'big',butterfly:'big',cherry:'big',bow:'big',heart:'big',star:'big',cloud:'big',biggem:'big',cross:'big',
@@ -814,7 +815,7 @@ const deeper=c=>H(hue(c),saturation(c)+18,brightness(c)-14);
 const ILLUS_NAME={plaid:'細格紋',washband:'水彩色帶',spiral:'細線漩渦',loopline:'捲圈線',sunstar:'八角放射星',ticks:'放射短線',dot1:'單點',stars:'手繪星星',florals:'手繪花卉',ditsy:'碎花',mushroom:'蘑菇',fruit:'水果',hearts:'手繪愛心',rainbow:'彩虹',gingham:'格紋',sky:'藍天白雲',starry:'星空',wave:'海浪',leopard:'豹紋',tortoise:'玳瑁',lace:'蕾絲',wing:'蝴蝶翅紋',abstract:'抽象色塊',lineface:'線條人臉',eyes:'眼睛',psyche:'迷幻漩渦',flame:'火焰'};
 const ILLUS_CAT={'日系手繪':['stars','spiral','sunstar','dot1','ticks','loopline','plaid','washband'],'花草':['florals','ditsy','mushroom'],'可愛':['fruit','hearts','rainbow','gingham'],'景色':['sky','starry','wave'],'紋理':['leopard','tortoise','lace','wing'],'藝術感':['abstract','lineface','eyes','psyche','flame']};
 const ILLUS_WHY={plaid:'很細的格線，像淡淡的格子布',washband:'幾條水彩暈開的色帶',spiral:'一條細線畫的漩渦，旁邊散小星',loopline:'像隨手畫的捲圈線',sunstar:'八個尖角的放射星，放在中間',ticks:'邊緣一圈短短的放射線',dot1:'只有一兩個小圓點，留白很多',stars:'平面手繪星星，一顆大的或幾顆小的',florals:'鬆鬆的手繪花，溫柔有筆觸',ditsy:'小碎花，日常又耐看',mushroom:'有點童話、有點怪',fruit:'草莓櫻桃檸檬，很有精神',hearts:'手畫的愛心，可愛不刻意',rainbow:'柔和的彩虹，心情好',gingham:'格紋，像野餐布',sky:'藍天白雲，放空',starry:'夜空和月亮，安靜',wave:'海浪，涼快有節奏',leopard:'豹紋，有個性',tortoise:'玳瑁，復古有質感',lace:'蕾絲，優雅細緻',wing:'蝴蝶翅膀的紋路',abstract:'抽象色塊，像藝術作品',lineface:'一筆畫的人臉，很有設計感',eyes:'眼睛，有點怪、很吸睛',psyche:'迷幻漩渦，七零年代感',flame:'火焰，熱烈'};
-const AES_ILLUS={'法式':[],'韓系':[],'日系':['stars','spiral','sunstar','dot1','ticks','loopline','plaid','washband'],'歐美':[],'美式復古':[],'芭蕾風':[],'Clean girl':[],'極簡':[],'Y2K':[],'暗黑':[],'朋克':[],'未來感':[]};
+const AES_ILLUS={'法式':[],'韓系':[],'日系':['stars','spiral','sunstar','dot1','ticks','loopline','plaid','washband'],'歐美':[],'美式復古':[],'芭蕾風':[],'Clean girl':[],'極簡':[],'Y2K':[],'暗黑':[],'朋克':[],'黑金屬':[],'未來感':[]};
 const MOOD_ILLUS={'開心':['fruit','rainbow'],'平靜':['sky','wave'],'想舒壓':['sky','abstract'],'期待':['starry','florals'],'焦躁':['flame','psyche'],'疲憊':['sky','ditsy'],'低落':['wave','starry'],'無感':['abstract','gingham'],'想鬧一下':['eyes','fruit']};
 const FOCUS={deco:'凸起來的小飾品為主',illus:'畫上去的圖案為主',both:'兩種都要'};
 (function(){
@@ -1341,7 +1342,7 @@ function drawSurf(g,sv){const x=g.drawingContext;x.save();x.setTransform(1,0,0,1
 [0,1,2].forEach(i=>{DRAW['surf'+i]=(g,c)=>SURF[i]?drawSurf(g,SURF[i]):DRAW.solid(g,c);});
 Object.assign(MOTIF_NAME,{surf0:'即時甲面・滿版',surf1:'即時甲面・局部',surf2:'即時甲面・呼應'});
 /* ---------- 後台風格（取自素材庫・風格走向） ---------- */
-const TREND_CATS={'地區流派':['法式','韓系','日系','歐美','美式復古'],'風格氛圍':['芭蕾風','Clean girl','極簡','Y2K','暗黑','朋克','未來感'],'質感材質':['裸色','奶油肌','透明感','玻璃感','水光','珍珠','金屬','鏡面']};
+const TREND_CATS={'地區流派':['法式','韓系','日系','歐美','美式復古'],'風格氛圍':['芭蕾風','Clean girl','極簡','Y2K','暗黑','朋克','黑金屬','未來感'],'質感材質':['裸色','奶油肌','透明感','玻璃感','水光','珍珠','金屬','鏡面']};
 const TREND={
  '法式':{pal:'透明或淡粉底＋白甲尖；也有彩色、雙色、亮片甲尖',shape:'杏仁、短方圓',mat:'亮面、透明感',els:'極簡～簡約；經典、細線、V 字、亮片、描邊法式；甲尖可加珍珠（R17）'},
  '韓系':{pal:'透明果凍疊色、裸底配中間粉色暈染',shape:'短甲',mat:'糖漿果凍、刷紋水波、透明凝膠水滴',els:'同色系立體小飾品、透明泡泡；每根做法不同（R18）'},
@@ -1355,6 +1356,7 @@ const TREND={
 
  '暗黑':{pal:'黑、酒紅、深紫、墨藍、炭灰',shape:'尖錐、杏仁',mat:'絲絨霧面、黑底鏡面、深紫貓眼、金色碎片',els:'黑色蕾絲、深色法式、深色小水鑽、金屬鉚釘、銀色細線（R24）'},
  '朋克':{pal:'黑白紅、螢光粉配黑',shape:'方、短方',mat:'霧面配金屬',els:'黑白格、條紋、格紋、閃電；鉚釘排成一列、鍊條、安全別針（R25）'},
+ '黑金屬':{pal:'霧黑、炭灰、煙燻黑、銀',shape:'短方、短圓',mat:'霧黑絨面配鏡面鉻、液態金屬',els:'立體鉻飾、鉻線部落紋、鋼珠、鉚釘、鍊條（R03–R08）'},
  '未來感':{pal:'銀、鉻光暈、混搭金屬',shape:'杏仁',mat:'鏡面鉻、貓眼光暈',els:'立體鉻飾、金屬滴落、鋼珠（R26）'},
  '裸色':{pal:'貼近膚色的米、粉、棕',shape:'短～中',mat:'亮面或霧面',els:'極簡'},
  '奶油肌':{pal:'奶白、奶粉、奶米',shape:'短甲最適合',mat:'介於不透明與半透明的雲霧感，不靠鉻粉',els:'極簡；可做奶白法式'},
@@ -1365,7 +1367,7 @@ const TREND={
  '金屬':{pal:'銀、金、玫瑰金，或疊在深色上',shape:'杏仁、長甲常見',mat:'鏡面金屬鉻粉',els:'簡約～適中；鉻法式、金屬立體花'},
  '鏡面':{pal:'銀、金、玫瑰金，或疊在深色上',shape:'杏仁、長甲常見',mat:'鏡面鉻粉，整片像鏡子',els:'簡約～適中'}
 };
-const TREND_MORE={'法式':['透明感','奶油肌、裸色、珍珠','4+1 重點指或漸層排列'],'韓系':['透明感','玻璃感、水光','3+2 集中或每根不同'],'日系':['奶油肌','透明感、珍珠','3+1+1 或全手統一'],'歐美':['金屬','鏡面、水光','雙重點指或拇指主角'],'美式復古':['裸色','奶油肌、金屬','全手統一'],'芭蕾風':['奶油肌','透明感、珍珠、水光','3+1+1'],'Clean girl':['裸色','透明感、水光、奶油肌','4+1 重點指'],'極簡':['裸色','奶油肌、金屬','4+1 重點指'],'Y2K':['透明感','玻璃感、金屬','3+2 集中或每根不同'],'暗黑':['鏡面','金屬、玻璃感','跨指連續'],'朋克':['裸色','金屬、鏡面','每根不同'],'未來感':['金屬','鏡面、玻璃感','全手統一或跨指連續'],'透明感':[null,null,'漸層排列']};
+const TREND_MORE={'法式':['透明感','奶油肌、裸色、珍珠','4+1 重點指或漸層排列'],'韓系':['透明感','玻璃感、水光','3+2 集中或每根不同'],'日系':['奶油肌','透明感、珍珠','3+1+1 或全手統一'],'歐美':['金屬','鏡面、水光','雙重點指或拇指主角'],'美式復古':['裸色','奶油肌、金屬','全手統一'],'芭蕾風':['奶油肌','透明感、珍珠、水光','3+1+1'],'Clean girl':['裸色','透明感、水光、奶油肌','4+1 重點指'],'極簡':['裸色','奶油肌、金屬','4+1 重點指'],'Y2K':['透明感','玻璃感、金屬','3+2 集中或每根不同'],'暗黑':['鏡面','金屬、玻璃感','跨指連續'],'朋克':['裸色','金屬、鏡面','每根不同'],'黑金屬':['金屬','鏡面、裸色','3+2 穿插或每根不同'],'未來感':['金屬','鏡面、玻璃感','全手統一或跨指連續'],'透明感':[null,null,'漸層排列']};
 const AVOID='不搭的組合（後台素材庫）：Clean girl、極簡不放大寶石或滿鑽，最多一個小飾品；暗黑不配高明度粉彩，粉彩只能小面積點綴；裸色質感不配霓虹色；金屬、鏡面的指甲不放霧面圖樣，霧面留給其他指；每根不同時配色控制在 3 色內；短甲每片最多 1 到 2 個大飾品；透明感不用大面積深色，深色只用在暈染或甲尖；上班或在家不用尖錐、超長，改杏仁或中長。';
 /* ---------- 狀態 ---------- */
 let TUNE_OPEN=false;
@@ -1415,9 +1417,9 @@ async function restyle(name){
   an.restyled=an.restyled||{};if(an.restyled[name])return an.restyled[name];
   const seen=[...an.elements.map(k=>`${EL_NAME[k]}（${k}）`),...(an.others||[])];
   const prompt=`你是美甲設計師。客人有指定想要的元素，現在要用後台的「${name}」風格來做。
-客人要的東西（從她的參考圖或描述解析出來）：${an.summary||''}
+客人要的東西（從客人的參考圖或描述解析出來）：${an.summary||''}
 看到的元素：${seen.join('、')||'沒有明確元素'}
-${an.desc?`她自己的描述（優先）：「${an.desc}」`:''}
+${an.desc?`客人自己的描述（優先）：「${an.desc}」`:''}
 原圖配色（只當參考，可以不用）：${(an.colors||[]).join(' ')}
 「${name}」風格在後台素材庫的定義：配色 ${t.pal}；甲型 ${t.shape}；材質 ${t.mat}；繁簡與常見元素 ${t.els}。${(()=>{const m=TREND_MORE[name];if(!m)return '';return (m[0]?`首選質感 ${m[0]}，也可以 ${m[1]}；`:'')+`五指排法建議 ${m[2]}。`;})()}
 ${AVOID}
@@ -1573,7 +1575,7 @@ function renderAiBox(){
   if(!S.imgs.length){
     if(S.mode!=='B'){box.hidden=true;dw.hidden=true;return;}
     dw.hidden=false;$('#descBox').hidden=false;$('#openDesc').hidden=true;
-    $('#descHint').textContent='沒有圖也可以，直接寫想要的元素和放的位置，例如：草莓和小星星，草莓放在無名指。';
+    $('#descHint').textContent='沒有圖也可以，直接寫想要的元素和放的位置，例如：銀色鍊條和小星星，鍊條放在無名指。';
     if(!S.analysis&&!S.analyzing){box.hidden=true;return;}
     box.hidden=false;}
   else $('#descHint').textContent='例如：銀色立體部落紋加電路板，灰藍白；第二張只要蝴蝶，放在無名指。你寫的會優先於 Claude 的判斷。';
@@ -1603,8 +1605,8 @@ async function analyze(textOnly){
   const useImg=!textOnly&&IMG_OK;const roleTxt=S.imgs.map((x,i)=>`第 ${i+1} 張：參考${roleTxtOf(x)}`).join('；');
   S.analyzing=true;S.analyzeFailed=false;renderAiBox();
   const base=Object.keys(AES).filter(k=>!AES[k].special);
-  const prompt=`你是美甲設計助理。${useImg?`附上 ${S.imgs.length} 張使用者提供的「${S.imgType}」，依序是${roleTxt}。請仔細看每一張，並照每張勾選的項目取用：沒勾「元素」就不要從那張取東西，沒勾「顏色」就不要從那張取顏色，沒勾「圖樣材質」就不要從那張取圖樣和材質。`:(S.imgs.length?`使用者提供了 ${S.imgs.length} 張「${S.imgType}」（${roleTxt}），但你看不到圖，只能依照她的描述。`:'使用者沒有給圖，只用文字描述她想要的元素。下面說的「圖上看得到」都改成「她描述裡提到的」。')}${desc?`她自己的描述（跟你看圖的判斷衝突時，以她的描述為準）：「${desc}」。`:''}${!useImg&&S.localColors.length?`從圖上抓到的顏色：${S.localColors.filter(h=>!isRemoved(h)).join(' ')}。`:''}${S.addCols.length?`她自己指定的顏色（一定要用進 colors 和主題的 cols）：${S.addCols.join(' ')}。`:''}
-colors 只取主體（指甲、作品本身、她要的東西）的顏色；照片的背景、桌面、手以外的環境顏色一律放進 bgColors，不能出現在 colors 或任何主題的 cols 裡。只從有勾「顏色」的圖取色；都沒勾就依她的描述和風格自己配。
+  const prompt=`你是美甲設計助理。${useImg?`附上 ${S.imgs.length} 張使用者提供的「${S.imgType}」，依序是${roleTxt}。請仔細看每一張，並照每張勾選的項目取用：沒勾「元素」就不要從那張取東西，沒勾「顏色」就不要從那張取顏色，沒勾「圖樣材質」就不要從那張取圖樣和材質。`:(S.imgs.length?`使用者提供了 ${S.imgs.length} 張「${S.imgType}」（${roleTxt}），但你看不到圖，只能依照客人的描述。`:'使用者沒有給圖，只用文字描述客人想要的元素。下面說的「圖上看得到」都改成「客人描述裡提到的」。')}${desc?`客人自己的描述（跟你看圖的判斷衝突時，以客人的描述為準）：「${desc}」。`:''}${!useImg&&S.localColors.length?`從圖上抓到的顏色：${S.localColors.filter(h=>!isRemoved(h)).join(' ')}。`:''}${S.addCols.length?`客人自己指定的顏色（一定要用進 colors 和主題的 cols）：${S.addCols.join(' ')}。`:''}
+colors 只取主體（指甲、作品本身、客人要的東西）的顏色；照片的背景、桌面、手以外的環境顏色一律放進 bgColors，不能出現在 colors 或任何主題的 cols 裡。只從有勾「顏色」的圖取色；都沒勾就依客人的描述和風格自己配。
 只回傳一個 JSON 物件，不要其他文字：
 {"summary":"用繁體中文一到兩句描述這張圖給人的感覺，像美甲師跟客人聊天","colors":["3到5個主體顏色的 #RRGGBB，由多到少"],"bgColors":["背景的顏色 #RRGGBB，0 到 3 個"],"aes":"從 ${base.join('、')} 選最接近的一個","fits":true 或 false（這張圖的風格能不能被上面的風格好好代表；像電路板、金屬部落紋、萬聖節血肉、特定主題這種明顯不同的風格就是 false）,
 "elements":["圖上『看得到』的東西，對應到這些 key：${Object.keys(EL_NAME).filter(k=>!k.startsWith('u')).join(', ')}，0 到 4 個"],
@@ -1612,7 +1614,7 @@ colors 只取主體（指甲、作品本身、她要的東西）的顏色；照�
 "special":{"name":"整體風格名稱，繁體中文 2 到 6 字","desc":"一句話描述","arrangement":"alternate|accent|gradient（五根指甲怎麼分配主題：交替／只有重點指不同／漸變）","shape":"square|round|almond|coffin|stiletto","len":"short|mid|long|xlong",
  "themes":[{"name":"主題名稱，2 到 6 字","base":"${BASES.join('|')} 其中一個（底色材質；煙燻暈染=smoky，奶白半透=milky，肌肉纖維=muscle，瘀青=bruise，霧面膚色=skin，流體畫的圓形細胞=cells，白底細黑格線交叉點放鋼珠=gridbead，深色底留白四芒星=negstar，黑白大色塊=bwblock，整片鉻銀加一排鋼珠=chromefull）","cols":["底色 #RRGGBB","第二色","第三色"],"surface":"甲面上要畫的平面圖樣，一句話描述，沒有就填 null","sculpt":"甲面上的大型立體雕塑或立體線條（例如金屬部落紋、肉感脊椎肋骨、纖維網、肉的增生團塊、凝膠水滴），一句話描述形狀，沒有就填 null","finish":"matte|glossy（底色是霧面還是亮面）","sculptKind":"shape|piped（雕塑是一整塊輪廓造型，還是像擠出來的立體線條：脊椎、肋骨、纖維、血管、水滴線）","sculptMat":"metal|flesh|wet|gel|bone（雕塑材質：金屬、霧面肉感、濕潤半透的肉感、透明凝膠、骨白）","sculptColor":"#RRGGBB 雕塑本身的顏色（金屬可略）","metal":"silver|gold|color","accent":"#RRGGBB 金屬部分的顏色","elements":["這個主題用到的小元素 key，從上面的清單選，0 到 3 個（例如鉚釘=stud）"]}]},
 "keywords":["2到4個繁體中文形容詞"],"basis":["依據的後台條目或參考圖編號"],"newTry":["後台沒有、這次新嘗試的做法"]}
-多張圖時，不同圖的東西通常是不同主題；她描述裡指定的位置或分配也要反映在 arrangement 和主題裡。themes 請拆成 1 到 3 個：如果這組指甲是由幾種不同做法的指甲組成（例如一種是煙燻底加金屬雕塑、一種是奶白底加電路線），每一種就是一個主題。${kbText('special','')}`;
+多張圖時，不同圖的東西通常是不同主題；客人描述裡指定的位置或分配也要反映在 arrangement 和主題裡。themes 請拆成 1 到 3 個：如果這組指甲是由幾種不同做法的指甲組成（例如一種是煙燻底加金屬雕塑、一種是奶白底加電路線），每一種就是一個主題。${kbText('special','')}`;
   try{
     const r=await SAMPLE.json(prompt,useImg?{images:S.imgs.map(x=>x.file)}:{});
     S.analysis={from:useImg?'image':'text',desc:desc||null,summary:String(r.summary||'').slice(0,160),colors:(r.colors||[]).filter(isHex).slice(0,5),
@@ -1675,7 +1677,7 @@ chips('feel',Object.keys(FEELS),'feel',null,'checkbox');
 chips('amount',AMT_KEYS,'amount','2','radio',Object.fromEntries(AMT_KEYS.map(k=>[k,AMOUNTS[+k]+'｜'+AMOUNT_DESC[+k]])));
 document.getElementById('amount').style.flexDirection='column';document.getElementById('amount').style.alignItems='flex-start';
 $('#intensity').addEventListener('input',e=>$('#intVal').textContent=e.target.value);
-const Q_ORDER=[0,2,3,4,6],QN=Q_ORDER.length; // 方向（1）和比重（5）不問了，用預設值；比重可在提案頁細調
+const Q_ORDER=[0,1,2,3,4,6],QN=Q_ORDER.length; // 比重（5）不問了，用預設值，可在提案頁細調
 chips('focusQ',Object.keys(FOCUS),'focusQ','both','radio',FOCUS);document.getElementById('focusQ').style.flexDirection='column';document.getElementById('focusQ').style.alignItems='flex-start';
 function showQ(i){S.q=i;document.querySelectorAll('.q').forEach(q=>{const on=+q.dataset.q===Q_ORDER[i];q.classList.toggle('on',on);if(on)q.querySelector('.qcount').textContent=`${i+1}／${QN}`;});
   $('#qBack').textContent=i===0?'回到照片':'上一題';$('#qNext').textContent=i===QN-1?'看推薦':'下一題';}
@@ -1763,7 +1765,7 @@ function ruleRec(A){
   else{const sig=SIG[best]||{};
     const style=[...new Set([...(an?an.elements:[]),...(sig.must||[]),...a.els])];
     const outside=[];A.feel.forEach(f=>{const k=(FEELS[f]||[]).find(x=>!style.includes(x)&&!outside.includes(x));if(k)outside.push(k);});
-    MOODS[A.mood].els.forEach(k=>{if(!style.includes(k)&&!outside.includes(k))outside.push(k);});
+    if(A.dir!=='酷帥俐落')MOODS[A.mood].els.forEach(k=>{if(!style.includes(k)&&!outside.includes(k))outside.push(k);}); // 想走酷帥時不補心情的甜美小物
     if(sig.bare&&!a.els.length){els=[];}
     else if(A.amount===0){els=style.filter(k=>KIND[k]==='small').slice(0,1);if(!els.length)els=['pearl'];}
     else{const nOut=nEl>=6?2:nEl>=3?1:0;els=[...style.slice(0,nEl-Math.min(nOut,outside.length)),...outside.slice(0,nOut)];
@@ -1799,7 +1801,8 @@ async function startRec(){
     const finList=Object.entries(FINISH).map(([k,f])=>`${k}(${f.name}：${f.desc})`).join('、');
     const elList=Object.entries(EL_CAT).map(([c,ks])=>c+'：'+ks.map(k=>`${k}(${EL_NAME[k]})`).join(' ')).join('\n');
     const illList=Object.entries(ILLUS_CAT).map(([c,ks])=>c+'：'+ks.map(k=>`${k}(${ILLUS_NAME[k]})`).join(' ')).join('\n');
-    const prompt=`你是一位會聆聽客人的美甲師。客人不懂美甲術語，只告訴你今天的狀態。請根據以下資料，為她設計一組五指美甲，只回傳一個 JSON 物件，不要其他文字。
+    const prompt=`你是一位會聆聽客人的美甲師。客人不懂美甲術語，只告訴你今天的狀態。請根據以下資料，為客人設計一組五指美甲，只回傳一個 JSON 物件，不要其他文字。
+不要預設客人的性別，也不要預設客人喜歡可愛甜美；稱呼一律用「你」。客人想走酷、帥、中性或俐落（例如選了「酷帥俐落」「酷酷的」「帥帥的」「金屬感的」，或在想說的話裡提到）時，用深色、霧黑、銀色液態金屬和俐落線條，短方或短圓甲，不要放蝴蝶結、愛心、櫻桃、粉彩這類甜美元素。
 客人資料：${JSON.stringify(info)}
 可選的美感風格（aes，分地區流派和風格氛圍兩類）：${aesList}
 可選的質感（finish，會疊在風格上，例如韓系＋水光、暗黑＋鏡面）：${finList}
@@ -1812,7 +1815,7 @@ ${illList}
 規則：照片裡看得到的元素要優先放進 elements；依據後台的參考圖和常見搭配選，例如星星、愛心、鉻飾常配鋼珠（bead）。風格清單中「特殊：」開頭的是依照片風格建立的，照片風格明顯特別時選它。
 規則：依「想要多繁複」決定元素數量：極簡只選 1 個小元素（pearl、stone、sparkle、drop 之一），顏色偏裸色；簡約 1 到 2 個；適中 2 到 3 個；豐富 3 到 4 個；極繁 5 到 6 個，可以混搭不同類別。極簡到適中要簡潔有質感、留白。
 格式：
-{"say":"用繁體中文兩到三句，像美甲師直接對客人說話，說明為什麼這樣配，要提到她說過的具體內容","aes":"其中一個風格名稱","finish":"其中一個質感 key","elements":[{"key":"元素key","why":"繁體中文一句，說明這個元素跟她今天的關係"}],"illus":["插畫key"],"shape":"square|round|almond|coffin|stiletto","len":"short|mid|long|xlong","accent":0到4的整數（0拇指 1食指 2中指 3無名指 4小指，放最多裝飾的那根）,"palette":["5個 #RRGGBB；有指定配色時一定照指定配色（可以調整順序），否則有照片顏色時以照片顏色為主"],"basis":["你依據的後台條目，例如 後台・日系、R01、客人用語・冷冷的、不搭的組合・短甲多飾品"],"newTry":["用到後台沒有的東西就寫在這裡，沒有就空陣列"]}${kbText('rec')}`;
+{"say":"用繁體中文兩到三句，像美甲師直接對客人說話，說明為什麼這樣配，要提到客人說過的具體內容","aes":"其中一個風格名稱","finish":"其中一個質感 key","elements":[{"key":"元素key","why":"繁體中文一句，說明這個元素跟客人今天的關係"}],"illus":["插畫key"],"shape":"square|round|almond|coffin|stiletto","len":"short|mid|long|xlong","accent":0到4的整數（0拇指 1食指 2中指 3無名指 4小指，放最多裝飾的那根）,"palette":["5個 #RRGGBB；有指定配色時一定照指定配色（可以調整順序），否則有照片顏色時以照片顏色為主"],"basis":["你依據的後台條目，例如 後台・日系、R01、客人用語・冷冷的、不搭的組合・短甲多飾品"],"newTry":["用到後台沒有的東西就寫在這裡，沒有就空陣列"]}${kbText('rec')}`;
     try{
       const r=await SAMPLE.json(prompt,{cache:false});
       const els=(r.elements||[]).filter(e=>e&&EL_NAME[e.key]).slice(0,5);
@@ -2382,7 +2385,7 @@ function toPaths(ls){const ps=ls.map(l=>({p:new Path2D(l.d),color:l.color,alpha:
 async function drawElements(keys,extras){
   const c=S.choice,A=S.answers,all=[...keys.map(k=>`${k}(${EL_NAME[k]})`),...extras.map(n=>`${n}(${n})`)];if(!all.length)return;
   const nv=all.length<=2?3:2;
-  const prompt=`你是美甲飾品設計師。客人今天${A.mood}${A.intensity>=4?'（很強烈）':''}，風格是「${c.aes}」（${AES[c.aes].desc}）${c.finish&&FINISH[c.finish]?`，質感是${FINISH[c.finish].name}（${FINISH[c.finish].desc}）`:''}，${AMOUNTS[c.amount]}路線，色盤：${c.pal.join(' ')}。${A.note?'她說：'+A.note+'。':''}
+  const prompt=`你是美甲飾品設計師。客人今天${A.mood}${A.intensity>=4?'（很強烈）':''}，風格是「${c.aes}」（${AES[c.aes].desc}）${c.finish&&FINISH[c.finish]?`，質感是${FINISH[c.finish].name}（${FINISH[c.finish].desc}）`:''}，${AMOUNTS[c.amount]}路線，色盤：${c.pal.join(' ')}。${A.note?'客人說：'+A.note+'。':''}
 請為下列每個元素，各畫 ${nv} 個「今天的版本」，當作指甲上的立體小飾品：${all.join('、')}。
 要求：同一個元素的每個版本要明顯不同（輪廓、姿態、瓣數或細節、繁簡程度都要變），但都一眼認得出來；造型精緻有質感，符合今天的風格與心情，不要卡通化。
 只回傳 JSON，不要其他文字：{"items":[{"key":"括號前的 key","variants":[{"layers":[{"d":"SVG path d","color":"#RRGGBB"}]}]}]}
@@ -2576,7 +2579,7 @@ $('#reviseBtn').onclick=async()=>{
   const P=S.plan,c=S.choice,A=S.answers;
   const motifs=Object.keys(MOTIF_NAME).filter(k=>DRAW[k]).map(k=>`${k}(${MOTIF_NAME[k]})`).join(', ');
   const els=Object.keys(EL_NAME).filter(k=>EL_3D.includes(k)).map(k=>`${k}(${EL_NAME[k]})`).join(', ');
-  const prompt=`你是美甲師，客人看了成品後用自己的話提出修改。請把她的話拆成具體的修改動作，只改她說到的部分。
+  const prompt=`你是美甲師，客人看了成品後用自己的話提出修改。請把客人的話拆成具體的修改動作，只改客人說到的部分。
 目前的設計：${JSON.stringify(planDesc())}
 客人說：「${text}」
 可用的甲面 key：${motifs}
@@ -2585,14 +2588,14 @@ $('#reviseBtn').onclick=async()=>{
 甲型 key：${Object.keys(SHAPE_NAME).join('|')}；長度 key：${Object.keys(LEN_NAME).join('|')}
 立體裝飾：kind 有 shape（一整塊造型）和 piped（擠出來的立體線條，例如脊椎、肋骨、纖維、血管）；material 有 metal（金屬）、flesh（霧面肉感）、wet（濕潤半透的肉感）、gel（透明凝膠）、bone（骨白）。
 只回傳 JSON，不要其他文字：
-{"ops":[{"from":"她說的哪一句（原話）","type":"pal|shape|len|motif|baseColor|matte|addEls|removeEls|elForm|scale|sculpt|sculptMat|sculptColor|sculptPlace","fingers":[手指編號，整體就五根都列],"value":見下方}],"cannot":["真的做不到的部分和原因；沒有就空陣列"],"newElements":["清單裡沒有、要新畫的元素名稱"]}
+{"ops":[{"from":"客人說的哪一句（原話）","type":"pal|shape|len|motif|baseColor|matte|addEls|removeEls|elForm|scale|sculpt|sculptMat|sculptColor|sculptPlace","fingers":[手指編號，整體就五根都列],"value":見下方}],"cannot":["真的做不到的部分和原因；沒有就空陣列"],"newElements":["清單裡沒有、要新畫的元素名稱"]}
 value 規則：pal＝5 個 #RRGGBB（照原本順序改）；shape／len＝key；motif＝甲面 key；baseColor＝#RRGGBB；matte＝true 或 false；addEls＝元素 key 陣列，新元素寫 "new:名稱"；removeEls＝元素 key 陣列；elForm＝做法 key（把這些手指上的元素都改成這個做法，例如不要金屬就改成 gel）；scale＝0.5 到 1.8；sculpt＝{"action":"remove|add|redraw","kind":"shape|piped","material":"metal|flesh|wet|gel|bone","color":"#RRGGBB","note":"要怎麼畫"}；sculptMat＝{"material":"...","color":"#RRGGBB"}（只換材質不重畫）；sculptColor＝#RRGGBB（只換立體裝飾的顏色，例如「增生不要紅色」就給一個不紅的膚色或粉色）；sculptPlace＝陣列，依序對應 fingers 裡有立體裝飾的手指，每個是 {"place":"base|middle|tip|left|right","rotate":-60 到 60 的角度,"scale":0.5 到 1.4,"flip":true 或 false}（移動、轉向、縮放立體裝飾；「交錯」「不同」「錯開」就讓每根的位置和方向都不一樣，例如甲根、中段偏右、甲尖輪流）。
-規則：手指編號 拇指=0 食指=1 中指=2 無名指=3 小指=4；「整體」「全部」代表 0 到 4。只改她明確說要改的，她沒提到的東西一律不要動，尤其不要拿掉。她說「保留」「留著」「還是要有」某樣東西時：目前有就不動；目前沒有就代表要加回來（例如瘀青 → motif 設成 bruise）。要求比較模糊但不會刪東西時（例如「位置可以交錯」「再多一點」），就照最合理的方式直接做，不要只問問題；只有可能刪掉東西、又不確定指哪幾根時，才寫進 cannot 問。cannot 裡用「你」稱呼她，不要寫成「客人」；不要出現任何程式代碼（例如 u1、th0_1、key 名稱），一律用中文名稱。「不要金屬」要同時處理立體裝飾的材質和元素做法。${kbText('revise',c.aes)}`;
+規則：手指編號 拇指=0 食指=1 中指=2 無名指=3 小指=4；「整體」「全部」代表 0 到 4。只改客人明確說要改的，客人沒提到的東西一律不要動，尤其不要拿掉。客人說「保留」「留著」「還是要有」某樣東西時：目前有就不動；目前沒有就代表要加回來（例如瘀青 → motif 設成 bruise）。要求比較模糊但不會刪東西時（例如「位置可以交錯」「再多一點」），就照最合理的方式直接做，不要只問問題；只有可能刪掉東西、又不確定指哪幾根時，才寫進 cannot 問。cannot 裡用「你」稱呼客人，不要寫成「客人」；不要出現任何程式代碼（例如 u1、th0_1、key 名稱），一律用中文名稱。「不要金屬」要同時處理立體裝飾的材質和元素做法。${kbText('revise',c.aes)}`;
   let r;
   try{r=await SAMPLE.json(prompt,{cache:false});}catch(e){btn.disabled=false;btn.textContent='照這樣改';out.innerHTML=`<p class="note quiet">${e&&e.code==='not_granted'?'沒有開放使用 Claude。':'這次沒有理解成功，可以換個說法再試一次。'}</p>`;return;}
   btn.textContent='修改中…';
   HIST.push(snapPlan(text));if(HIST.length>10)HIST.shift();
-  const clean=t=>String(t).replace(/\b(u\d+|th\d+_\w+|ov_\w+)\b/g,m=>EL_NAME[m]||MOTIF_NAME[m]||'').replace(/（\s*）|\(\s*\)/g,'').replace(/客人/g,'你').replace(/她/g,'你');
+  const clean=t=>String(t).replace(/\b(u\d+|th\d+_\w+|ov_\w+)\b/g,m=>EL_NAME[m]||MOTIF_NAME[m]||'').replace(/（\s*）|\(\s*\)/g,'').replace(/客人/g,'你').replace(/客人/g,'你');
   const done=[],fail=[...(r.cannot||[]).filter(Boolean).map(clean)];
   const log=(from,ok,txt)=>(ok?done:fail).push(from?`「${from}」→ ${txt}`:txt);
   try{
@@ -2819,7 +2822,7 @@ $('#exportCsv').onclick=async()=>{
 /* ---------- 試戴 ---------- */
 const HANDS_VER='0.4.1675469240',HANDS_URL='vendor/mediapipe-hands/';
 const TIP=[4,8,12,16,20],DIP=[3,7,11,15,19];
-const TRY={on:false,src:null,video:null,img:null,stream:null,hands:null,busy:false,lm:null,label:null,seen:0,invert:false,shots:[],selfie:true};
+const TRY={on:false,src:null,video:null,img:null,stream:null,hands:null,busy:false,lm:null,shots:[],selfie:true};
 function tryHint(t){const h=$('#tryHint');h.hidden=!t;if(t)h.textContent=t;}
 function loadHandsLib(){
   if(window.Hands)return Promise.resolve();
@@ -2829,7 +2832,7 @@ async function initHands(){
   if(TRY.hands)return TRY.hands;
   await loadHandsLib();
   const h=new Hands({locateFile:f=>HANDS_URL+f});
-  h.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:.6,minTrackingConfidence:.5,selfieMode:true});
+  h.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:.5,minTrackingConfidence:.4,selfieMode:true});
   h.onResults(onHands);
   await h.initialize();
   TRY.hands=h;return h;
@@ -2837,15 +2840,19 @@ async function initHands(){
 /* 把偵測結果換成畫布座標，並做平滑 */
 function srcSize(){const v=TRY.src;if(!v)return null;const w=v.videoWidth||v.naturalWidth,h=v.videoHeight||v.naturalHeight;return w&&h?{w,h}:null;}
 function fitRect(){const s=srcSize();if(!s)return null;const k=Math.max(width/s.w,height/s.h);const dw=s.w*k,dh=s.h*k;return {x:(width-dw)/2,y:(height-dh)/2,w:dw,h:dh};}
+// 偵測到的每一隻手都戴上（左右手、手心手背都算，最多兩隻）。TRY.lm 是陣列，一隻手一組點。
 function onHands(r){
-  const L=r.multiHandLandmarks&&r.multiHandLandmarks[0];
-  if(!L){TRY.lm=null;TRY.seen=0;return;}
-  TRY.label=r.multiHandedness&&r.multiHandedness[0]?r.multiHandedness[0].label:null;
+  const all=r.multiHandLandmarks||[];
+  if(!all.length){TRY.lm=null;return;}
   const f=fitRect();if(!f)return;
-  const pts=L.map(p=>({x:f.x+p.x*f.w,y:f.y+p.y*f.h}));
-  const a=TRY.src===TRY.video&&TRY.lm?.55:1;
-  TRY.lm=TRY.lm?pts.map((p,i)=>({x:TRY.lm[i].x+(p.x-TRY.lm[i].x)*a,y:TRY.lm[i].y+(p.y-TRY.lm[i].y)*a})):pts;
-  TRY.seen++;
+  const prev=TRY.lm||[],live=TRY.src===TRY.video;
+  TRY.lm=all.map((L,h)=>{
+    const pts=L.map(p=>({x:f.x+p.x*f.w,y:f.y+p.y*f.h}));
+    // 平滑：跟上一幀最近的那隻手對齊，避免兩隻手的點互相拉扯
+    let old=null,bd=1e9;prev.forEach(q=>{const d=Math.hypot(q[0].x-pts[0].x,q[0].y-pts[0].y);if(d<bd){bd=d;old=q;}});
+    if(!live||!old||bd>f.w*.25)return pts;
+    return pts.map((p,i)=>({x:old[i].x+(p.x-old[i].x)*.55,y:old[i].y+(p.y-old[i].y)*.55}));
+  });
 }
 async function pump(){
   if(!TRY.on||TRY.src!==TRY.video)return;
@@ -2853,25 +2860,18 @@ async function pump(){
   if(TRY.hands&&!TRY.busy&&v.readyState>=2){TRY.busy=true;try{await TRY.hands.send({image:v});}catch(e){console.warn(e);}TRY.busy=false;}
   requestAnimationFrame(pump);
 }
-function backFacing(lm){
-  const w=lm[0],a=lm[5],b=lm[17];
-  const cr=(a.x-w.x)*(b.y-w.y)-(a.y-w.y)*(b.x-w.x);
-  let back=TRY.label==='Left'?cr>0:cr<0;
-  return TRY.invert?!back:back;
-}
 function drawTry(P){
   const c=cx(),f=fitRect();
   if(f){c.save();
     if(TRY.src===TRY.video&&TRY.selfie){c.translate(width,0);c.scale(-1,1);c.drawImage(TRY.src,width-f.x-f.w,f.y,f.w,f.h);}
     else c.drawImage(TRY.src,f.x,f.y,f.w,f.h);
     c.restore();}
-  const lm=TRY.lm;
   if(!TRY.hands){return;}
-  if(!lm){tryHint(TRY.src===TRY.img?'這張照片找不到手，換一張手背清楚的照片':'把手放進畫面');$('#tryShot').disabled=true;return;}
-  if(!backFacing(lm)){tryHint('把手背朝向鏡頭');$('#tryShot').disabled=false;return;}
+  if(!TRY.lm){tryHint(TRY.src===TRY.img?'這張照片找不到手，換一張手比較清楚的照片':'把手放進畫面');$('#tryShot').disabled=true;return;}
   tryHint('');$('#tryShot').disabled=false;
-  const span=Math.hypot(lm[5].x-lm[17].x,lm[5].y-lm[17].y);
   const G=layout(P);FLIP=false;
+  TRY.lm.forEach(lm=>{
+  const span=Math.hypot(lm[5].x-lm[17].x,lm[5].y-lm[17].y);
   P.fingers.forEach((fg,i)=>{
     const t=lm[TIP[i]],d=lm[DIP[i]];
     const dx=t.x-d.x,dy=t.y-d.y,seg=Math.hypot(dx,dy);if(seg<2)return;
@@ -2882,6 +2882,7 @@ function drawTry(P){
     push();c.translate(bx,by);c.rotate(Math.atan2(ux,-uy));c.scale(s,s);
     drawNail2D(fg,g,P,0,i);drawLines(fg,g,P,0);if(fg.sculpt)drawSculpt(fg,g);drawDecos(fg,g,P,0);
     pop();
+  });
   });
   FLIP=true;
 }
@@ -2918,7 +2919,7 @@ async function usePhoto(file){
   try{tryHint('載入手部偵測…');const h=await initHands();h.setOptions({selfieMode:false});
     if(typeof h.reset==='function')h.reset();
     tryHint('找手中…');await h.send({image:img});
-    if(!TRY.lm)tryHint('這張照片找不到手，換一張手背清楚的照片');}
+    if(!TRY.lm)tryHint('這張照片找不到手，換一張手比較清楚的照片');}
   catch(e){console.warn('hands',e);tryHint('');$('#tryMsg').textContent='手部偵測沒有載入成功，請重新整理再試一次。';}
 }
 function renderShots(){
@@ -2955,7 +2956,6 @@ function closeTry(){
 $('#toTry').onclick=openTry;$('#tryBack').onclick=closeTry;$('#tryShot').onclick=tryShot;
 $('#tryFile').addEventListener('change',e=>{usePhoto(e.target.files[0]);e.target.value='';});
 $('#tryCam').onclick=()=>{TRY.img=null;startCam();};
-$('#tryFlip').onclick=()=>{TRY.invert=!TRY.invert;$('#tryFlip').textContent=TRY.invert?'改回原本的判斷':'手背、手心判斷反了';};
 
 /* ---------- 首頁、展覽模式、鏡頭拍照 ---------- */
 // 對話框：回首頁確認、閒置倒數、拍照共用
