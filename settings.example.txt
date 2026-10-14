@@ -20,3 +20,6 @@ PHONE_WIFI_SSID=
 PHONE_WIFI_PASS=
 # 電腦有好幾個網路時，指定要用哪個位址（例如行動熱點通常是 192.168.137.1）；不填就自動找
 PHONE_HOST=
+
+# 寫 AI_MODE=demo 就不呼叫 Claude、不花錢（假的設計結果，用來調介面）
+AI_MODE=

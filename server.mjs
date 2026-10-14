@@ -44,6 +44,8 @@ const DAILY_LIMIT = parseInt(settings.DAILY_AI_LIMIT || "300", 10);
 // 展覽安全碼：展覽時打開測試紀錄、離開展覽模式都要輸入
 const EXPO_PIN = (settings.EXPO_PIN || "").trim();
 const KIOSK = process.argv.includes("--kiosk");
+// 示範模式：不呼叫 Claude、不花錢，回假的設計結果，用來調介面。用「調介面（不花錢）.bat」開，或 settings.txt 寫 AI_MODE=demo
+const DEMO = process.argv.includes("--demo") || /^demo$/i.test((settings.AI_MODE || "").trim());
 // 手機上傳：用哪個埠、電腦的區網位址（不填就自動找）、要不要在 QR 旁邊放 Wi-Fi 的 QR
 const PHONE_PORT = parseInt(settings.PHONE_PORT || "8788", 10);
 const PHONE_HOST = (settings.PHONE_HOST || "").trim();
@@ -70,7 +72,7 @@ async function api(req, res, p, url) {
   const method = req.method;
   let m0;
   if (p === "/api/me") return json(res, { ok: true });
-  if (p === "/api/limits") return json(res, { images: true, maxImages: MAX_IMAGES });
+  if (p === "/api/limits") return json(res, { images: true, maxImages: MAX_IMAGES, demo: DEMO });
   if (p === "/api/ai" && method === "POST") return ai(req, res);
   if (p === "/api/unlock" && method === "POST") return unlock(req, res);
   if (p === "/api/phone" && method === "POST") return phoneStart(res);
@@ -93,6 +95,7 @@ async function api(req, res, p, url) {
 /* ---------- Claude ---------- */
 
 async function ai(req, res) {
+  if (DEMO) return demoReply(req, res);
   if (!client) return json(res, { error: "no_api_key" }, 500);
   const body = JSON.parse((await readBody(req)).toString("utf8") || "null");
   if (!body || typeof body.prompt !== "string" || !body.prompt) return json(res, { error: "bad_request" }, 400);
@@ -231,6 +234,21 @@ const phoneServer = http.createServer(async (req, res) => {
   }
 });
 phoneServer.on("error", e => console.log(`手機上傳沒有開成（${e.code}），用手機傳照片的功能不能用。`));
+
+// 示範模式的假回覆：欄位和真的一樣，內容隨機挑，等一下才回，看得到等待畫面
+const pick = a => a[Math.floor(Math.random() * a.length)];
+async function demoReply(req, res) {
+  await readBody(req);
+  await new Promise(r => setTimeout(r, 1200 + Math.random() * 1200));
+  const pal = pick([["#F2C6D0", "#FFFFFF", "#C9A0FF", "#E8D7D0"], ["#141414", "#C9CDD3", "#6E7278", "#E8D7D0"], ["#F3E3C3", "#9CC3E6", "#A8C3A0", "#B07A3C"], ["#2B2B3A", "#8FD3FF", "#D7B8FF", "#E9EEF4"]]);
+  json(res, { result: {
+    summary: "（示範模式）這是假的解析，用來調介面，沒有呼叫 Claude。",
+    colors: pal, bgColors: [], aes: pick(["韓系", "日系", "黑金屬", "未來感"]), fits: true,
+    elements: [...new Set([pick(["heart", "star", "pearl", "bow"]), pick(["chain", "drip", "stud", "cross"])])], others: [], keywords: ["示範"],
+    say: pick(["（示範模式）今天用透亮的果凍底配一點銀色小飾品，乾淨又有亮點。", "（示範模式）黑色亮面加液態銀，短方圓甲，酷一點但不會太重。", "（示範模式）奶白底配淡淡的星星和小珍珠，輕快不甜膩。"]),
+    why: {}, basis: ["示範模式"], newTry: [],
+  }, stop_reason: "end_turn", demo: true });
+}
 
 // 回覆應該只有一個 JSON；容許前後多了說明文字或 ``` 圍起來。
 function parseJson(text) {
@@ -424,6 +442,7 @@ await importOldData();
 server.on("error", e => {
   if (e.code === "EADDRINUSE") {
     console.log(`Undertone 好像已經開著了（${PORT} 埠被占用），直接打開瀏覽器。`);
+    if (DEMO) console.log("⚠ 已經開著的那個不是示範模式，會花到 API。要調介面不花錢，先關掉另一個黑色視窗再開一次。");
     openBrowser();
     setTimeout(() => process.exit(0), 1500);
   } else throw e;
@@ -433,9 +452,10 @@ server.listen(PORT, "127.0.0.1", () => {
   if (process.argv.includes("--open")) openBrowser();
   const link = `http://localhost:${PORT}/undertone/`;
   console.log(`\nUndertone 已啟動：${link}`);
-  console.log(client ? `Claude 模型：${MODEL}（思考深度 ${EFFORT}，每天最多 ${DAILY_LIMIT} 次）` : "⚠ 還沒設定 API 金鑰（settings.txt），AI 功能不能用。");
+  if (DEMO) console.log("示範模式：不會呼叫 Claude，不花錢。設計結果是假的，只用來調介面。");
+  else console.log(client ? `Claude 模型：${MODEL}（思考深度 ${EFFORT}，每天最多 ${DAILY_LIMIT} 次）` : "⚠ 還沒設定 API 金鑰（settings.txt），AI 功能不能用。");
   // 開啟時先確認金鑰能不能用（查模型資料，不花錢）
-  if (client) client.models.retrieve(MODEL).then(
+  if (client && !DEMO) client.models.retrieve(MODEL).then(
     () => console.log("✓ API 金鑰可以用"),
     e => console.error(e instanceof Anthropic.AuthenticationError
       ? `✗ API 金鑰不對或已失效（開頭 ${API_KEY.slice(0, 10)}…，共 ${API_KEY.length} 個字）。到 https://console.anthropic.com/settings/keys 重新建立一把，貼進 settings.txt 後重新啟動。`

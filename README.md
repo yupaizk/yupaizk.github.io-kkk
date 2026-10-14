@@ -22,6 +22,10 @@
 - 只有這台電腦能開，同一個 Wi-Fi 的其他人連不進來。
 - 要有網路 AI 才能用。p5.js 和手部偵測都放在資料夾裡，不用另外下載。
 
+## 調介面不花錢
+
+點兩下 **`調介面（不花錢）.bat`**：流程、畫面、試戴都照常，但不會呼叫 Claude，提案和解析是隨機的假結果（右下角會標「示範模式」）。也可以在 `settings.txt` 寫 `AI_MODE=demo`，之後每次啟動都是示範模式；拿掉這行就恢復。要先關掉其他開著的黑色視窗。
+
 ## 展覽怎麼開
 
 1. 先在 `settings.txt` 加一行 `EXPO_PIN=你的安全碼`（只有你知道的數字或文字），存檔。
@@ -61,6 +65,7 @@
 | `public/undertone/vendor/` | p5.js 1.9.4、MediaPipe Hands 0.4.1675469240（離線用） |
 | `啟動 Undertone.bat` | Windows 啟動檔 |
 | `phone/upload.html` | 手機掃 QR code 後打開的上傳頁 |
+| `調介面（不花錢）.bat` | 示範模式：不呼叫 Claude、不花錢，用來調介面 |
 | `展覽啟動.bat` | 展覽用啟動檔：瀏覽器全螢幕（kiosk），開啟展覽模式 |
 
 Mac 或已經裝好 Node.js 的電腦：`npm install` 之後執行 `npm start`。

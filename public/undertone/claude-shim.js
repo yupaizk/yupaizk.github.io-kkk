@@ -38,7 +38,17 @@
 
   /* ---------- sample：Claude ---------- */
   const sample = {
-    async limits() { return call('/limits'); },
+    async limits() {
+      const l = await call('/limits');
+      // 示範模式：右下角標一個小字，提醒現在的設計結果是假的、沒有花錢
+      if (l.demo && !document.getElementById('demoTag')) {
+        const t = document.createElement('div');
+        t.id = 'demoTag'; t.textContent = '示範模式・不呼叫 Claude';
+        t.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:60;font:12px/1 system-ui,sans-serif;padding:6px 10px;border-radius:999px;background:#161616;color:#fff;opacity:.7;pointer-events:none';
+        document.body.appendChild(t);
+      }
+      return l;
+    },
     async json(prompt, opts) {
       opts = opts || {};
       const images = [];
