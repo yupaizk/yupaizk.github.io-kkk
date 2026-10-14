@@ -240,8 +240,7 @@ body.atHome .masthead{display:none}
 .hero-steps b{font-weight:500;font-size:18px}
 .hero-steps span{color:var(--soft);font-size:15px}
 .hero-foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:20px 0 8px;border-top:1px solid var(--line)}
-.expo-toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
-.expo-toggle input{width:18px;height:18px;accent-color:var(--lacquer)}
+.pin-input{width:100%;font:inherit;font-size:20px;letter-spacing:.3em;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--chip);color:var(--ink);margin-top:8px}
 .hero-foot .stat{margin:0;font-size:13px}
 body.expo #openLog,body.expo #homeLog{display:none}
 /* 字標按鈕 */
@@ -319,10 +318,6 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
         <li><b>看設計師的提案</b><span>風格、配色、元素，都可以再調</span></li>
         <li><b>戴上試試</b><span>用說的修改，再用鏡頭試戴</span></li>
       </ol>
-    </div>
-    <div class="hero-foot">
-      <label class="expo-toggle"><input type="checkbox" id="expoMode"><span>展覽模式</span></label>
-      <span class="stat" id="expoHint">開啟後會藏起測試紀錄，閒置一段時間自動回到這一頁。紀錄可以按 Ctrl＋Shift＋L 打開。</span>
     </div>
   </section>
 
@@ -3085,6 +3080,7 @@ function captureTry(){return new Promise(res=>{const cv=document.querySelector('
 async function tryShot(){
   const b=await captureTry();if(!b)return;
   const shot={blob:b,url:URL.createObjectURL(b),t:Date.now()};TRY.shots.unshift(shot);renderShots();
+  if(!CUR&&ASSETS){$('#tryMsg').textContent='等成品存檔…';for(let i=0;i<40&&!CUR;i++)await new Promise(r=>setTimeout(r,500));}
   if(!CUR||!ASSETS){$('#tryMsg').textContent=DL?'拍好了，點照片可以下載。這張沒有存進測試紀錄（這次成品沒有存檔成功）。':'拍好了。這個畫面沒辦法存檔，可以先截圖保存。';return;}
   $('#tryMsg').textContent='存進測試紀錄中…';
   try{const r=await ASSETS.upload(b,{type:'image/png'});
@@ -3132,12 +3128,30 @@ $('#homeBtn').onclick=()=>{
   d.el.querySelector('[data-k="stay"]').onclick=d.close;
 };
 
-// 展覽模式：藏起測試紀錄、閒置自動回首頁。設定記在這台電腦的瀏覽器裡。
-const EXPO_KEY='undertone.expo';
-function setExpo(on){document.body.classList.toggle('expo',on);$('#expoMode').checked=on;try{localStorage.setItem(EXPO_KEY,on?'1':'0');}catch(e){}}
-try{setExpo(localStorage.getItem(EXPO_KEY)==='1');}catch(e){setExpo(false);}
-$('#expoMode').addEventListener('change',e=>setExpo(e.target.checked));
-document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&(e.key==='L'||e.key==='l')){e.preventDefault();openLog();}});
+// 展覽模式：用「展覽啟動.bat」開（網址帶 ?expo=1）。藏起測試紀錄、閒置自動回首頁、畫面上沒有開關。
+// 按 Ctrl＋Shift＋L 輸入安全碼（settings.txt 的 EXPO_PIN），才能打開紀錄或離開展覽模式。
+const EXPO_OFF='undertone.expo.off';
+function setExpo(on){document.body.classList.toggle('expo',on);}
+{let off=false;try{off=sessionStorage.getItem(EXPO_OFF)==='1';}catch(e){}setExpo(new URLSearchParams(location.search).get('expo')==='1'&&!off);}
+const inExpo=()=>document.body.classList.contains('expo');
+function pinSheet(){
+  const d=sheet(`<h3>輸入安全碼</h3><p class="stat">展覽中要打開測試紀錄或離開展覽模式，請輸入安全碼。</p>
+    <input type="password" class="pin-input" inputmode="numeric" autocomplete="off" aria-label="安全碼">
+    <p class="stat pin-msg" role="alert"></p>
+    <div class="actions"><button class="btn main" data-k="log">打開測試紀錄</button><button class="btn ghost" data-k="exit">離開展覽模式</button><button class="btn ghost" data-k="cancel">取消</button></div>`);
+  const inp=d.el.querySelector('.pin-input'),msg=d.el.querySelector('.pin-msg');inp.focus();
+  const check=async then=>{msg.textContent='確認中…';
+    try{const cap=window.claude&&claude.use?await claude.use('expo'):null;if(!cap)throw Object.assign(new Error(),{code:'no_server'});
+      await cap.unlock(inp.value);d.close();then();}
+    catch(e){inp.value='';inp.focus();msg.textContent=e.code==='wrong_pin'?'安全碼不對。':e.code==='no_pin'?'還沒設定安全碼：在 settings.txt 加一行 EXPO_PIN=你的安全碼，重新啟動。':'現在沒辦法確認安全碼。';}};
+  d.el.querySelector('[data-k="log"]').onclick=()=>check(openLog);
+  d.el.querySelector('[data-k="exit"]').onclick=()=>check(()=>{try{sessionStorage.setItem(EXPO_OFF,'1');}catch(e){}setExpo(false);});
+  d.el.querySelector('[data-k="cancel"]').onclick=d.close;
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')check(openLog);});
+}
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&(e.key==='L'||e.key==='l')){e.preventDefault();if(inExpo())pinSheet();else openLog();}});
+// 展覽中關掉右鍵選單
+document.addEventListener('contextmenu',e=>{if(inExpo())e.preventDefault();});
 
 let lastAct=Date.now(),idleSheet=null;
 ['pointerdown','keydown','wheel','touchstart','input'].forEach(t=>document.addEventListener(t,()=>{lastAct=Date.now();},{passive:true,capture:true}));

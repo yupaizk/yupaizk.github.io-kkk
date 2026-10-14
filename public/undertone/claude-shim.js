@@ -119,7 +119,12 @@
     },
   };
 
-  const caps = { sample, db, assets, downloads };
+  /* ---------- expo：展覽安全碼（比對 settings.txt 的 EXPO_PIN，網頁裡不放安全碼） ---------- */
+  const expo = {
+    async unlock(pin) { return call('/unlock', sendJson('POST', { pin })); },
+  };
+
+  const caps = { sample, db, assets, downloads, expo };
   window.claude = {
     async use(name) {
       if (!caps[name]) throw apiError('not_granted');

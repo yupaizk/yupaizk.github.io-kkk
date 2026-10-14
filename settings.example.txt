@@ -10,3 +10,6 @@ CLAUDE_EFFORT=medium
 
 # 每天最多呼叫幾次 Claude，避免意外花太多錢
 DAILY_AI_LIMIT=300
+
+# 展覽安全碼：展覽時按 Ctrl+Shift+L，輸入這組才能打開測試紀錄或離開展覽模式
+EXPO_PIN=

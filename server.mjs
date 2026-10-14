@@ -4,8 +4,8 @@
 import http from "node:http";
 import { readFile, writeFile, mkdir, readdir, rm, copyFile, rename, stat } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
-import { randomBytes } from "node:crypto";
-import { exec } from "node:child_process";
+import { randomBytes, timingSafeEqual } from "node:crypto";
+import { exec, spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
@@ -39,6 +39,9 @@ const API_KEY = rawKey && !rawKey.includes("...") ? rawKey : "";
 const MODEL = settings.CLAUDE_MODEL || "claude-opus-5-5";
 const EFFORT = settings.CLAUDE_EFFORT || "medium";
 const DAILY_LIMIT = parseInt(settings.DAILY_AI_LIMIT || "300", 10);
+// 展覽安全碼：展覽時打開測試紀錄、離開展覽模式都要輸入
+const EXPO_PIN = (settings.EXPO_PIN || "").trim();
+const KIOSK = process.argv.includes("--kiosk");
 // ANTHROPIC_BASE_URL 只在測試時接假的 API 用。
 const client = API_KEY ? new Anthropic({ apiKey: API_KEY, baseURL: settings.ANTHROPIC_BASE_URL || undefined }) : null;
 
@@ -62,6 +65,7 @@ async function api(req, res, p, url) {
   if (p === "/api/me") return json(res, { ok: true });
   if (p === "/api/limits") return json(res, { images: true, maxImages: MAX_IMAGES });
   if (p === "/api/ai" && method === "POST") return ai(req, res);
+  if (p === "/api/unlock" && method === "POST") return unlock(req, res);
 
   let m;
   if (p === "/api/blob" && method === "POST") return putBlob(req, res, randomBytes(16).toString("hex"));
@@ -129,6 +133,16 @@ async function ai(req, res) {
     last = { error: msg.stop_reason === "max_tokens" ? "too_long" : "bad_json", detail: text.slice(0, 500) };
   }
   return json(res, last, last.error === "rate_limited" ? 429 : 502);
+}
+
+// 展覽安全碼：比對 settings.txt 的 EXPO_PIN。打錯會等一下才回，避免一直亂猜。
+async function unlock(req, res) {
+  const body = JSON.parse((await readBody(req)).toString("utf8") || "null") || {};
+  if (!EXPO_PIN) return json(res, { error: "no_pin" }, 400);
+  const a = Buffer.from(String(body.pin || "")), b = Buffer.from(EXPO_PIN);
+  if (a.length === b.length && timingSafeEqual(a, b)) return json(res, { ok: true });
+  await new Promise(r => setTimeout(r, 1500));
+  return json(res, { error: "wrong_pin" }, 403);
 }
 
 // 回覆應該只有一個 JSON；容許前後多了說明文字或 ``` 圍起來。
@@ -345,6 +359,26 @@ server.listen(PORT, "127.0.0.1", () => {
 
 function openBrowser() {
   const link = `http://localhost:${PORT}/undertone/`;
+  if (KIOSK && process.platform === "win32") return openKiosk(link + "?expo=1");
   const cmd = process.platform === "win32" ? `start "" "${link}"` : process.platform === "darwin" ? `open "${link}"` : `xdg-open "${link}"`;
   exec(cmd, () => {});
+}
+
+// 展覽用：全螢幕、沒有網址列和分頁（kiosk）。用獨立的瀏覽器設定檔（data/kiosk-browser），
+// 平常開著的瀏覽器不受影響，鏡頭權限允許一次之後就會記住。
+function openKiosk(link) {
+  const env = process.env, cands = [
+    [path.join(env.ProgramFiles || "C:\\Program Files", "Google\\Chrome\\Application\\chrome.exe"), false],
+    [path.join(env["ProgramFiles(x86)"] || "C:\\Program Files (x86)", "Google\\Chrome\\Application\\chrome.exe"), false],
+    [path.join(env.LOCALAPPDATA || "", "Google\\Chrome\\Application\\chrome.exe"), false],
+    [path.join(env["ProgramFiles(x86)"] || "C:\\Program Files (x86)", "Microsoft\\Edge\\Application\\msedge.exe"), true],
+    [path.join(env.ProgramFiles || "C:\\Program Files", "Microsoft\\Edge\\Application\\msedge.exe"), true],
+  ];
+  const found = cands.find(([f]) => existsSync(f));
+  if (!found) { console.log("找不到 Chrome 或 Edge，改用一般視窗打開（可以按 F11 全螢幕）。"); exec(`start "" "${link}"`, () => {}); return; }
+  const [exe, edge] = found;
+  const args = [`--kiosk`, link, `--user-data-dir=${path.join(DATA, "kiosk-browser")}`, "--no-first-run", "--no-default-browser-check",
+    "--disable-pinch", "--overscroll-history-navigation=0", "--disable-features=Translate", "--disable-session-crashed-bubble"];
+  if (edge) args.push("--edge-kiosk-type=fullscreen");
+  spawn(exe, args, { detached: true, stdio: "ignore" }).unref();
 }

@@ -22,6 +22,19 @@
 - 只有這台電腦能開，同一個 Wi-Fi 的其他人連不進來。
 - 要有網路 AI 才能用。p5.js 和手部偵測都放在資料夾裡，不用另外下載。
 
+## 展覽怎麼開
+
+1. 先在 `settings.txt` 加一行 `EXPO_PIN=你的安全碼`（只有你知道的數字或文字），存檔。
+2. 點兩下 **`展覽啟動.bat`**：瀏覽器會全螢幕打開（kiosk 模式），沒有網址列和分頁，觀眾按 F11 也退不出來。
+3. 第一次用鏡頭時允許相機，之後會記住。
+4. 展覽模式下畫面上沒有開關，測試紀錄也藏起來；閒置一段時間會自動回首頁。
+5. 你要看紀錄或離開展覽模式：按 **Ctrl＋Shift＋L**，輸入安全碼。
+6. 要關掉：按 **Alt＋F4** 關瀏覽器，再關掉黑色視窗。
+
+每一次的成品圖、觀眾上傳或用鏡頭拍的參考照片、試戴拍下來的照片，都會存進 `data/`（紀錄在 `data/db/records/`，圖片在 `data/blobs/`），在測試紀錄頁可以看、可以下載。
+
+展覽前記得把 Windows 的螢幕保護程式和自動睡眠關掉（設定 → 系統 → 電源）。
+
 ## 設定（`settings.txt`）
 
 | 名稱 | 預設 | 說明 |
@@ -30,6 +43,7 @@
 | `CLAUDE_MODEL` | `claude-opus-5-5` | 用哪個 Claude 模型 |
 | `CLAUDE_EFFORT` | `medium` | 思考深度：`low`／`medium`／`high`／`xhigh`／`max`，越高越慢越貴 |
 | `DAILY_AI_LIMIT` | `300` | 每天最多呼叫幾次 Claude |
+| `EXPO_PIN` | — | 展覽安全碼：展覽時打開測試紀錄、離開展覽模式要輸入 |
 
 `settings.txt`、`data/` 不會放上 GitHub。
 
@@ -42,5 +56,6 @@
 | `public/undertone/kb/backend.json` | 生成器讀的後台資料 |
 | `public/undertone/vendor/` | p5.js 1.9.4、MediaPipe Hands 0.4.1675469240（離線用） |
 | `啟動 Undertone.bat` | Windows 啟動檔 |
+| `展覽啟動.bat` | 展覽用啟動檔：瀏覽器全螢幕（kiosk），開啟展覽模式 |
 
 Mac 或已經裝好 Node.js 的電腦：`npm install` 之後執行 `npm start`。
