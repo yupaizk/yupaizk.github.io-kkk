@@ -346,6 +346,33 @@ body.atHome .wrap{padding-top:0}
   .s1-go{flex-wrap:wrap}
   .hero{min-height:calc(100vh - 40px)}
 }
+
+/* ---------- v38 細修 ---------- */
+/* 首頁：標題細一點、中文小標小一點 */
+.hero-title{font-weight:400}
+.hero-lead{font-size:clamp(15px,1.2vw,17px);line-height:1.8}
+/* 上方那一條：往下一點、往兩邊延伸，捲動時固定在上面 */
+.masthead{position:sticky;top:0;z-index:40;background:var(--bg);margin-left:-48px;margin-right:-48px;padding:44px 48px 22px}
+.result .split-main,.tryon .split-main{top:120px}
+/* 題目頁：題號放左上角，字和選項放大、拉開距離，按鈕不要一條長黑棒 */
+section[data-step="2"]{max-width:none;position:relative}
+section[data-step="2"]>.q,section[data-step="2"]>.actions{max-width:860px;margin-inline:auto;width:100%}
+section[data-step="2"] .qcount{position:absolute;top:0;left:0;font-size:15px;letter-spacing:.16em;margin:0}
+section[data-step="2"] h2{font-size:44px;margin-bottom:12px}
+section[data-step="2"] .lead{margin-bottom:40px}
+section[data-step="2"] .chips{gap:12px}
+section[data-step="2"] .chips span{padding:12px 22px;font-size:18px}
+section[data-step="2"] .block{margin-top:44px}
+section[data-step="2"] input[type=range]{max-width:520px}
+section[data-step="2"] textarea{min-height:140px;font-size:17px}
+section[data-step="2"]>.actions{margin-top:56px;justify-content:space-between}
+section[data-step="2"]>.actions .btn{flex:0 0 auto;min-width:170px;padding:15px 28px}
+section[data-step="2"]>.actions .btn.main{min-width:260px}
+@media (max-width:999px){
+  .masthead{margin-left:-18px;margin-right:-18px;padding:18px 18px 14px}
+  section[data-step="2"] .qcount{position:static;margin-bottom:6px}
+  section[data-step="2"] h2{font-size:30px}
+}
 </style>
 </head>
 <body>
