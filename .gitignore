@@ -3,3 +3,6 @@ runtime/
 data/
 settings.txt
 undertone-old-data/
+
+# 首頁的作品影片和照片（有人像，不放上公開的 GitHub）
+public/undertone/media/
