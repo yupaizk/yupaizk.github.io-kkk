@@ -76,6 +76,7 @@ async function api(req, res, p, url) {
   if (p === "/api/ai" && method === "POST") return ai(req, res);
   if (p === "/api/unlock" && method === "POST") return unlock(req, res);
   if (p === "/api/phone" && method === "POST") return phoneStart(res);
+  if (p === "/api/share" && method === "POST") return shareStart(req, res);
   if ((m0 = p.match(/^\/api\/phone\/([0-9a-f]{32})(?:\/(\d+))?$/))) return phoneRoute(req, res, m0[1], m0[2]);
 
   let m;
@@ -198,9 +199,28 @@ async function phoneRoute(req, res, token, n) {
   res.end(await readFile(it.file));
 }
 
+// 存到手機：成品圖或試戴照片開一個 30 分鐘有效的下載碼，手機掃 QR code 打開 /d/下載碼，長按存圖
+const SHARE_TTL = 30 * 60 * 1000;
+const shares = new Map();
+async function shareStart(req, res) {
+  const body = JSON.parse((await readBody(req)).toString("utf8") || "null") || {};
+  const host = lanAddress();
+  if (!host || !phoneServerUp) return json(res, { error: "no_lan" }, 503);
+  if (!BLOB_RE.test(String(body.id || "")) || !(await findBlob(body.id))) return json(res, { error: "not_found" }, 404);
+  const token = randomBytes(16).toString("hex");
+  shares.set(token, { id: body.id, created: Date.now() });
+  json(res, { url: `http://${host}:${PHONE_PORT}/d/${token}`, wifi: PHONE_WIFI });
+}
+const SHARE_PAGE = id => `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UNDERTONE</title><style>body{margin:0;background:#EDEDED;color:#161616;font-family:"Google Sans","Noto Sans TC","PingFang TC",system-ui,sans-serif;text-align:center}
+main{max-width:560px;margin:0 auto;padding:32px 18px 48px}.mark{letter-spacing:.34em;font-size:20px;margin:0 0 24px}img{width:100%;border-radius:16px;display:block;background:#fff}
+p{color:#6E6E6E;line-height:1.6}a{display:inline-block;margin-top:8px;padding:14px 28px;border-radius:14px;background:#161616;color:#fff;text-decoration:none}</style></head>
+<body><main><p class="mark">UNDERTONE</p><img src="${id}/img" alt="今天的指甲"><p>長按圖片可以存到相簿；或按下面的按鈕下載。</p><a href="${id}/img" download="undertone.png">下載這張圖</a></main></body></html>`;
+
 // 過期的上傳碼和照片定時清掉
 setInterval(() => {
   const now = Date.now();
+  for (const [t, sh] of shares) if (now - sh.created > SHARE_TTL) shares.delete(t);
   for (const [t, ses] of phoneSessions) if (now - ses.created > PHONE_TTL) { phoneSessions.delete(t); rm(path.join(PHONE_DIR, t), { recursive: true, force: true }).catch(() => {}); }
 }, 60 * 1000).unref();
 
@@ -209,7 +229,18 @@ let phoneServerUp = false;
 const PHONE_PAGE = path.join(ROOT, "phone", "upload.html");
 const phoneServer = http.createServer(async (req, res) => {
   try {
-    const m = new URL(req.url, "http://x").pathname.match(/^\/u\/([0-9a-f]{32})$/);
+    const pn = new URL(req.url, "http://x").pathname;
+    const dm = pn.match(/^\/d\/([0-9a-f]{32})(\/img)?$/);
+    if (dm && req.method === "GET") {
+      const sh = shares.get(dm[1]);
+      if (!sh || Date.now() - sh.created > SHARE_TTL) { res.writeHead(410, { "Content-Type": "text/plain; charset=utf-8" }); return res.end("這個 QR code 過期了，請在電腦上再按一次。"); }
+      if (!dm[2]) { res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }); return res.end(SHARE_PAGE(dm[1])); }
+      const b = await findBlob(sh.id);
+      if (!b) return notFound(res);
+      res.writeHead(200, { "Content-Type": b.type, "Cache-Control": "no-store", "Content-Disposition": `inline; filename="undertone.${b.type.split("/")[1]}"` });
+      return res.end(await readFile(b.f));
+    }
+    const m = pn.match(/^\/u\/([0-9a-f]{32})$/);
     const ses = m && phoneSessions.get(m[1]);
     if (!m) return notFound(res);
     if (req.method === "GET") {

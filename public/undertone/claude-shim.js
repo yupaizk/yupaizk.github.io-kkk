@@ -145,6 +145,8 @@
       return new File([b], `phone-${Date.now()}-${n}.${(b.type.split('/')[1] || 'jpg')}`, { type: b.type });
     },
     async stop(token) { await call('/phone/' + token, { method: 'DELETE' }).catch(() => {}); },
+    // 存到手機：拿一個下載用的網址（手機掃 QR code 打開）
+    async share(id) { return call('/share', sendJson('POST', { id })); },
   };
 
   const caps = { sample, db, assets, downloads, expo, phone };
