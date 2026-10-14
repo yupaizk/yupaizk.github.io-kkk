@@ -124,7 +124,20 @@
     async unlock(pin) { return call('/unlock', sendJson('POST', { pin })); },
   };
 
-  const caps = { sample, db, assets, downloads, expo };
+  /* ---------- phone：手機掃 QR code 傳照片（server.mjs 另開的區網上傳頁） ---------- */
+  const phone = {
+    async start() { return call('/phone', { method: 'POST' }); },
+    async list(token) { return (await call('/phone/' + token)).items; },
+    async file(token, n) {
+      const r = await fetch(API + '/phone/' + token + '/' + n);
+      if (!r.ok) throw apiError('http_' + r.status);
+      const b = await r.blob();
+      return new File([b], `phone-${Date.now()}-${n}.${(b.type.split('/')[1] || 'jpg')}`, { type: b.type });
+    },
+    async stop(token) { await call('/phone/' + token, { method: 'DELETE' }).catch(() => {}); },
+  };
+
+  const caps = { sample, db, assets, downloads, expo, phone };
   window.claude = {
     async use(name) {
       if (!caps[name]) throw apiError('not_granted');

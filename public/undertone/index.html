@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="vendor/p5.min.js"></script>
 <script src="claude-shim.js"></script>
+<script src="vendor/qrcode.js"></script>
 <style>
 :root{
   --bg:#EDEDED; --panel:#F7F7F7; --ink:#161616; --soft:#6E6E6E; --line:#CDCDCD;
@@ -196,10 +197,7 @@ section[data-step="2"]{max-width:760px}
 /* 4：成品在左，修改與評分在右 */
 .result .split-main{position:sticky;top:24px}
 #stage{margin:0;max-height:calc(100vh - 170px)}
-.result .split-side .actions{order:-1;margin-top:0}
-.result .split-side .actions .btn.main{flex:1 1 100%}
-.result .split-side .actions .btn.ghost{flex:1 1 auto}
-.result .split-side #reviseBox{margin-top:32px}
+.result .split-side #reviseBox{margin-top:0}
 .result .split-side #saveBox{margin-top:20px}
 .tryon{grid-template-columns:minmax(0,2fr) minmax(300px,1fr)}
 /* 試戴 */
@@ -274,7 +272,6 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
 /* 等待 */
 .loading::after{content:"";display:block;width:180px;height:2px;margin-top:18px;background:linear-gradient(90deg,transparent,var(--ink),transparent);background-size:200% 100%;animation:ld 1.4s linear infinite}
 @keyframes ld{from{background-position:200% 0}to{background-position:-200% 0}}
-#drawing::after{content:"…";display:inline-block;width:1.2em;text-align:left;animation:dots 1.2s steps(4) infinite;overflow:hidden;vertical-align:bottom}
 @keyframes dots{0%{width:0}100%{width:1.2em}}
 @media (prefers-reduced-motion:reduce){.loading::after,#drawing::after{animation:none}}
 /* 對話框 */
@@ -286,11 +283,68 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
 .cam-view video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
 .cam-view .cam-msg{position:absolute;inset:auto 0 0 0;margin:0;padding:10px;color:#fff;text-align:center}
 .sheet-card:has(.cam-view){max-width:640px}
+.sheet-card:has(.qr-row){max-width:560px;text-align:center}
+.qr-row{display:flex;justify-content:center;gap:24px;margin-top:16px}
+.qr{width:220px}.qr svg{width:100%;height:auto;display:block;background:#fff;border-radius:12px}
+.qr .stat{margin:8px 0 0}
+.sheet-card:has(.qr-row) .actions{justify-content:center}
+.camrow{display:flex;gap:10px;flex-wrap:wrap}
 @media (max-width:999px){
   .hero{min-height:auto;padding:40px 0 24px}
   .hero-steps{grid-template-columns:1fr;gap:18px;margin-top:40px}
   .pitch{grid-template-columns:1fr;gap:20px;padding:20px}
   .tune-body{columns:1}
+}
+
+/* ---------- v36 版面 ---------- */
+/* 步驟條靠右 */
+.masthead nav.steps{margin:0 0 0 auto;flex:0 1 560px}
+.masthead #openLog{margin-left:12px}
+/* 各頁內容放在畫面中間偏上，不要全擠在左上 */
+.screen.on[data-step="0"],.screen.on[data-step="2"],.screen.on[data-step="3"]{display:flex;flex-direction:column;justify-content:center;min-height:calc(100vh - 200px)}
+section[data-step="0"]{max-width:1080px;margin-inline:auto;width:100%}
+section[data-step="0"] .mode{min-height:260px}
+section[data-step="2"]{max-width:880px;margin-inline:auto;width:100%}
+section[data-step="2"] h2{font-size:40px}
+section[data-step="2"] .chips label span,section[data-step="2"] .chips label{font-size:17px}
+section[data-step="2"]>.actions{margin-top:36px}
+section[data-step="1"]{padding-top:2vh}
+/* 交給感覺：右欄沒東西，改成置中一欄 */
+body:not(.modeB) .screen.on[data-step="1"]{max-width:900px;margin-inline:auto;width:100%;display:flex;flex-direction:column;justify-content:center;min-height:calc(100vh - 200px)}
+body:not(.modeB) section[data-step="1"] .split{grid-template-columns:1fr;gap:0}
+/* 第 1 步：放不放照片一樣大 */
+.s1-go{display:flex;align-items:center;gap:12px}
+.s1-go #to2,.s1-go #skip1{flex:1 1 0;padding-top:16px;padding-bottom:16px}
+.s1-go #toMode{flex:none;margin-left:8px}
+/* 等待：字標跳動 */
+.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;min-height:calc(100vh - 260px)}
+.loader p{margin:0;color:var(--soft);font-size:16px}
+.bounce{display:flex;font-weight:500;font-size:clamp(40px,6vw,84px);letter-spacing:.18em;margin-right:-.18em;line-height:1}
+.bounce span{display:inline-block;animation:hop 1.4s cubic-bezier(.3,.7,.4,1) infinite}
+@keyframes hop{0%,55%,100%{transform:translateY(0)}25%{transform:translateY(-.3em)}40%{transform:translateY(.04em)}}
+#drawing .loader{min-height:0}
+#drawing .bounce{font-size:clamp(28px,3.4vw,46px)}
+@media (prefers-reduced-motion:reduce){.bounce span{animation:none}}
+/* 成品：按鈕排在指甲下面一排 */
+.result-actions{margin-top:18px;display:flex;gap:10px}
+.result-actions .btn{flex:1 1 0;padding-left:10px;padding-right:10px}
+.result-actions .btn.main{flex:1.4 1 0}
+/* 首頁：標題置中、滿版，往下捲看步驟和作品 */
+.hero{min-height:100vh;max-width:none;align-items:center;text-align:center;padding:48px 0 40px;position:relative}
+.hero-title{margin-left:0;margin-right:-.06em}
+.hero-lead{margin-left:auto;margin-right:auto}
+.hero-actions{justify-content:center}
+.scroll-cue{appearance:none;border:0;background:none;color:var(--soft);font:inherit;font-size:13px;letter-spacing:.2em;cursor:pointer;position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px}
+.scroll-cue span{font-size:18px;animation:cue 1.8s ease-in-out infinite}
+@keyframes cue{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.home-more{max-width:1080px;margin:0 auto;padding:96px 0 120px;text-align:center}
+.home-more .hero-steps{margin-top:24px;text-align:left}
+body.atHome .wrap{padding-top:0}
+@media (max-width:999px){
+  .screen.on[data-step="0"],.screen.on[data-step="2"],.screen.on[data-step="3"]{min-height:0}
+  .result-actions{flex-wrap:wrap}.result-actions .btn{flex:1 1 40%}
+  .s1-go{flex-wrap:wrap}
+  .hero{min-height:calc(100vh - 40px)}
 }
 </style>
 </head>
@@ -311,21 +365,25 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
     <div class="hero">
       <p class="eyebrow">Nail design, read from your mood</p>
       <h1 class="hero-title">UNDERTONE</h1>
-      <p class="hero-lead">把今天的心情、穿搭和喜歡的東西告訴設計師，<br>它會為你畫一組只屬於今天的指甲，再讓你戴在手上看看。</p>
+      <p class="hero-lead">把今天的心情、穿搭和喜歡的東西告訴 UNDERTONE，<br>它會為你畫一組只屬於今天的指甲，再讓你戴在手上看看。</p>
       <div class="hero-actions"><button class="btn main" id="startBtn">開始設計</button><button class="btn ghost" id="homeLog">測試紀錄</button></div>
+      <button type="button" class="scroll-cue" id="scrollCue" aria-label="往下看">往下看<span aria-hidden="true">↓</span></button>
+    </div>
+    <div class="home-more" id="homeMore">
+      <p class="eyebrow">How it works</p>
       <ol class="hero-steps">
         <li><b>說說今天</b><span>心情、穿搭，或一張參考圖</span></li>
-        <li><b>看設計師的提案</b><span>風格、配色、元素，都可以再調</span></li>
-        <li><b>戴上試試</b><span>用說的修改，再用鏡頭試戴</span></li>
+        <li><b>看 UNDERTONE 的提案</b><span>風格、配色、元素，都可以再調</span></li>
+        <li><b>戴上試試</b><span>用文字修改，再用鏡頭試戴</span></li>
       </ol>
     </div>
   </section>
 
   <section class="screen" data-step="0">
     <h2>從哪裡開始？</h2>
-    <p class="lead">兩條路都會走到同一個地方：一組只屬於今天的指甲，最後還能用說的修改。</p>
+    <p class="lead">兩條路都會走到同一個地方：一組只屬於今天的指甲，最後還能用文字更改。</p>
     <div class="modes">
-      <button class="mode" data-mode="A"><b>交給感覺</b><span>還沒有想法也沒關係。說說今天的心情，設計師替你想。</span><em>可以拍一張今天的穿搭，當作配色參考</em></button>
+      <button class="mode" data-mode="A"><b>交給感覺</b><span>還沒有想法也沒關係。說說今天的心情，UNDERTONE 替你想。</span><em>可以拍一張今天的穿搭，當作配色參考</em></button>
       <button class="mode" data-mode="B"><b>我有想要的</b><span>心裡已經有元素或圖樣，像星星、鍊條、某張圖。給我圖，或直接寫下來。</span><em>可以忠於原圖，也可以換成某種風格</em></button>
     </div>
   </section>
@@ -342,7 +400,7 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
       <span class="big" id="dropTxt">點這裡加照片</span>
       <small id="dropSub">最多 3 張，可以直接拖進來</small>
     </label>
-    <div class="actions camrow"><button type="button" class="btn ghost" id="camBtn">用鏡頭拍一張</button></div>
+    <div class="actions camrow"><button type="button" class="btn ghost" id="camBtn">用鏡頭拍一張</button><button type="button" class="btn ghost" id="phoneBtn" hidden>用手機上傳</button></div>
     <p class="stat privacy">照片和成品只存在這台電腦，作為研究紀錄。</p>
     <div class="pal" id="localPal"></div>
     <p class="stat" id="palHint" hidden style="margin:6px 0 0">點色塊可以刪掉不要的顏色（例如照片背景）。</p>
@@ -359,10 +417,10 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
       <div id="trendBox" hidden></div></div>
     <div class="block" id="bAmtWrap" data-ma-hide><h3>想要多繁複</h3><p class="stat">決定幾根指甲畫滿、元素放多少。</p><div class="chips" id="bAmt"></div></div>
     </div></div>
-    <div class="actions">
+    <div class="actions s1-go">
       <button class="btn main" id="to2">下一步</button>
       <button class="btn ghost" id="skip1" data-mb-hide>先不放照片</button>
-      <button class="btn ghost" id="toMode">換一條路</button>
+      <button class="linkbtn" id="toMode">換一條路</button>
     </div>
   </section>
 
@@ -378,7 +436,7 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
     <div class="q" data-q="1">
       <div class="qcount"></div>
       <h2>想要什麼氣質？</h2>
-      <p class="lead">直覺選一個。這題影響最大，決定設計師往哪個方向走。</p>
+      <p class="lead">直覺選一個。這題影響最大，決定 UNDERTONE 往哪個方向走。</p>
       <div class="chips" id="dir"></div>
     </div>
     <div class="q" data-q="2">
@@ -390,7 +448,7 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
     <div class="q" data-q="3">
       <div class="qcount"></div>
       <h2>今天想穿什麼顏色？</h2>
-      <p class="lead">最多選兩組疊在一起，例如冷色加深色。不選就交給設計師。</p>
+      <p class="lead">最多選兩組疊在一起，例如冷色加深色。不選就交給 UNDERTONE。</p>
       <div id="famChips" class="famgrid"></div>
       <div class="block" id="famPrev" hidden><h3>這組配色</h3><div class="pal" id="famPal"></div>
         <div class="actions" style="margin-top:10px"><button class="btn ghost" id="famShuffle" type="button">換一組</button><button class="btn ghost" id="famOwn" type="button">自己挑</button></div>
@@ -410,7 +468,7 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
     </div>
     <div class="q" data-q="6">
       <div class="qcount"></div>
-      <h2>還有什麼想讓設計師知道？</h2>
+      <h2>還有什麼想讓 UNDERTONE 知道？</h2>
       <p class="lead">最近在意的事、今天發生的事、想要的一個小細節都可以。不寫也行。</p>
       <textarea id="note" placeholder="例如：最近很累，但想要有一點點亮的東西"></textarea>
     </div>
@@ -426,7 +484,13 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
 
   <section class="screen" data-step="4">
     <div class="split result"><div class="split-main">
-    <div id="stage"><div id="drawing" hidden>設計師正在畫今天的元素</div></div>
+    <div id="stage"><div id="drawing" hidden></div></div>
+    <div class="actions result-actions">
+      <button class="btn main" id="toTry">戴上手試試</button>
+      <button class="btn ghost" id="reroll">再生一組</button>
+      <button class="btn ghost" id="back3">回去調整</button>
+      <button class="btn ghost" id="restart">重新開始</button>
+    </div>
     </div><div class="split-side">
     <div class="block" id="reviseBox"><h3>想改哪裡？</h3><p class="stat">看著成品直接說，例如「無名指的雕花細一點」「拇指換成電路線」「整體再暗一點」。只會動你說的地方。</p>
       <textarea id="reviseIn" placeholder="例如：整體再暗一點" style="min-height:70px"></textarea>
@@ -434,12 +498,6 @@ details.tune>summary{cursor:pointer;padding:18px 0 4px;font-weight:500;color:var
       <div id="reviseOut"></div></div>
     <div class="note" id="saveBox"><span class="saved">存檔中…</span></div>
     <div class="note" id="recipe"></div>
-    <div class="actions">
-      <button class="btn main" id="toTry">戴上手試試</button>
-      <button class="btn ghost" id="reroll">同樣設定，再生一組</button>
-      <button class="btn ghost" id="back3">回去調整</button>
-      <button class="btn ghost" id="restart">重新開始</button>
-    </div>
     </div></div>
   </section>
 
@@ -562,7 +620,7 @@ const EL_3D=Object.keys(EL_NAME).filter(k=>k!=='script'&&k!=='dots');
 const FORMABLE=['gothcross','heart','star','sparkle','moon','cross','flower','leaf','butterfly','cloud','bow','drop'];
 const FORM_NAME={clear:'純透明',gummy:'軟糖',gel:'立體凝膠',metal:'金屬飾品',emboss:'同色浮雕',jelly:'透明果凍',paint:'平面彩繪',outline:'金屬勾邊',glitter:'亮粉'};
 const AES_FORMS={'法式':['jelly','metal'],'韓系':['gel','jelly','clear'],'日系':['paint','paint','clear','gummy'],'歐美':['metal','glitter','gel'],'美式復古':['gel','metal'],'芭蕾風':['gel','jelly'],'Clean girl':['clear','jelly'],'極簡':['outline','metal'],'Y2K':['glitter','metal','outline','gel'],'暗黑':['metal','gel'],'朋克':['metal','paint'],'黑金屬':['metal','outline'],'未來感':['metal','outline','jelly']};
-const FREEDOM=['照我說的','可以小改','讓設計師發揮'];
+const FREEDOM=['照我說的','可以小改','讓 UNDERTONE 發揮'];
 const DMOODS={'照常發揮':'照常發揮','想收斂':'今天想收斂一點','想玩色':'今天想多玩一點顏色','想加點立體':'今天想多加一點立體','想換個型態':'今天想換個做法'};
 const KIND={fleurcross:'big',spike:'mid',chromebubble:'big',safetypin:'big',gemstar:'big',gothcross:'big',bubbletxt:'big',ministar:'small',rose:'big',carve:'big',daisy:'big',flower:'big',butterfly:'big',cherry:'big',bow:'big',heart:'big',star:'big',cloud:'big',biggem:'big',cross:'big',
   leaf:'leaf',swirl:'mid',gelripple:'mid',bead:'small',chromesym:'big',chromeframe:'line',pearl:'small',stud:'small',stone:'small',sparkle:'small',bubble:'small',ripple:'line',drip:'line',chain:'line',moon:'big',drop:'small'};
@@ -1504,7 +1562,7 @@ chips('bAmt',AMT_KEYS,'bAmt','2','radio',AMT_LAB);
 function setMode(m){S.mode=m;document.body.classList.toggle('modeA',m==='A');document.body.classList.toggle('modeB',m==='B');
   S.imgType=m==='B'?'風格參考圖':'今天的穿搭';S.analysis=null;
   $('#s1title').textContent=m==='B'?'想要什麼？':'今天穿了什麼？';
-  $('#s1lead').textContent=m==='B'?'放 1 到 3 張參考圖，或直接寫下想要的元素。每張圖可以標出要參考哪些部分。':'拍一張穿搭，或上傳照片，設計師會從裡面挑出今天的顏色。沒有也可以先跳過。';
+  $('#s1lead').textContent=m==='B'?'放 1 到 3 張參考圖，或直接寫下想要的元素。每張圖可以標出要參考哪些部分。':'拍一張穿搭，或上傳照片，UNDERTONE 會從裡面挑出今天的顏色。沒有也可以先跳過。';
   renderImgs();renderAiBox();go(1);}
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 $('#toMode').onclick=()=>{S.maxStep=0;go(0);};
@@ -1676,6 +1734,8 @@ const AI_ERR={no_api_key:'settings.txt 裡還沒填 API 金鑰',bad_api_key:'API
   daily_limit:'今天的呼叫次數用完了，可以在 settings.txt 調高 DAILY_AI_LIMIT',rate_limited:'Claude 那邊太忙或額度用完，等一下再試',
   api_error:'Claude 那邊出錯，等一下再試',network:'連不上 Claude，檢查網路',refused:'Claude 不處理這組圖',
   too_long:'回覆太長被截斷',bad_json:'回覆格式不對',bad_request:'請求被 Claude 退回，黑色視窗裡有詳細原因',too_large:'圖片太大'};
+// 等待畫面：字標一個字母一個字母跳動
+function loader(msg){return `<div class="loader" role="status"><div class="bounce" aria-hidden="true">${[...'UNDERTONE'].map((ch,i)=>`<span style="animation-delay:${i*.09}s">${ch}</span>`).join('')}</div><p>${esc(msg)}</p></div>`;}
 function renderAiBox(){
   const box=$('#aiBox'),dw=$('#descWrap');
   if(!S.imgs.length){
@@ -1791,7 +1851,7 @@ showQ(0);
 $('#qBack').onclick=()=>S.q===0?go(1):showQ(S.q-1);
 $('#qNext').onclick=()=>S.q<QN-1?showQ(S.q+1):startRec();
 const FAMS={
-  none:{n:'交給設計師',h:[],s:[0,0],l:[0,0]},
+  none:{n:'交給 UNDERTONE',h:[],s:[0,0],l:[0,0]},
   muted:{n:'低飽和霧色',h:[255,215,30,140,330],s:[.08,.24],l:[.5,.88]},
   pastel:{n:'粉嫩',h:[345,10,25,300,190],s:[.45,.75],l:[.8,.93]},
   nude:{n:'裸膚色',h:[18,28,12,35],s:[.2,.45],l:[.6,.9]},
@@ -1899,7 +1959,7 @@ function ruleRec(A){
 }
 async function startRec(){
   go(3);const body=$('#recBody');
-  body.innerHTML='<p class="loading">設計師正在讀你的回答，挑風格和配色</p>';
+  body.innerHTML=loader('UNDERTONE 正在讀你的回答，挑風格和配色');
   const A=answers();const base=ruleRec(A);let rec=base;
   if(SAMPLE){
     const info={指定色系:A.colorFam&&A.colorFam.length?A.colorFam.map(k=>FAMS[k].n).join('＋'):null,指定配色:A.colorPal&&A.colorPal.length?A.colorPal:null,照片:S.imgs.length?`${S.imgs.length} 張${S.imgType}（${S.imgs.map((x,i)=>`第${i+1}張參考${roleTxtOf(x)}`).join('、')}）`:'沒有提供',照片解析:S.analysis?S.analysis.summary:null,照片顏色:(S.analysis&&S.analysis.colors.length?S.analysis.colors:S.localColors),心情:A.mood,強烈程度:A.intensity,想走的方向:A.dir,喜歡的感覺:A.feel,想要多繁複:AMOUNTS[A.amount]+'（'+AMOUNT_DESC[A.amount]+'）',偏好:FOCUS[A.focus],其他想說的:A.note||null,參考圖描述:$('#imgDesc').value.trim()||null,照片裡看得到的東西:S.analysis?[...S.analysis.elements.map(k=>EL_NAME[k]),...(S.analysis.others||[])]:null};
@@ -1951,7 +2011,7 @@ function renderRec(){
   const rec3=r.els,others=Object.keys(EL_NAME).filter(k=>!rec3.includes(k)&&!k.startsWith('u'));
   const lab=(obj,pick,fmt)=>Object.fromEntries(Object.entries(obj).map(([k,v])=>[k,k===pick?fmt(v)+'（推薦）':fmt(v)]));
   body.innerHTML=`
-    <h2>設計師的提案</h2>
+    <h2>UNDERTONE 的提案</h2>
     ${r.fallback?`<p class="note quiet">${r.fallback}</p>`:''}
     ${S.img&&!S.analysis?'<p class="note">⚠ 這次沒有讀到參考圖，只用了照片的顏色，推薦可能跟圖差很多。可以回第 1 步重新解析。</p>':''}
     <div class="pitch">
@@ -1967,7 +2027,6 @@ function renderRec(){
     ${KB_USED.size?`<p class="stat" style="margin:4px 0 0">這次送給 Claude 的後台：${esc([...KB_USED].join('｜'))}</p>`:''}
     ${r.palFrom?`<p class="stat" style="margin:8px 0 0">配色照${esc(r.palFrom)}${r.palWarn?'｜'+esc(r.palWarn):''}</p>`:''}
     <p class="stat" style="margin:8px 0 0">${KB?`依據：${esc(((r.basis&&r.basis.length)?r.basis:['後台・'+kbName(c.aes)]).join('、'))}${r.newTry&&r.newTry.length?`｜<b>新嘗試（後台沒有）</b>：${esc(r.newTry.join('、'))}`:''}`:'後台資料讀取中…'}</p>
-    <div class="actions pitch-go"><button class="btn main" id="toGen">就這樣，生成</button><button class="btn ghost" id="back2">回去改答案</button></div>
     <details class="tune" id="tune" ${TUNE_OPEN?'open':''}><summary>想自己調整細節</summary><div class="tune-body">
     <div class="block" data-mb-hide><h3>風格</h3><div id="cAes"></div></div>
     <div class="block" id="y2kWrap" ${c.aes==='Y2K'?'':'hidden'}><h3>Y2K 方向</h3><p class="stat">${esc(Y2KV[c.y2k||'spicy'].desc)}（依據 ${Y2KV[c.y2k||'spicy'].ref}）。換方向會一起換配色、元素和甲型。</p><div class="chips" id="cY2k"></div></div>
@@ -1980,17 +2039,19 @@ function renderRec(){
       <details class="more"><summary>加更多元素</summary><div id="cMore"></div></details>
       <div class="block" style="margin-top:14px"><h3>清單裡沒有？自己寫</h3><p class="stat">例如：草莓、小貓、貝殼、緞帶。會請 Claude 畫成指甲上的小飾品。</p>
         <div style="display:flex;gap:8px"><input id="cusIn" type="text" maxlength="20" placeholder="想加什麼？" style="flex:1;font:inherit;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:10px 12px">
-        <button class="btn ghost" id="cusBtn" style="padding:10px 14px">加入</button></div><div class="chips" id="cusForm" style="margin-top:8px"></div><div class="cuslist" id="cusList"></div><p class="stat" id="cusMsg" style="margin-top:8px"></p>${S.analysis&&S.analysis.others&&S.analysis.others.length?`<p class="stat" style="margin:10px 0 6px">照片裡還看到這些，點一下請設計師畫成元素：</p><div class="chips">${S.analysis.others.map(n=>`<button type="button" class="linkbtn" data-other="${esc(n)}">${esc(n)}</button>`).join('')}</div>`:''}</div></div>
+        <button class="btn ghost" id="cusBtn" style="padding:10px 14px">加入</button></div><div class="chips" id="cusForm" style="margin-top:8px"></div><div class="cuslist" id="cusList"></div><p class="stat" id="cusMsg" style="margin-top:8px"></p>${S.analysis&&S.analysis.others&&S.analysis.others.length?`<p class="stat" style="margin:10px 0 6px">照片裡還看到這些，點一下請 UNDERTONE 畫成元素：</p><div class="chips">${S.analysis.others.map(n=>`<button type="button" class="linkbtn" data-other="${esc(n)}">${esc(n)}</button>`).join('')}</div>`:''}</div></div>
     <div class="block" data-mb-hide><h3>畫在甲面上的圖案</h3><p class="stat">標「推薦」的是依你今天的狀態選的。</p><div class="chips" id="cIll"></div>
       <details class="more"><summary>更多圖案</summary><div id="cIllMore"></div></details></div>
     <div class="block"><h3>飾品和圖案的比重</h3><div class="chips" id="cFocus"></div></div>
-    <div class="block"><h3>裝飾的做法</h3><p class="stat">同一個愛心可以是凝膠、金屬、浮雕或平面。不選就交給設計師。</p><div class="chips" id="cForm"></div></div>
-    <div class="block"><h3>元素怎麼畫</h3><p class="stat">素材庫是固定的樣式；即時手繪會請設計師依今天的狀態重新畫，每次都不一樣，但要多等十幾秒。</p><div class="chips" id="cLive"></div></div>
+    <div class="block"><h3>裝飾的做法</h3><p class="stat">同一個愛心可以是凝膠、金屬、浮雕或平面。不選就交給 UNDERTONE。</p><div class="chips" id="cForm"></div></div>
+    <div class="block"><h3>元素怎麼畫</h3><p class="stat">素材庫是固定的樣式；即時手繪會請 UNDERTONE 依今天的狀態重新畫，每次都不一樣，但要多等十幾秒。</p><div class="chips" id="cLive"></div></div>
     <div class="block"><h3>甲型</h3><div class="chips" id="cShape"></div></div>
     <div class="block"><h3>裝飾最多的那根</h3><div class="chips" id="cAcc"></div></div>
     <div class="block"><h3>顏色</h3><div class="pal" id="cPal"></div></div>
-    <div class="block"><h3>留給設計師多少空間？</h3><p class="stat">設計師也有自己的想法，可能會加、減或換掉一些東西。</p><div class="chips" id="cFree"></div></div>
-    </div></details>`;
+    <div class="block"><h3>留給 UNDERTONE 多少空間？</h3><p class="stat">UNDERTONE 也有自己的想法，可能會加、減或換掉一些東西。</p><div class="chips" id="cFree"></div></div>
+    </div></details>
+    <div class="actions pitch-go"><button class="btn main" id="toGen">生成</button><button class="btn ghost" id="back2">回去改答案</button></div>
+`;
   $('#tune').addEventListener('toggle',e=>{TUNE_OPEN=e.target.open;});
   {const groups={};Object.keys(AES).forEach(k=>{const g=AES[k].group||'照片風格';(groups[g]=groups[g]||[]).push(k);});
    $('#cAes').innerHTML=Object.entries(groups).map(([g,ks])=>`<div class="cat"><h4>${esc(g)}</h4><div class="chips">${ks.map(k=>`<label><input type="radio" name="cAes" value="${esc(k)}" ${k===c.aes?'checked':''}><span>${esc(k)}${k===r.aes?'（推薦）':''}</span></label>`).join('')}</div></div>`).join('');}
@@ -2008,7 +2069,7 @@ function renderRec(){
   $('#cIllMore').innerHTML=Object.entries(ILLUS_CAT).map(([cat,ks])=>{const list=ks.filter(k=>!r.illus.includes(k));if(!list.length)return '';
     return `<div class="cat"><h4>${cat}</h4><div class="chips">${list.map(k=>`<label><input type="checkbox" name="cIll" value="${k}" ${c.illus.includes(k)?'checked':''}><span>${ILLUS_NAME[k]}</span></label>`).join('')}</div></div>`;}).join('');
   chips('cFree',['0','1','2'],'cFree',String(c.freedom),'radio',{0:FREEDOM[0],1:FREEDOM[1],2:FREEDOM[2]});
-  chips('cLive',['live','lib'],'cLive',(c.live??!!SAMPLE)?'live':'lib','radio',{live:'設計師即時手繪',lib:'素材庫'});
+  chips('cLive',['live','lib'],'cLive',(c.live??!!SAMPLE)?'live':'lib','radio',{live:'UNDERTONE 即時手繪',lib:'素材庫'});
   chips('cShape',Object.keys(SHAPE_NAME),'cShape',c.shape,'radio',lab(SHAPE_NAME,r.shape,v=>v));
   chips('cAcc',['0','1','2','3','4'],'cAcc',String(c.accent),'radio',lab(Object.fromEntries(FINGERS.map((f,i)=>[String(i),f.n])),String(r.accent),v=>v));
   $('#cEls').innerHTML=rec3.map(k=>`<label class="el rec"><input type="checkbox" name="cEls" value="${k}" ${c.els.includes(k)?'checked':''}><span><b>${esc(elLabel(k))}${elSwatch(k)}</b><small>${esc(r.why[k]||EL_WHY[k])}</small></span></label>`).join('');
@@ -2625,20 +2686,20 @@ async function build(){
   const inTheme=n=>{if(!isSp)return false;const tx=a.special.themes.map(t=>String(t.name||'')+String(t.surface||'')+String(t.sculpt||'')).join('|');for(let i=0;i<n.length-1;i++)if(tx.includes(n.slice(i,i+2)))return true;return false;};
   const extras=isSp&&S.analysis?(S.analysis.others||[]).filter(n=>!PATW.test(n)&&!inTheme(n)&&!Object.values(CUSTOM).some(x=>x.name===n)).slice(0,2):[];
   if(SAMPLE&&(keys.length||extras.length||isSp)){
-    $('#drawing').textContent=isSp?`設計師正在畫「${a.special.name}」的甲面和雕塑…（約 20～40 秒）`:'設計師正在畫今天的元素…';
+    $('#drawing').innerHTML=loader(isSp?`UNDERTONE 正在畫「${a.special.name}」的甲面和雕塑（約 20～40 秒）`:'UNDERTONE 正在畫今天的元素');
     $('#drawing').hidden=false;$('#reroll').disabled=true;
     const res=await Promise.allSettled([keys.length||extras.length?drawElements(keys,extras):Promise.resolve(),isSp?drawSurfaces():Promise.resolve(),isSp?drawSculpts():Promise.resolve()]);
     if(tk!==BUILD_TK)return;$('#drawing').hidden=true;$('#reroll').disabled=false;
     const denied=res.some(r=>r.status==='rejected'&&r.reason&&r.reason.code==='not_granted');
     if(denied)LIVE_NOTE='沒有開放使用 Claude，改用素材庫的樣式。';
-    else{const miss=[];if((keys.length||extras.length)&&!Object.keys(LIVE).length)miss.push('元素');if(isSp&&a.special.themes.some(t=>t.surface)&&!TH_SURF.some(Boolean))miss.push('甲面');if(isSp&&a.special.themes.some(t=>t.sculpt)&&!TH_SCULPT.some(Boolean))miss.push('雕塑');if(miss.length)LIVE_NOTE=`這次設計師沒畫好${miss.join('和')}，先用素材庫的樣式代替。`;}
+    else{const miss=[];if((keys.length||extras.length)&&!Object.keys(LIVE).length)miss.push('元素');if(isSp&&a.special.themes.some(t=>t.surface)&&!TH_SURF.some(Boolean))miss.push('甲面');if(isSp&&a.special.themes.some(t=>t.sculpt)&&!TH_SCULPT.some(Boolean))miss.push('雕塑');if(miss.length)LIVE_NOTE=`這次 UNDERTONE 沒畫好${miss.join('和')}，先用素材庫的樣式代替。`;}
   }
   HIST=[];if($('#reviseOut'))$('#reviseOut').innerHTML='';
   if(isSp)registerThemeMotifs(a.special.themes);
   if(S.plan)S.plan.fingers.forEach(f=>f.tex.remove());
   S.plan=plan();renderRecipe();
   const lk=Object.keys(LIVE),drew=[...lk.map(k=>EL_NAME[k]),...(TH_SURF.some(Boolean)?['甲面圖樣']:[]),...(TH_SCULPT.some(Boolean)?['金屬雕塑']:[])];
-  if(drew.length||LIVE_NOTE)$('#recipe').insertAdjacentHTML('afterbegin',`<p class="note quiet" style="margin-top:0">${drew.length?'這次由設計師即時手繪：'+drew.join('、')+'。':''}${LIVE_NOTE}</p>`);
+  if(drew.length||LIVE_NOTE)$('#recipe').insertAdjacentHTML('afterbegin',`<p class="note quiet" style="margin-top:0">${drew.length?'這次由 UNDERTONE 即時手繪：'+drew.join('、')+'。':''}${LIVE_NOTE}</p>`);
   queueSave();
 }
 function hex(c){return '#'+[red(c),green(c),blue(c)].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');}
@@ -2651,7 +2712,7 @@ function renderRecipe(){
   const inputs=S.mode==='B'?[`模式 B：${S.imgs.length} 張參考圖${$('#imgDesc').value.trim()?'＋文字描述':''}`]:['模式 A',S.img?`照片（${S.analysis?'Claude 解析':'只抓顏色'}）`:'沒有照片',`回答 ${[A.mood,A.dir,A.feel.length?1:0,1,A.note].filter(Boolean).length} 題`];
   $('#recipe').innerHTML=`<h2 style="font-size:20px">這一組怎麼來的</h2>
     <p class="stat">你給了：${inputs.join('、')}<br>推薦來自：${S.rec.by}<br>推薦 ${n.total} 項，你改了 ${n.changed} 項${n.added?`，另外自己加了 ${n.added} 個元素或圖案`:''}<br>${c.aes}／${SHAPE_NAME[c.shape]}／${LEN_NAME[c.len]}／第 ${S.reroll+1} 版</p>
-    <div class="note quiet" style="margin:4px 0 12px">${p.fr===0?'設計師照你說的做，沒有自己改。':`設計師${DMOODS[p.dmood]}${p.changes.length?'：<br>'+p.changes.join('<br>'):'，這次沒有特別改動。'}`}</div>
+    <div class="note quiet" style="margin:4px 0 12px">${p.fr===0?'UNDERTONE 照你說的做，沒有自己改。':`UNDERTONE ${DMOODS[p.dmood]}${p.changes.length?'：<br>'+p.changes.join('<br>'):'，這次沒有特別改動。'}`}</div>
     <ol>${items}</ol>${p.unplaced&&p.unplaced.length?`<p class="note quiet">這次沒有位置放上：${p.unplaced.map(esc).join('、')}。可以用第 5 步指定要放在哪根手指。</p>`:''}`;
 }
 $('#reroll').onclick=()=>{S.reroll++;build().catch(err=>{console.error(err);$('#recipe').textContent='生成時出錯了：'+(err&&err.message||err);});};
@@ -2908,7 +2969,7 @@ async function loadLog(){
       ${d.detail?`${d.detail.user&&d.detail.user.length?`<p style="margin-top:10px"><b>你做了什麼</b></p><ul class="maplist">${d.detail.user.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
         ${d.detail.sys&&d.detail.sys.length?`<p style="margin-top:10px"><b>系統做了什麼</b></p><ul class="maplist">${d.detail.sys.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
         ${d.detail.fingers?`<p style="margin-top:10px"><b>每根指甲</b></p><ul class="maplist">${d.detail.fingers.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}`
-      :`<p>設計師：${g.freedom===0?'照單全收':esc((g.mood||'')+(g.changes&&g.changes.length?'：'+g.changes.join('；'):''))}</p>`}
+      :`<p>UNDERTONE：${g.freedom===0?'照單全收':esc((g.mood||'')+(g.changes&&g.changes.length?'：'+g.changes.join('；'):''))}</p>`}
       ${d.revise&&d.revise.text?`<p style="margin-top:10px"><b>這次用說的修改</b>：「${esc(d.revise.text)}」</p>${(d.revise.mapping||[]).length?`<ul class="maplist">${d.revise.mapping.map(m=>`<li>${esc(m.to||((m.from?'「'+m.from+'」→ ':'')+(m.to||'')))}</li>`).join('')}</ul>`:''}${(d.revise.cannot||[]).length?`<p class="meta">沒做到：${d.revise.cannot.map(esc).join('；')}</p>`:''}`:''}
       <div class="rlabel">整體喜歡程度</div>${rateHtml('like',d.like)}
       <div class="rlabel">像不像你想要的樣子</div>${rateHtml('match',d.match)}
@@ -3119,6 +3180,7 @@ function sheet(html){
 }
 const resetToHome=()=>location.reload();
 $('#startBtn').onclick=()=>go(0);
+$('#scrollCue').onclick=()=>$('#homeMore').scrollIntoView({behavior:'smooth'});
 $('#homeLog').onclick=()=>openLog();
 $('#homeBtn').onclick=()=>{
   if(S.step==='home')return;
@@ -3183,6 +3245,34 @@ $('#camBtn').onclick=async()=>{
     const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);
     c.toBlob(b=>{stop();if(b)takeFile(new File([b],`camera-${Date.now()}.jpg`,{type:'image/jpeg'}));},'image/jpeg',.92);
   };
+};
+
+// 第 1 步：手機掃 QR code 傳照片（展覽時觀眾沒辦法用電腦的檔案）。手機要和電腦連同一個 Wi-Fi。
+let PHONE=null;
+(async()=>{try{if(window.claude&&claude.use&&window.qrcode){PHONE=await claude.use('phone');$('#phoneBtn').hidden=false;}}catch(e){PHONE=null;}})();
+function qrSvg(text){const q=qrcode(0,'M');q.addData(text);q.make();return q.createSvgTag({cellSize:6,margin:2,scalable:true});}
+$('#phoneBtn').onclick=async()=>{
+  if(!PHONE)return;
+  if(S.imgs.length>=3){$('#phoneBtn').textContent='已經有 3 張了';return;}
+  const d=sheet(`<h3>用手機傳照片</h3><p class="stat">手機連上和這台電腦一樣的 Wi-Fi，用相機掃下面的 QR code，選照片傳上來。</p>
+    <div class="qr-row"><div class="qr" id="qrWifi" hidden></div><div class="qr" id="qrUp"><p class="stat">準備中…</p></div></div>
+    <p class="stat phone-msg" role="status"></p>
+    <div class="actions"><button class="btn ghost" data-k="close">關閉</button></div>`);
+  const msg=d.el.querySelector('.phone-msg'),closeBtn=d.el.querySelector('[data-k="close"]');let ses=null,timer=null,got=0,done=false;
+  const stop=()=>{done=true;clearInterval(timer);if(ses)PHONE.stop(ses.token);d.close();};
+  d.el.querySelector('[data-k="close"]').onclick=stop;
+  try{ses=await PHONE.start();}catch(e){d.el.querySelector('#qrUp').innerHTML='';msg.textContent=e.code==='no_lan'?'這台電腦沒有連上 Wi-Fi 或區網，沒辦法用手機傳。可以改用「用鏡頭拍一張」。':'手機上傳現在不能用。';return;}
+  if(done){PHONE.stop(ses.token);return;}
+  d.el.querySelector('#qrUp').innerHTML=qrSvg(ses.url)+`<p class="stat">${ses.wifi?'再掃這個傳照片':'掃這個傳照片'}</p>`;
+  if(ses.wifi){const w=d.el.querySelector('#qrWifi'),esc2=v=>String(v).replace(/([\\;,:"])/g,'\\$1');w.hidden=false;
+    w.innerHTML=qrSvg(`WIFI:T:${ses.wifi.pass?'WPA':'nopass'};S:${esc2(ses.wifi.ssid)};${ses.wifi.pass?`P:${esc2(ses.wifi.pass)};`:''};`)+`<p class="stat">先掃這個連 Wi-Fi（${esc(ses.wifi.ssid)}）</p>`;}
+  timer=setInterval(async()=>{
+    try{const items=await PHONE.list(ses.token);
+      for(;got<items.length&&S.imgs.length<3;got++){takeFile(await PHONE.file(ses.token,got));}
+      if(got){msg.textContent=`收到 ${got} 張了${S.imgs.length>=3?'，已經滿 3 張':''}。`;closeBtn.textContent='完成';closeBtn.className='btn main';}
+      if(S.imgs.length>=3||got>=(ses.max||3))setTimeout(stop,1200);
+    }catch(e){if(e.code==='expired'){msg.textContent='QR code 過期了，關掉再按一次「用手機上傳」。';clearInterval(timer);}}
+  },1500);
 };
 
 /* ---------- p5 ---------- */

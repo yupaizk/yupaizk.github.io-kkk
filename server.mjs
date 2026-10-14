@@ -1,12 +1,14 @@
 // Undertone 本機伺服器：在自己的電腦上跑生成器。
 // 送出 public/ 的網頁，並提供 claude-shim.js 用的 API：呼叫 Claude、存測試紀錄和圖片。
-// 資料存在 data/ 資料夾；API 金鑰讀 settings.txt。只接受本機連線。
+// 資料存在 data/ 資料夾；API 金鑰讀 settings.txt。生成器只接受本機連線；
+// 另外開一個手機上傳用的小伺服器（同一個 Wi-Fi 的手機掃 QR code 傳照片），只收照片、不給看任何資料。
 import http from "node:http";
 import { readFile, writeFile, mkdir, readdir, rm, copyFile, rename, stat } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { exec, spawn } from "node:child_process";
 import path from "node:path";
+import os from "node:os";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -42,6 +44,10 @@ const DAILY_LIMIT = parseInt(settings.DAILY_AI_LIMIT || "300", 10);
 // 展覽安全碼：展覽時打開測試紀錄、離開展覽模式都要輸入
 const EXPO_PIN = (settings.EXPO_PIN || "").trim();
 const KIOSK = process.argv.includes("--kiosk");
+// 手機上傳：用哪個埠、電腦的區網位址（不填就自動找）、要不要在 QR 旁邊放 Wi-Fi 的 QR
+const PHONE_PORT = parseInt(settings.PHONE_PORT || "8788", 10);
+const PHONE_HOST = (settings.PHONE_HOST || "").trim();
+const PHONE_WIFI = settings.PHONE_WIFI_SSID ? { ssid: settings.PHONE_WIFI_SSID, pass: settings.PHONE_WIFI_PASS || "" } : null;
 // ANTHROPIC_BASE_URL 只在測試時接假的 API 用。
 const client = API_KEY ? new Anthropic({ apiKey: API_KEY, baseURL: settings.ANTHROPIC_BASE_URL || undefined }) : null;
 
@@ -62,10 +68,13 @@ const server = http.createServer(async (req, res) => {
 
 async function api(req, res, p, url) {
   const method = req.method;
+  let m0;
   if (p === "/api/me") return json(res, { ok: true });
   if (p === "/api/limits") return json(res, { images: true, maxImages: MAX_IMAGES });
   if (p === "/api/ai" && method === "POST") return ai(req, res);
   if (p === "/api/unlock" && method === "POST") return unlock(req, res);
+  if (p === "/api/phone" && method === "POST") return phoneStart(res);
+  if ((m0 = p.match(/^\/api\/phone\/([0-9a-f]{32})(?:\/(\d+))?$/))) return phoneRoute(req, res, m0[1], m0[2]);
 
   let m;
   if (p === "/api/blob" && method === "POST") return putBlob(req, res, randomBytes(16).toString("hex"));
@@ -144,6 +153,84 @@ async function unlock(req, res) {
   await new Promise(r => setTimeout(r, 1500));
   return json(res, { error: "wrong_pin" }, 403);
 }
+
+/* ---------- 手機上傳 ---------- */
+// 生成器按「用手機上傳」→ 開一個 20 分鐘有效的上傳碼，QR code 指到 http://電腦區網位址:8788/u/上傳碼。
+// 手機傳上來的照片先放 data/phone/<上傳碼>/，生成器每隔一下來拿，拿到後和本機上傳的照片一樣處理。
+const PHONE_DIR = path.join(DATA, "phone");
+const PHONE_TTL = 20 * 60 * 1000, PHONE_MAX = 3, PHONE_MAX_BYTES = 15 * 1024 * 1024;
+const phoneSessions = new Map();
+
+function lanAddress() {
+  if (PHONE_HOST) return PHONE_HOST;
+  const found = [];
+  for (const [name, list] of Object.entries(os.networkInterfaces())) {
+    if (/vethernet|vmware|virtualbox|hyper-v|wsl|loopback|docker|tailscale|zerotier/i.test(name)) continue;
+    for (const a of list || []) {
+      if (a.family !== "IPv4" || a.internal || a.address.startsWith("169.254.")) continue;
+      const rank = a.address.startsWith("192.168.") ? 0 : a.address.startsWith("10.") ? 1 : /^172\.(1[6-9]|2\d|3[01])\./.test(a.address) ? 2 : 3;
+      found.push([rank, a.address]);
+    }
+  }
+  found.sort((x, y) => x[0] - y[0]);
+  return found.length ? found[0][1] : null;
+}
+
+function phoneStart(res) {
+  const host = lanAddress();
+  if (!host || !phoneServerUp) return json(res, { error: "no_lan" }, 503);
+  const token = randomBytes(16).toString("hex");
+  phoneSessions.set(token, { created: Date.now(), items: [] });
+  json(res, { token, url: `http://${host}:${PHONE_PORT}/u/${token}`, wifi: PHONE_WIFI, max: PHONE_MAX });
+}
+
+async function phoneRoute(req, res, token, n) {
+  const ses = phoneSessions.get(token);
+  if (req.method === "DELETE") { phoneSessions.delete(token); await rm(path.join(PHONE_DIR, token), { recursive: true, force: true }); return json(res, { ok: true }); }
+  if (!ses) return json(res, { error: "expired" }, 404);
+  if (n === undefined) return json(res, { items: ses.items.map((it, i) => ({ n: i, type: it.type })) });
+  const it = ses.items[+n];
+  if (!it) return notFound(res);
+  res.writeHead(200, { "Content-Type": it.type, "Cache-Control": "no-store" });
+  res.end(await readFile(it.file));
+}
+
+// 過期的上傳碼和照片定時清掉
+setInterval(() => {
+  const now = Date.now();
+  for (const [t, ses] of phoneSessions) if (now - ses.created > PHONE_TTL) { phoneSessions.delete(t); rm(path.join(PHONE_DIR, t), { recursive: true, force: true }).catch(() => {}); }
+}, 60 * 1000).unref();
+
+// 區網上的手機只能用這個伺服器：打開上傳頁、送照片，其他一律 404
+let phoneServerUp = false;
+const PHONE_PAGE = path.join(ROOT, "phone", "upload.html");
+const phoneServer = http.createServer(async (req, res) => {
+  try {
+    const m = new URL(req.url, "http://x").pathname.match(/^\/u\/([0-9a-f]{32})$/);
+    const ses = m && phoneSessions.get(m[1]);
+    if (!m) return notFound(res);
+    if (req.method === "GET") {
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+      return res.end(await readFile(PHONE_PAGE));
+    }
+    if (req.method !== "POST") return notFound(res);
+    if (!ses || Date.now() - ses.created > PHONE_TTL) return json(res, { error: "expired" }, 410);
+    if (ses.items.length >= PHONE_MAX) return json(res, { error: "full" }, 409);
+    const type = (req.headers["content-type"] || "").split(";")[0];
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(type)) return json(res, { error: "bad_type" }, 415);
+    const body = await readBody(req);
+    if (!body.length || body.length > PHONE_MAX_BYTES) return json(res, { error: "too_large" }, 413);
+    await mkdir(path.join(PHONE_DIR, m[1]), { recursive: true });
+    const file = path.join(PHONE_DIR, m[1], `${ses.items.length}.${type.split("/")[1]}`);
+    await writeFile(file, body);
+    ses.items.push({ type, file });
+    json(res, { ok: true, count: ses.items.length, max: PHONE_MAX });
+  } catch (e) {
+    console.error("手機上傳：", e.message);
+    if (!res.headersSent) json(res, { error: "server_error" }, 500);
+  }
+});
+phoneServer.on("error", e => console.log(`手機上傳沒有開成（${e.code}），用手機傳照片的功能不能用。`));
 
 // 回覆應該只有一個 JSON；容許前後多了說明文字或 ``` 圍起來。
 function parseJson(text) {
@@ -354,6 +441,12 @@ server.listen(PORT, "127.0.0.1", () => {
       ? `✗ API 金鑰不對或已失效（開頭 ${API_KEY.slice(0, 10)}…，共 ${API_KEY.length} 個字）。到 https://console.anthropic.com/settings/keys 重新建立一把，貼進 settings.txt 後重新啟動。`
       : e instanceof Anthropic.NotFoundError ? `✗ 找不到模型 ${MODEL}，檢查 settings.txt 的 CLAUDE_MODEL。`
       : `✗ 檢查金鑰時出錯：${e.message}`));
+  rm(PHONE_DIR, { recursive: true, force: true }).catch(() => {});
+  phoneServer.listen(PHONE_PORT, "0.0.0.0", () => {
+    phoneServerUp = true;
+    const host = lanAddress();
+    console.log(host ? `手機上傳：同一個 Wi-Fi 的手機掃生成器上的 QR code 就能傳照片（${host}:${PHONE_PORT}）。Windows 問要不要允許時，勾「私人網路」。` : "手機上傳：這台電腦沒有連上 Wi-Fi 或區網，用手機傳照片的功能暫時不能用。");
+  });
   console.log("要關掉時，直接關這個視窗。\n");
 });
 

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UNDERTONE 傳照片</title>
+<style>
+  :root{--bg:#EDEDED;--panel:#F7F7F7;--ink:#161616;--soft:#6E6E6E;--line:#CDCDCD}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Google Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  main{max-width:520px;margin:0 auto;padding:40px 20px calc(40px + env(safe-area-inset-bottom))}
+  .mark{font-size:22px;letter-spacing:.34em;font-weight:500;margin:0 0 36px}
+  h1{font-size:26px;font-weight:500;margin:0 0 8px}
+  p{color:var(--soft);line-height:1.6;margin:0 0 24px}
+  label.pick{display:flex;align-items:center;justify-content:center;width:100%;min-height:64px;border-radius:16px;background:var(--ink);color:#fff;font-size:18px;font-weight:500;cursor:pointer}
+  label.pick input{display:none}
+  label.pick[aria-disabled="true"]{opacity:.4;pointer-events:none}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:20px}
+  .grid figure{margin:0;position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--panel);border:1px solid var(--line)}
+  .grid img{width:100%;height:100%;object-fit:cover;display:block}
+  .grid figcaption{position:absolute;inset:auto 0 0 0;padding:4px 6px;font-size:12px;color:#fff;background:rgba(22,22,22,.6);text-align:center}
+  #msg{margin-top:20px;font-size:15px;color:var(--ink);min-height:1.5em}
+</style>
+</head>
+<body>
+<main>
+  <p class="mark">UNDERTONE</p>
+  <h1>傳照片到展場的電腦</h1>
+  <p>選穿搭、喜歡的圖，或直接拍一張。最多 3 張，傳完回到電腦前面就會看到。</p>
+  <label class="pick" id="pick"><input type="file" id="file" accept="image/*" multiple>選照片或拍照</label>
+  <div class="grid" id="grid"></div>
+  <p id="msg" role="status"></p>
+</main>
+<script>
+// 手機上的照片先縮小（長邊 2000px、JPEG）再傳，傳得快，電腦也只需要這麼大。
+const MAX = 3, $ = s => document.querySelector(s);
+let sent = 0;
+async function shrink(file) {
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const k = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    return await new Promise(r => c.toBlob(r, 'image/jpeg', .88));
+  } catch (e) {
+    return /^image\/(jpeg|png|webp|gif)$/.test(file.type) ? file : null;
+  }
+}
+function show(blob, label) {
+  const f = document.createElement('figure');
+  f.innerHTML = `<img alt=""><figcaption>${label}</figcaption>`;
+  f.querySelector('img').src = URL.createObjectURL(blob);
+  $('#grid').appendChild(f);
+  return f.querySelector('figcaption');
+}
+$('#file').addEventListener('change', async e => {
+  const files = [...e.target.files].slice(0, MAX - sent);
+  e.target.value = '';
+  for (const file of files) {
+    const blob = await shrink(file);
+    if (!blob) { $('#msg').textContent = '這張照片的格式讀不出來，換一張試試。'; continue; }
+    const cap = show(blob, '傳送中…');
+    try {
+      const r = await fetch(location.pathname, { method: 'POST', headers: { 'Content-Type': blob.type || 'image/jpeg' }, body: blob });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || r.status);
+      sent = j.count; cap.textContent = '已傳到電腦';
+    } catch (err) {
+      cap.textContent = '沒傳成功';
+      $('#msg').textContent = String(err.message) === 'expired' ? '這個 QR code 過期了，請在電腦上重新按「用手機上傳」。'
+        : String(err.message) === 'full' ? '已經傳滿 3 張了。' : '沒有傳成功，確認手機和電腦連在同一個 Wi-Fi 再試一次。';
+    }
+  }
+  if (sent >= MAX) { $('#pick').setAttribute('aria-disabled', 'true'); $('#msg').textContent = '傳好了，回到電腦前面繼續。'; }
+  else if (sent) $('#msg').textContent = `已傳 ${sent} 張，還可以再傳 ${MAX - sent} 張。`;
+});
+</script>
+</body>
+</html>
