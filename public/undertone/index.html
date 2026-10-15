@@ -2466,6 +2466,16 @@ function drawSculpt(f,g){
       c.save();c.translate(-1.6,-2.2);c.fillStyle='rgba(255,255,255,.6)';c.fill(sc.hi);c.restore();
       c.fillStyle='rgba(255,255,255,.9)';sc.blobs.filter(b=>b[2]>=sc.bigR).slice(0,4).forEach(([x,y,r])=>{c.beginPath();c.ellipse(x-r*.3,y-r*.4,r*.3,r*.1,-.7,0,TAU);c.fill();});
       c.restore();return;}
+    if(mat==='metal'){
+      // 鏡面鉻：深色邊、帶白色反光條的金屬本體（右下留一圈暗邊做出圓管厚度）、一道銳利的白色高光
+      const deep=mixHex(m[2],'#000000',.62),body=c.createLinearGradient(0,0,100,200);
+      [[0,'#FFFFFF'],[.1,m[1]],[.2,deep],[.29,m[1]],[.4,'#FFFFFF'],[.48,m[0]],[.57,m[2]],[.67,deep],[.77,m[1]],[.88,'#FFFFFF'],[1,m[1]]].forEach(([o,col])=>body.addColorStop(o,col));
+      const all=(fill,dx,dy)=>{c.save();c.translate(dx,dy);c.fillStyle=fill;c.strokeStyle=fill;c.fill(fill===deep?sc.full:sc.mid);sc.strokes.forEach(st=>{c.lineWidth=st.w*(fill===deep?1:.8);c.stroke(st.p);});c.restore();};
+      c.globalAlpha=1;
+      c.save();c.shadowColor='rgba(0,0,0,.42)';c.shadowBlur=px*1.1;c.shadowOffsetX=px*.25;c.shadowOffsetY=px*.6;all(deep,0,0);c.restore();
+      all(body,-.7,-1);
+      c.save();c.translate(-1.5,-2.1);c.fillStyle='rgba(255,255,255,.96)';c.fill(sc.hi);c.strokeStyle='rgba(255,255,255,.96)';sc.strokes.forEach(st=>{c.lineWidth=st.w*.22;c.stroke(st.p);});c.restore();
+      c.restore();return;}
     const fl=mat==='flesh'||mat==='wet';
     if(fl){c.save();c.shadowColor='rgba(60,15,15,.35)';c.shadowBlur=px*2.2;c.shadowOffsetX=px*.3;c.shadowOffsetY=px*.8;fillP(sc.full,P_.dark,0,0,.9);c.restore();}
     c.save();c.shadowColor=`rgba(40,10,10,${P_.sh})`;c.shadowBlur=px;c.shadowOffsetX=px*.25;c.shadowOffsetY=px*.55;fillP(sc.full,P_.dark,0,0,1);strk(P_.dark,1,0,0,1);c.restore();
@@ -2666,6 +2676,13 @@ function smoothPts(pts){if(pts.length<3)return pts;const out=[pts[0]];
   for(let i=0;i<pts.length-1;i++){const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)];
     for(let t=.25;t<=1;t+=.25){const t2=t*t,t3=t2*t,f=(a,b,c,d)=>.5*(2*b+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);
       out.push([f(p0[0],p1[0],p2[0],p3[0]),f(p0[1],p1[1],p2[1],p3[1]),Math.max(1,p1[2]+(p2[2]-p1[2])*t)]);}}return out;}
+// 金屬立體線條：不要肉感的抖動和疙瘩，改成俐落的線：再平滑一次、粗細統一，兩端收尖（封閉的圈不收）
+function metalTidy(lines){
+  lines.forEach((l,li)=>{const sm=[...smoothPts(l)];l.length=0;l.push(...sm);
+    const ws=l.map(p=>p[2]).sort((a,b)=>a-b),w0=Math.max(3.6,Math.min(9,ws[Math.floor(ws.length/2)]));
+    const closed=Math.hypot(l[0][0]-l[l.length-1][0],l[0][1]-l[l.length-1][1])<w0*1.5,n=l.length;
+    l.forEach((p,i)=>{const t=i/(n-1);p[2]=closed?w0:w0*(.34+.66*Math.pow(Math.sin(Math.PI*Math.min(1,t*1.08)),.55));});});
+}
 function fleshify(lines,blobs){
   const R=Math.random;
   const cen=blobs.length?[blobs.reduce((a,b)=>a+b[0],0)/blobs.length,blobs.reduce((a,b)=>a+b[1],0)/blobs.length]:null;
@@ -2695,7 +2712,7 @@ function fleshify(lines,blobs){
     lines.push(smoothPts([[a.x,a.y,Math.max(2.6,Math.min(5,a.r))],[mid[0],mid[1],2.2],[b.x,b.y,Math.max(2.6,Math.min(5,b.r))]]));
     par[f(other)]=main;}
 }
-function parseSculpt(sc,kind){
+function parseSculpt(sc,kind,mat){
   if(!sc)return null;
   if(kind==='piped'){
     const okNum=v=>typeof v==='number'&&isFinite(v);
@@ -2704,10 +2721,10 @@ function parseSculpt(sc,kind){
     const dots=(sc.dots||[]).filter(d=>Array.isArray(d)&&d.length>=3&&d.every(okNum)).slice(0,60).map(([x,y,r])=>[x,y,Math.max(1.5,Math.min(8,r))]);
     const strokes=(sc.strokes||[]).filter(x=>x&&typeof x.d==='string'&&x.d.length<4000&&SAFE_D.test(x.d)).slice(0,30).map(x=>{try{return {p:new Path2D(x.d),w:Math.max(3,Math.min(16,+x.w||6))};}catch(e){return null;}}).filter(Boolean);
     if(!lines.length&&!blobs.length&&!dots.length&&!strokes.length)return null;
-    fleshify(lines,blobs);
+    if((mat||'metal')==='metal')metalTidy(lines);else fleshify(lines,blobs);
     const mk=(k,minR)=>{const p=new Path2D();lines.forEach(l=>stampLine(l,k,p));[...blobs,...dots].forEach(([x,y,r])=>{if(minR&&r<minR)return;p.moveTo(x+r*k,y);p.arc(x,y,r*k,0,TAU);});return p;};
     const bigR=blobs.length?[...blobs].map(b=>b[2]).sort((a,b)=>b-a)[Math.min(blobs.length-1,3)]:99;
-    return {kind:'piped',full:mk(1),mid:mk(.8),hi:mk(.32,bigR),strokes,blobs,bigR};}
+    return {kind:'piped',full:mk(1),mid:mk(.8),hi:mk((mat||'metal')==='metal'?.2:.32,bigR),strokes,blobs,bigR};}
   const ds=(sc.paths||[]).filter(d=>typeof d==='string'&&d.length<6000&&SAFE_D.test(d)).slice(0,3);if(!ds.length)return null;
   try{const p=new Path2D();ds.forEach(d=>p.addPath(new Path2D(d)));return {kind:'shape',path:p};}catch(e){return null;}
 }
@@ -2735,7 +2752,7 @@ ${simple?'請畫 1 個就好，形狀簡單一點、元素少一點。':'請畫 
 只回傳 JSON，不要其他文字：{"sculpts":[每個版本照上面的回傳格式]}
 規則：座標都在畫布範圍內；paths 只用 M L C Q A Z 指令與絕對座標，每條 d 不超過 2000 個字元；數字最多一位小數。${kbText('draw',S.choice.aes)}`;
   const r=await SAMPLE.json(prompt,{cache:false});
-  return (r&&r.sculpts||[]).slice(0,3).map(x=>parseSculpt(x,t.sculptKind)).filter(Boolean);
+  return (r&&r.sculpts||[]).slice(0,3).map(x=>parseSculpt(x,t.sculptKind,t.sculptMat)).filter(Boolean);
 }
 async function drawSculpts(){
   const c=S.choice,a=AES[c.aes],sp=a.special,idx=sp.themes.map((t,i)=>i).filter(i=>sp.themes[i].sculpt);if(!idx.length)return;
@@ -2799,7 +2816,7 @@ async function oneSculpt(kind,mat,desc){
 畫布和指甲一樣：寬 100、高 200 的直式長方形，y=0 是甲尖、y=200 是甲根。裝飾佔甲面 60% 到 85%。
 內容：${sculptSpec(kind,mat,desc)}
 只回傳 JSON，照上面的回傳格式，不要其他文字。只用 M L C Q A Z 指令與絕對座標；每條 d 不超過 2500 個字元。`,{cache:false});
-  return parseSculpt(r,kind);
+  return parseSculpt(r,kind,mat);
 }
 const FN=n=>n.map(i=>FINGERS[i].n).join('、');
 let HIST=[];
