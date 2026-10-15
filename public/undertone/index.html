@@ -998,8 +998,9 @@ const IL={
     for(let k=0;k<4;k++){const t=R(.35,1),a=t*turns*T2,r=6+t*78*ks;star5(x,cx0+Math.cos(a)*r+R(-6,6),cy0+Math.sin(a)*r*1.15+R(-6,6),R(6,9)*ks,ink);}},
   loopline(x,c,d){bgc(x,c[0]);x.strokeStyle=css(c[2]);x.lineWidth=2*(window._ilLw||1);x.lineCap='round';x.beginPath();const y0=R(180,230);x.moveTo(30,y0);
     for(let k=0;k<5;k++){const bx=40+k*28;x.bezierCurveTo(bx+10,y0-4,bx+22,y0-34,bx+12,y0-34);x.bezierCurveTo(bx+2,y0-34,bx+6,y0-4,bx+26,y0);}x.stroke();},
-  sunstar(x,c,d){bgc(x,c[0]);const cx0=100,cy0=R(180,220),r1=R(52,66)*(window._ilScale||1),r2=r1*.42;fillC(x,c[1]);x.beginPath();
-    for(let i=0;i<16;i++){const a=i/16*T2-Math.PI/2,r=i%2?r2:r1;const px=cx0+Math.cos(a)*r,py=cy0+Math.sin(a)*r;i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.fill();},
+  sunstar(x,c,d){bgc(x,c[0]);const cx0=100,cy0=R(180,220),r1=R(56,70)*(window._ilScale||1),r2=r1*.13;fillC(x,c[1]);x.beginPath();
+    // 細長的八角星：上下左右長、斜的短，腰很細，比較俐落
+    for(let i=0;i<16;i++){const a=i/16*T2-Math.PI/2,r=i%2?r2:(i%4===0?r1:r1*.62);const px=cx0+Math.cos(a)*r,py=cy0+Math.sin(a)*r;i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.fill();},
   ticks(x,c,d){bgc(x,c[0]);x.strokeStyle=css(c[1]);x.lineWidth=4;x.lineCap='round';for(let i=0;i<12;i++){const a=i/12*T2;const ex=100+Math.cos(a)*88,ey=200+Math.sin(a)*178,ix=100+Math.cos(a)*74,iy=200+Math.sin(a)*150;x.beginPath();x.moveTo(ix,iy);x.lineTo(ex,ey);x.stroke();}},
   dot1(x,c,d){bgc(x,c[0]);fillC(x,c[2]);const n=R(0,1)<.6?1:2;for(let k=0;k<n;k++){x.beginPath();x.arc(100,n===1?R(190,220):150+k*110,R(8,12)*(window._ilScale||1),0,T2);x.fill();}},
   stars(x,c,d){bgc(x,c[0]);const big=R(0,1)<.45;const col=R(0,1)<.5?c[1]:c[2];
