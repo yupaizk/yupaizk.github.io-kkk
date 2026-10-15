@@ -432,7 +432,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
     <h2>從哪裡開始？</h2>
     <p class="lead">兩條路都會走到同一個地方：一組只屬於今天的指甲，最後還能用文字更改。</p>
     <div class="modes">
-      <button class="mode" data-mode="A"><b>交給感覺</b><span>還沒有想法也沒關係。說說今天的心情，UNDERTONE 替你想。</span><em>可以拍一張今天的穿搭，當作配色參考</em></button>
+      <button class="mode" data-mode="A"><b>交給感覺</b><span>還沒有想法也沒關係。說說今天的心情，UNDERTONE 替你想。</span><em>可以上傳一張今天的穿搭，當作配色參考</em></button>
       <button class="mode" data-mode="B"><b>我有想要的</b><span>心裡已經有元素或圖樣，像星星、鍊條、某張圖。給我圖，或直接寫下來。</span><em>可以忠於原圖，也可以換成某種風格</em></button>
     </div>
   </section>
@@ -449,7 +449,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
       <span class="big" id="dropTxt">點這裡加照片</span>
       <small id="dropSub">最多 3 張，可以直接拖進來</small>
     </label>
-    <div class="actions camrow"><button type="button" class="btn ghost" id="camBtn">用鏡頭拍一張</button><button type="button" class="btn ghost" id="phoneBtn" hidden>用手機上傳</button></div>
+    <div class="actions camrow"><button type="button" class="btn ghost" id="camBtn" hidden>用鏡頭拍一張</button><button type="button" class="btn ghost" id="phoneBtn" hidden>用手機上傳</button></div>
     <p class="stat privacy">照片和成品只存在這台電腦，作為研究紀錄。</p>
     <div class="pal" id="localPal"></div>
     <p class="stat" id="palHint" hidden style="margin:6px 0 0">點色塊可以刪掉不要的顏色（例如照片背景）。</p>
@@ -1612,7 +1612,7 @@ chips('bAmt',AMT_KEYS,'bAmt','2','radio',AMT_LAB);
 function setMode(m){S.mode=m;document.body.classList.toggle('modeA',m==='A');document.body.classList.toggle('modeB',m==='B');
   S.imgType=m==='B'?'風格參考圖':'今天的穿搭';S.analysis=null;
   $('#s1title').textContent=m==='B'?'想要什麼？':'今天穿了什麼？';
-  $('#s1lead').textContent=m==='B'?'放 1 到 3 張參考圖，或直接寫下想要的元素。每張圖可以標出要參考哪些部分。':'拍一張穿搭，或上傳照片，UNDERTONE 會從裡面挑出今天的顏色。沒有也可以先跳過。';
+  $('#s1lead').textContent=m==='B'?'放 1 到 3 張參考圖，或直接寫下想要的元素。每張圖可以標出要參考哪些部分。':'上傳一張穿搭照片，UNDERTONE 會從裡面挑出今天的顏色。沒有也可以先跳過。';
   renderImgs();renderAiBox();go(1);}
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 $('#toMode').onclick=()=>{S.maxStep=0;go(0);};
