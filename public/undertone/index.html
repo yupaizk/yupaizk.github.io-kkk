@@ -358,6 +358,16 @@ body.atHome .wrap{padding-top:0}
 body.expo .ig{pointer-events:none}
 @media (max-width:999px){.works{grid-template-columns:1fr;max-width:360px}.works .work-side{display:none}}
 
+/* 第 1 步：手機 QR code 面板 */
+.phone-panel[hidden],.camrow[hidden]{display:none}
+.phone-panel{display:flex;align-items:center;gap:36px;padding:28px 32px;background:var(--panel);border:1px solid var(--line);border-radius:24px}
+.phone-panel .qr-row{margin:0;flex:none}
+.phone-panel .qr{width:200px}
+.phone-panel h3{margin:0 0 8px;font-size:22px;font-weight:500}
+.phone-panel .phone-how{font-size:15px;line-height:1.7}
+.phone-panel .phone-msg{margin:8px 0 0;font-size:16px;color:var(--ink)}
+@media (max-width:999px){.phone-panel{flex-direction:column;text-align:center}}
+
 /* 隨時回首頁 */
 .masthead .home-btn{margin-left:12px;font-size:14px;padding:8px 16px}
 
@@ -432,7 +442,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
     <h2>從哪裡開始？</h2>
     <p class="lead">兩條路都會走到同一個地方：一組只屬於今天的指甲，最後還能用文字更改。</p>
     <div class="modes">
-      <button class="mode" data-mode="A"><b>交給感覺</b><span>還沒有想法也沒關係。說說今天的心情，UNDERTONE 替你想。</span><em>可以上傳一張今天的穿搭，當作配色參考</em></button>
+      <button class="mode" data-mode="A"><b>交給感覺</b><span>還沒有想法也沒關係。說說今天的心情，UNDERTONE 替你想。</span><em>可以用手機傳一張今天的穿搭，當作配色參考</em></button>
       <button class="mode" data-mode="B"><b>我有想要的</b><span>心裡已經有元素或圖樣，像星星、鍊條、某張圖。給我圖，或直接寫下來。</span><em>可以忠於原圖，也可以換成某種風格</em></button>
     </div>
   </section>
@@ -444,12 +454,16 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
     <div class="chips" id="imgType" data-ma-hide data-mb-hide></div>
     <div id="imgList"></div>
     <div id="pickView" hidden style="margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:10px;background:var(--panel)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="stat" style="margin:0">點圖上的顏色，就會加進配色</span><button type="button" class="linkbtn" id="pickClose">收起</button></div><img id="pickImg" alt="取色用的大圖" style="width:100%;max-height:60vh;object-fit:contain;display:block;border-radius:10px;cursor:crosshair"></div>
+    <div class="phone-panel" id="phonePanel" hidden>
+      <div class="qr-row"><div class="qr" id="qrWifi" hidden></div><div class="qr" id="qrUp"><p class="stat">準備中…</p></div></div>
+      <div class="phone-side"><h3>用手機掃 QR code 傳照片</h3><p class="stat phone-how">打開手機相機掃左邊的 QR code，選照片傳上來，最多 3 張。</p><p class="phone-msg" role="status"></p></div>
+    </div>
     <label class="drop" id="drop">
       <input type="file" id="file" accept="image/*" multiple>
       <span class="big" id="dropTxt">點這裡加照片</span>
       <small id="dropSub">最多 3 張，可以直接拖進來</small>
     </label>
-    <div class="actions camrow"><button type="button" class="btn ghost" id="camBtn" hidden>用鏡頭拍一張</button><button type="button" class="btn ghost" id="phoneBtn" hidden>用手機上傳</button></div>
+    <div class="actions camrow"><button type="button" class="btn ghost" id="camBtn" hidden>用鏡頭拍一張</button></div>
     <p class="stat privacy">照片和成品只存在這台電腦，作為研究紀錄。</p>
     <div class="pal" id="localPal"></div>
     <p class="stat" id="palHint" hidden style="margin:6px 0 0">點色塊可以刪掉不要的顏色（例如照片背景）。</p>
@@ -1597,6 +1611,7 @@ const isHex=h=>/^#[0-9a-fA-F]{6}$/.test(h||'');
 (async()=>{try{if(window.claude&&claude.use){SAMPLE=await claude.use('sample');if(SAMPLE){const l=await SAMPLE.limits().catch(()=>null);IMG_OK=!!(l&&l.images);SAVE=!!(l&&l.save);}}}catch(e){SAMPLE=null;}renderAiBox();if(S.imgs.length&&!S.analysis&&!S.analyzing&&SAMPLE&&IMG_OK)analyze();})();
 /* ---------- 導覽 ---------- */
 function go(n){
+  if(n===1)setTimeout(phoneStart,0);else if(typeof phoneStop==='function')phoneStop();
   S.step=n;if(typeof n==='number')S.maxStep=Math.max(S.maxStep,n);
   document.body.classList.toggle('atHome',n==='home');
   document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.dataset.step===String(n)));
@@ -1612,7 +1627,7 @@ chips('bAmt',AMT_KEYS,'bAmt','2','radio',AMT_LAB);
 function setMode(m){S.mode=m;document.body.classList.toggle('modeA',m==='A');document.body.classList.toggle('modeB',m==='B');
   S.imgType=m==='B'?'風格參考圖':'今天的穿搭';S.analysis=null;
   $('#s1title').textContent=m==='B'?'想要什麼？':'今天穿了什麼？';
-  $('#s1lead').textContent=m==='B'?'放 1 到 3 張參考圖，或直接寫下想要的元素。每張圖可以標出要參考哪些部分。':'上傳一張穿搭照片，UNDERTONE 會從裡面挑出今天的顏色。沒有也可以先跳過。';
+  $('#s1lead').textContent=m==='B'?'用手機掃 QR code 傳 1 到 3 張參考圖，或直接寫下想要的元素。每張圖可以標出要參考哪些部分。':'用手機掃 QR code 傳一張穿搭照片，UNDERTONE 會從裡面挑出今天的顏色。沒有也可以先跳過。';
   renderImgs();renderAiBox();go(1);}
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 $('#toMode').onclick=()=>{S.maxStep=0;go(0);};
@@ -1744,7 +1759,7 @@ function renderImgs(){
   $('#pickImg').onclick=ev=>pickColor(null,ev);$('#pickClose').onclick=()=>{$('#pickView').hidden=true;};
   if(!S.imgs.length)$('#pickView').hidden=true;
   S.imgs.forEach((x,i)=>document.querySelectorAll(`input[name="role${i}"]`).forEach(r=>r.onchange=()=>{x.roles=[...document.querySelectorAll(`input[name="role${i}"]:checked`)].map(e=>e.value);imgsChanged();}));
-  const left=3-S.imgs.length;drop.hidden=left<=0;drop.classList.toggle('small',S.imgs.length>0);
+  const left=3-S.imgs.length;drop.hidden=left<=0||!$('#phonePanel').hidden;drop.classList.toggle('small',S.imgs.length>0);
   $('#dropTxt').textContent=S.imgs.length?`再加一張（還可以 ${left} 張）`:'點這裡加照片';
   renderPal();
 }
@@ -3298,33 +3313,34 @@ $('#camBtn').onclick=async()=>{
   };
 };
 
-// 第 1 步：手機掃 QR code 傳照片（展覽時觀眾沒辦法用電腦的檔案）。手機要和電腦連同一個 Wi-Fi。
-let PHONE=null;
-(async()=>{try{if(window.claude&&claude.use&&window.qrcode){PHONE=await claude.use('phone');$('#phoneBtn').hidden=false;}}catch(e){PHONE=null;}})();
+// 第 1 步：照片只能用手機掃 QR code 傳（展覽的電腦不給觀眾選檔案）。QR code 直接放在頁面上。
+// 伺服器有開 Cloudflare 通道時，手機用自己的網路就能傳；沒有通道才需要和電腦連同一個 Wi-Fi。
+// 沒有本機伺服器（例如 claude.ai 預覽）時，退回原本的點框框選照片。
+let PHONE=null,PH=null;
 function qrSvg(text){const q=qrcode(0,'M');q.addData(text);q.make();return q.createSvgTag({cellSize:6,margin:2,scalable:true});}
-$('#phoneBtn').onclick=async()=>{
-  if(!PHONE)return;
-  if(S.imgs.length>=3){$('#phoneBtn').textContent='已經有 3 張了';return;}
-  const d=sheet(`<h3>用手機傳照片</h3><p class="stat">手機連上和這台電腦一樣的 Wi-Fi，用相機掃下面的 QR code，選照片傳上來。</p>
-    <div class="qr-row"><div class="qr" id="qrWifi" hidden></div><div class="qr" id="qrUp"><p class="stat">準備中…</p></div></div>
-    <p class="stat phone-msg" role="status"></p>
-    <div class="actions"><button class="btn ghost" data-k="close">關閉</button></div>`);
-  const msg=d.el.querySelector('.phone-msg'),closeBtn=d.el.querySelector('[data-k="close"]');let ses=null,timer=null,got=0,done=false;
-  const stop=()=>{done=true;clearInterval(timer);if(ses)PHONE.stop(ses.token);d.close();};
-  d.el.querySelector('[data-k="close"]').onclick=stop;
-  try{ses=await PHONE.start();}catch(e){d.el.querySelector('#qrUp').innerHTML='';msg.textContent=e.code==='no_lan'?'這台電腦沒有連上 Wi-Fi 或區網，沒辦法用手機傳。可以改用「用鏡頭拍一張」。':'手機上傳現在不能用。';return;}
-  if(done){PHONE.stop(ses.token);return;}
-  d.el.querySelector('#qrUp').innerHTML=qrSvg(ses.url)+`<p class="stat">${ses.wifi?'再掃這個傳照片':'掃這個傳照片'}</p>`;
-  if(ses.wifi){const w=d.el.querySelector('#qrWifi'),esc2=v=>String(v).replace(/([\\;,:"])/g,'\\$1');w.hidden=false;
+function phoneUi(on){$('#phonePanel').hidden=!on;$('#drop').hidden=on;$('.camrow').hidden=on;}
+async function phoneStart(){
+  if(!PHONE||PH||S.step!==1)return;
+  const ph=PH={ses:null,timer:null,got:0};const msg=$('#phonePanel .phone-msg');
+  $('#qrUp').innerHTML='<p class="stat">準備中…</p>';$('#qrWifi').hidden=true;msg.textContent='';
+  try{ph.ses=await PHONE.start();}catch(e){if(PH===ph)PH=null;$('#qrUp').innerHTML='';msg.textContent=e.code==='no_lan'?'這台電腦沒有連上網路，手機傳不上來。可以先跳過照片。':'手機上傳現在不能用，可以先跳過照片。';return;}
+  if(PH!==ph){PHONE.stop(ph.ses.token);return;}
+  const ses=ph.ses;
+  $('#phonePanel .phone-how').textContent=ses.remote?'打開手機相機掃左邊的 QR code，選照片傳上來，最多 3 張。用手機自己的網路就可以，不用連 Wi-Fi。'
+    :(ses.wifi?'先掃左邊的 QR code 連上 Wi-Fi，再掃右邊的 QR code 選照片傳上來，最多 3 張。':'手機要連上和這台電腦一樣的 Wi-Fi，再掃左邊的 QR code 選照片傳上來，最多 3 張。');
+  $('#qrUp').innerHTML=qrSvg(ses.url)+`<p class="stat">${ses.wifi?'再掃這個傳照片':'掃這個傳照片'}</p>`;
+  if(ses.wifi){const w=$('#qrWifi'),esc2=v=>String(v).replace(/([\\;,:"])/g,'\\$1');w.hidden=false;
     w.innerHTML=qrSvg(`WIFI:T:${ses.wifi.pass?'WPA':'nopass'};S:${esc2(ses.wifi.ssid)};${ses.wifi.pass?`P:${esc2(ses.wifi.pass)};`:''};`)+`<p class="stat">先掃這個連 Wi-Fi（${esc(ses.wifi.ssid)}）</p>`;}
-  timer=setInterval(async()=>{
+  ph.timer=setInterval(async()=>{
+    if(PH!==ph){clearInterval(ph.timer);return;}
     try{const items=await PHONE.list(ses.token);
-      for(;got<items.length&&S.imgs.length<3;got++){takeFile(await PHONE.file(ses.token,got));}
-      if(got){msg.textContent=`收到 ${got} 張了${S.imgs.length>=3?'，已經滿 3 張':''}。`;closeBtn.textContent='完成';closeBtn.className='btn main';}
-      if(S.imgs.length>=3||got>=(ses.max||3))setTimeout(stop,1200);
-    }catch(e){if(e.code==='expired'){msg.textContent='QR code 過期了，關掉再按一次「用手機上傳」。';clearInterval(timer);}}
+      for(;ph.got<items.length&&S.imgs.length<3;ph.got++){takeFile(await PHONE.file(ses.token,ph.got));}
+      if(ph.got)msg.textContent=`收到 ${ph.got} 張了${S.imgs.length>=3?'，已經滿 3 張，可以按「下一步」':''}。`;
+    }catch(e){if(e.code==='expired'&&PH===ph){phoneStop();phoneStart();}}
   },1500);
-};
+}
+function phoneStop(){if(!PH)return;clearInterval(PH.timer);if(PH.ses)PHONE.stop(PH.ses.token);PH=null;}
+(async()=>{try{if(window.claude&&claude.use&&window.qrcode){PHONE=await claude.use('phone');phoneUi(true);if(S.step===1)phoneStart();}}catch(e){PHONE=null;}})();
 
 /* ---------- p5 ---------- */
 function setup(){

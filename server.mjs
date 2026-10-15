@@ -184,12 +184,33 @@ function lanAddress() {
   return found.length ? found[0][1] : null;
 }
 
-function phoneStart(res) {
+// 不同網路也能上傳：資料夾裡有 cloudflared（Cloudflare 的免費通道程式）就自動開一條臨時的公開網址，
+// 手機用自己的 4G／5G 也連得到，只會通到手機上傳頁。沒有就只能用同一個 Wi-Fi。
+let TUNNEL = null, tunnelStarting = false;
+function startTunnel() {
+  const exe = [path.join(ROOT, "cloudflared.exe"), path.join(ROOT, "cloudflared")].find(f => existsSync(f));
+  if (!exe) return;
+  console.log("手機上傳：正在開不用同一個 Wi-Fi 的通道（cloudflared）…");
+  tunnelStarting = true;
+  const cf = spawn(exe, ["tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${PHONE_PORT}`], { stdio: ["ignore", "pipe", "pipe"] });
+  const read = buf => {
+    const m = String(buf).match(/https:\/\/(?!api\.)[a-z0-9-]+\.trycloudflare\.com/);
+    if (m && !TUNNEL) { TUNNEL = m[0]; console.log(`手機上傳：通道開好了，手機不用連同一個 Wi-Fi 也能傳（${TUNNEL}）。`); }
+  };
+  cf.stdout.on("data", read); cf.stderr.on("data", read);
+  cf.on("error", e => { tunnelStarting = false; console.log("手機上傳：通道程式開不起來（" + e.message + "），改用同一個 Wi-Fi。"); });
+  cf.on("exit", code => { tunnelStarting = false; if (TUNNEL) console.log("手機上傳：通道斷了，改回只能用同一個 Wi-Fi。"); TUNNEL = null; });
+  process.on("exit", () => cf.kill());
+}
+
+async function phoneStart(res) {
+  // 通道剛啟動還沒好時，等它最多 12 秒
+  for (let i = 0; i < 24 && tunnelStarting && !TUNNEL; i++) await new Promise(r => setTimeout(r, 500));
   const host = lanAddress();
-  if (!host || !phoneServerUp) return json(res, { error: "no_lan" }, 503);
+  if (!phoneServerUp || (!host && !TUNNEL)) return json(res, { error: "no_lan" }, 503);
   const token = randomBytes(16).toString("hex");
   phoneSessions.set(token, { created: Date.now(), items: [] });
-  json(res, { token, url: `http://${host}:${PHONE_PORT}/u/${token}`, wifi: PHONE_WIFI, max: PHONE_MAX });
+  json(res, { token, url: TUNNEL ? `${TUNNEL}/u/${token}` : `http://${host}:${PHONE_PORT}/u/${token}`, wifi: TUNNEL ? null : PHONE_WIFI, remote: !!TUNNEL, max: PHONE_MAX });
 }
 
 async function phoneRoute(req, res, token, n) {
@@ -471,8 +492,9 @@ server.listen(PORT, "127.0.0.1", () => {
   rm(PHONE_DIR, { recursive: true, force: true }).catch(() => {});
   phoneServer.listen(PHONE_PORT, "0.0.0.0", () => {
     phoneServerUp = true;
+    startTunnel();
     const host = lanAddress();
-    console.log(host ? `手機上傳：同一個 Wi-Fi 的手機掃生成器上的 QR code 就能傳照片（${host}:${PHONE_PORT}）。Windows 問要不要允許時，勾「私人網路」。` : "手機上傳：這台電腦沒有連上 Wi-Fi 或區網，用手機傳照片的功能暫時不能用。");
+    if (!tunnelStarting) console.log(host ? `手機上傳：同一個 Wi-Fi 的手機掃生成器上的 QR code 就能傳照片（${host}:${PHONE_PORT}）。Windows 問要不要允許時，勾「私人網路」。` : "手機上傳：這台電腦沒有連上 Wi-Fi 或區網，用手機傳照片的功能暫時不能用。");
   });
   console.log("要關掉時，直接關這個視窗。\n");
 });

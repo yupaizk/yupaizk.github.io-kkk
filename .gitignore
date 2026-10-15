@@ -6,3 +6,7 @@ undertone-old-data/
 
 # 首頁的作品影片和照片（有人像，不放上公開的 GitHub）
 public/undertone/media/
+
+# 不用同一個 Wi-Fi 的手機上傳通道程式（自己下載放進來）
+cloudflared
+cloudflared.exe

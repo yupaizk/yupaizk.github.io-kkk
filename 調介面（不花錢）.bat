@@ -28,6 +28,15 @@ if not exist "settings.txt" (
   notepad "settings.txt"
 )
 
+rem 手機掃 QR code 傳照片：下載 Cloudflare 的通道程式，手機用自己的網路就能傳，不用連同一個 Wi-Fi（只下載一次）
+if not exist "cloudflared.exe" (
+  echo 正在下載手機上傳用的通道程式（cloudflared，第一次才需要）……
+  curl -fsSL -o "cloudflared.exe" "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe" || (
+    if exist "cloudflared.exe" del "cloudflared.exe"
+    echo 沒有下載成功，手機上傳先只能用同一個 Wi-Fi。下次啟動會再試。
+  )
+)
+
 rem 調介面用：不呼叫 Claude、不花錢，設計結果是假的。
 rem 關掉這個視窗的「快速編輯」，點到視窗時程式才不會暫停（只影響標題叫 Undertone 的視窗）。
 reg add "HKCU\Console\Undertone" /v QuickEdit /t REG_DWORD /d 0 /f >nul 2>&1
