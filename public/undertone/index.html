@@ -358,6 +358,9 @@ body.atHome .wrap{padding-top:0}
 body.expo .ig{pointer-events:none}
 @media (max-width:999px){.works{grid-template-columns:1fr;max-width:360px}.works .work-side{display:none}}
 
+/* 隨時回首頁 */
+.masthead .home-btn{margin-left:12px;font-size:14px;padding:8px 16px}
+
 /* ---------- v38 細修 ---------- */
 /* 首頁：標題細一點、中文小標小一點 */
 .hero-title{font-weight:400}
@@ -397,6 +400,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
     <button data-go="4">成品</button>
   </nav>
   <button class="linkbtn" id="openLog">測試紀錄 <span id="logN"></span></button>
+  <button type="button" class="linkbtn home-btn" id="homeBtn2">回首頁</button>
   </header>
 
   <section class="screen" data-step="home">
@@ -1576,7 +1580,8 @@ const AVOID='不搭的組合（後台素材庫）：Clean girl、極簡不放大
 /* ---------- 狀態 ---------- */
 let TUNE_OPEN=false;
 const S={mode:null,step:0,maxStep:0,q:0,img:null,imgType:'今天的穿搭',localColors:[],analysis:null,rec:null,choice:null,reroll:0,plan:null,bRoute:'faithful',bTrend:null};
-let SAMPLE=null,IMG_OK=false;
+// SAVE：省錢模式（展覽用）。提案用規則、元素用素材庫，只有讀照片和用說的修改才呼叫 Claude
+let SAMPLE=null,IMG_OK=false,SAVE=false;
 
 const $=s=>document.querySelector(s);
 function chips(id,keys,name,def,type='radio',labels){
@@ -1589,7 +1594,7 @@ function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const isHex=h=>/^#[0-9a-fA-F]{6}$/.test(h||'');
 
-(async()=>{try{if(window.claude&&claude.use){SAMPLE=await claude.use('sample');if(SAMPLE){const l=await SAMPLE.limits().catch(()=>null);IMG_OK=!!(l&&l.images);}}}catch(e){SAMPLE=null;}renderAiBox();if(S.imgs.length&&!S.analysis&&!S.analyzing&&SAMPLE&&IMG_OK)analyze();})();
+(async()=>{try{if(window.claude&&claude.use){SAMPLE=await claude.use('sample');if(SAMPLE){const l=await SAMPLE.limits().catch(()=>null);IMG_OK=!!(l&&l.images);SAVE=!!(l&&l.save);}}}catch(e){SAMPLE=null;}renderAiBox();if(S.imgs.length&&!S.analysis&&!S.analyzing&&SAMPLE&&IMG_OK)analyze();})();
 /* ---------- 導覽 ---------- */
 function go(n){
   S.step=n;if(typeof n==='number')S.maxStep=Math.max(S.maxStep,n);
@@ -1647,7 +1652,7 @@ function startRecB(){
   const rec={basis:(S.analysis&&S.analysis.basis)||[],newTry:(S.analysis&&S.analysis.newTry)||[],aes:key,els,why,illus:[],focus:'both',shape:a.shape,len:a.len,accent:2,amount:A.amount,pal:[...a.pal],
     say:(S.bRoute==='style'&&S.bTrend?`我保留你要的東西，換成「${S.bTrend}」的做法：「${a.special.name}」，${a.desc}。`:`我照你的${S.imgs.length?'圖':'描述'}整理成「${a.special.name}」：${a.desc}。`)+`${T.length>1?`拆成 ${T.length} 個主題（${T.map(t=>t.name).join('、')}），用「${ARR_NAME[a.special.arrangement]}」的方式排。`:''}`,by:S.bRoute==='style'?'參考＋後台風格':'參考圖'};
   S.rec=rec;S.answers=A;
-  S.choice={arr:null,live:!!SAMPLE,illus:[],focus:'both',aes:key,els:[...els],shape:rec.shape,len:rec.len,accent:2,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:1};
+  S.choice={arr:null,live:!!SAMPLE&&!SAVE,illus:[],focus:'both',aes:key,els:[...els],shape:rec.shape,len:rec.len,accent:2,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:1};
   go(3);renderRec();
 }
 
@@ -2006,7 +2011,8 @@ async function startRec(){
   go(3);const body=$('#recBody');
   body.innerHTML=loader('UNDERTONE 正在讀你的回答，挑風格和配色');
   const A=answers();const base=ruleRec(A);let rec=base;
-  if(SAMPLE){
+  if(SAVE)await new Promise(r=>setTimeout(r,900));
+  if(SAMPLE&&!SAVE){
     const info={指定色系:A.colorFam&&A.colorFam.length?A.colorFam.map(k=>FAMS[k].n).join('＋'):null,指定配色:A.colorPal&&A.colorPal.length?A.colorPal:null,照片:S.imgs.length?`${S.imgs.length} 張${S.imgType}（${S.imgs.map((x,i)=>`第${i+1}張參考${roleTxtOf(x)}`).join('、')}）`:'沒有提供',照片解析:S.analysis?S.analysis.summary:null,照片顏色:(S.analysis&&S.analysis.colors.length?S.analysis.colors:S.localColors),心情:A.mood,強烈程度:A.intensity,想走的方向:A.dir,喜歡的感覺:A.feel,想要多繁複:AMOUNTS[A.amount]+'（'+AMOUNT_DESC[A.amount]+'）',偏好:FOCUS[A.focus],其他想說的:A.note||null,參考圖描述:$('#imgDesc').value.trim()||null,照片裡看得到的東西:S.analysis?[...S.analysis.elements.map(k=>EL_NAME[k]),...(S.analysis.others||[])]:null};
     const aesList=Object.entries(AES).map(([k,a])=>`${k}（${a.group?a.group+'；':''}${a.desc}${a.special?'':'；代表元素 '+[...new Set([...((SIG[k]||{}).must||[]),...a.els])].join(' ')+'；重點：'+((SIG[k]||{}).note||'')}）`).join('、');
     const finList=Object.entries(FINISH).map(([k,f])=>`${k}(${f.name}：${f.desc})`).join('、');
@@ -2048,7 +2054,7 @@ ${illList}
     const conflict=(KB&&KB.avoid||[]).find(x=>(A.colorFam.includes('vivid')&&/霓虹/.test(x.combo)&&/裸色/.test(x.combo)&&/裸|Clean|極簡/.test(rec.aes))||(A.colorFam.includes('pastel')&&/粉彩/.test(x.combo)&&rec.aes==='暗黑'));
     if(conflict)rec.palWarn=`後台提醒：${conflict.combo}（${conflict.why}），還是照你選的做。`;}
   S.rec=rec;S.answers=A;
-  S.choice={y2k:rec.y2k||null,arr:null,live:!!SAMPLE,illus:[...rec.illus],focus:rec.focus,aes:rec.aes,finish:rec.finish||null,els:[...rec.els],shape:rec.shape,len:rec.len,accent:rec.accent,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:1};
+  S.choice={y2k:rec.y2k||null,arr:null,live:!!SAMPLE&&!SAVE,illus:[...rec.illus],focus:rec.focus,aes:rec.aes,finish:rec.finish||null,els:[...rec.els],shape:rec.shape,len:rec.len,accent:rec.accent,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:1};
   renderRec();
 }
 function renderRec(){
@@ -2060,7 +2066,7 @@ function renderRec(){
     ${r.fallback?`<p class="note quiet">${r.fallback}</p>`:''}
     ${S.img&&!S.analysis?'<p class="note">⚠ 這次沒有讀到參考圖，只用了照片的顏色，推薦可能跟圖差很多。可以回第 1 步重新解析。</p>':''}
     <div class="pitch">
-      <p class="say">${esc(r.say)}</p>
+      <p class="say">${esc(inExpo()?String(r.say).replace(/（R\d+(?:[、，,]\s*R\d+)*）/g,''):r.say)}</p>
       <dl class="pitch-facts">
         <div><dt>風格</dt><dd>${esc(r.aes||'—')}${r.finish&&FINISH[r.finish]?`・${esc(FINISH[r.finish].name)}`:''}</dd></div>
         <div><dt>甲型</dt><dd>${esc(SHAPE_NAME[r.shape]||r.shape||'—')}${r.len&&LEN_NAME[r.len]?`・${LEN_NAME[r.len]}`:''}</dd></div>
@@ -2114,7 +2120,7 @@ function renderRec(){
   $('#cIllMore').innerHTML=Object.entries(ILLUS_CAT).map(([cat,ks])=>{const list=ks.filter(k=>!r.illus.includes(k));if(!list.length)return '';
     return `<div class="cat"><h4>${cat}</h4><div class="chips">${list.map(k=>`<label><input type="checkbox" name="cIll" value="${k}" ${c.illus.includes(k)?'checked':''}><span>${ILLUS_NAME[k]}</span></label>`).join('')}</div></div>`;}).join('');
   chips('cFree',['0','1','2'],'cFree',String(c.freedom),'radio',{0:FREEDOM[0],1:FREEDOM[1],2:FREEDOM[2]});
-  chips('cLive',['live','lib'],'cLive',(c.live??!!SAMPLE)?'live':'lib','radio',{live:'UNDERTONE 即時手繪',lib:'素材庫'});
+  chips('cLive',['live','lib'],'cLive',(c.live??(!!SAMPLE&&!SAVE))?'live':'lib','radio',{live:'UNDERTONE 即時手繪',lib:'素材庫'});
   chips('cShape',Object.keys(SHAPE_NAME),'cShape',c.shape,'radio',lab(SHAPE_NAME,r.shape,v=>v));
   chips('cAcc',['0','1','2','3','4'],'cAcc',String(c.accent),'radio',lab(Object.fromEntries(FINGERS.map((f,i)=>[String(i),f.n])),String(r.accent),v=>v));
   $('#cEls').innerHTML=rec3.map(k=>`<label class="el rec"><input type="checkbox" name="cEls" value="${k}" ${c.els.includes(k)?'checked':''}><span><b>${esc(elLabel(k))}${elSwatch(k)}</b><small>${esc(r.why[k]||EL_WHY[k])}</small></span></label>`).join('');
@@ -2730,14 +2736,15 @@ async function build(){
   const PATW=/格|紋|條紋|波點|點點|圓點|漸層|暈染|亮片|貓眼|底色|質感/;
   const inTheme=n=>{if(!isSp)return false;const tx=a.special.themes.map(t=>String(t.name||'')+String(t.surface||'')+String(t.sculpt||'')).join('|');for(let i=0;i<n.length-1;i++)if(tx.includes(n.slice(i,i+2)))return true;return false;};
   const extras=isSp&&S.analysis?(S.analysis.others||[]).filter(n=>!PATW.test(n)&&!inTheme(n)&&!Object.values(CUSTOM).some(x=>x.name===n)).slice(0,2):[];
-  if(SAMPLE&&(keys.length||extras.length||isSp)){
+  if(SAVE){extras.length=0;}
+  if(SAMPLE&&(keys.length||extras.length||(isSp&&!SAVE))){
     $('#drawing').innerHTML=loader(isSp?`UNDERTONE 正在畫「${a.special.name}」的甲面和雕塑（約 20～40 秒）`:'UNDERTONE 正在畫今天的元素');
     $('#drawing').hidden=false;$('#reroll').disabled=true;
-    const res=await Promise.allSettled([keys.length||extras.length?drawElements(keys,extras):Promise.resolve(),isSp?drawSurfaces():Promise.resolve(),isSp?drawSculpts():Promise.resolve()]);
+    const res=await Promise.allSettled([keys.length||extras.length?drawElements(keys,extras):Promise.resolve(),isSp&&!SAVE?drawSurfaces():Promise.resolve(),isSp&&!SAVE?drawSculpts():Promise.resolve()]);
     if(tk!==BUILD_TK)return;$('#drawing').hidden=true;$('#reroll').disabled=false;
     const denied=res.some(r=>r.status==='rejected'&&r.reason&&r.reason.code==='not_granted');
     if(denied)LIVE_NOTE='沒有開放使用 Claude，改用素材庫的樣式。';
-    else{const miss=[];if((keys.length||extras.length)&&!Object.keys(LIVE).length)miss.push('元素');if(isSp&&a.special.themes.some(t=>t.surface)&&!TH_SURF.some(Boolean))miss.push('甲面');if(isSp&&a.special.themes.some(t=>t.sculpt)&&!TH_SCULPT.some(Boolean))miss.push('雕塑');if(miss.length)LIVE_NOTE=`這次 UNDERTONE 沒畫好${miss.join('和')}，先用素材庫的樣式代替。`;}
+    else{const miss=[];if((keys.length||extras.length)&&!Object.keys(LIVE).length)miss.push('元素');if(isSp&&!SAVE&&a.special.themes.some(t=>t.surface)&&!TH_SURF.some(Boolean))miss.push('甲面');if(isSp&&!SAVE&&a.special.themes.some(t=>t.sculpt)&&!TH_SCULPT.some(Boolean))miss.push('雕塑');if(miss.length)LIVE_NOTE=`這次 UNDERTONE 沒畫好${miss.join('和')}，先用素材庫的樣式代替。`;}
   }
   HIST=[];if($('#reviseOut'))$('#reviseOut').innerHTML='';
   if(isSp)registerThemeMotifs(a.special.themes);
@@ -3227,6 +3234,7 @@ const resetToHome=()=>location.reload();
 $('#startBtn').onclick=()=>go(0);
 $('#scrollCue').onclick=()=>$('#homeMore').scrollIntoView({behavior:'smooth'});
 $('#homeLog').onclick=()=>openLog();
+$('#homeBtn2').onclick=()=>$('#homeBtn').onclick();
 $('#homeBtn').onclick=()=>{
   if(S.step==='home')return;
   const d=sheet(`<h3>回到首頁？</h3><p class="stat">這組還沒完成的設計會清掉；已經存進紀錄的不會不見。</p>

@@ -23,3 +23,6 @@ PHONE_HOST=
 
 # 寫 AI_MODE=demo 就不呼叫 Claude、不花錢（假的設計結果，用來調介面）
 AI_MODE=
+# AI_MODE=save：省錢模式（提案用規則、元素用素材庫，只有讀照片和文字修改才呼叫 Claude）；AI_MODE=full：展覽也用完整模式
+# 省錢模式下呼叫 Claude 的思考深度
+SAVE_EFFORT=low

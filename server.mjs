@@ -46,6 +46,10 @@ const EXPO_PIN = (settings.EXPO_PIN || "").trim();
 const KIOSK = process.argv.includes("--kiosk");
 // 示範模式：不呼叫 Claude、不花錢，回假的設計結果，用來調介面。用「調介面（不花錢）.bat」開，或 settings.txt 寫 AI_MODE=demo
 const DEMO = process.argv.includes("--demo") || /^demo$/i.test((settings.AI_MODE || "").trim());
+// 省錢模式：展覽用（展覽啟動.bat 預設開）。生成器的提案改用規則、元素用素材庫，只有讀照片和用說的修改才呼叫 Claude，
+// 而且思考深度用 SAVE_EFFORT（預設 low）。settings.txt 寫 AI_MODE=full 可以關掉。
+const SAVE = !DEMO && (process.argv.includes("--save") || /^save$/i.test((settings.AI_MODE || "").trim())) && !/^full$/i.test((settings.AI_MODE || "").trim());
+const SAVE_EFFORT = settings.SAVE_EFFORT || "low";
 // 手機上傳：用哪個埠、電腦的區網位址（不填就自動找）、要不要在 QR 旁邊放 Wi-Fi 的 QR
 const PHONE_PORT = parseInt(settings.PHONE_PORT || "8788", 10);
 const PHONE_HOST = (settings.PHONE_HOST || "").trim();
@@ -72,7 +76,7 @@ async function api(req, res, p, url) {
   const method = req.method;
   let m0;
   if (p === "/api/me") return json(res, { ok: true });
-  if (p === "/api/limits") return json(res, { images: true, maxImages: MAX_IMAGES, demo: DEMO });
+  if (p === "/api/limits") return json(res, { images: true, maxImages: MAX_IMAGES, demo: DEMO, save: SAVE });
   if (p === "/api/ai" && method === "POST") return ai(req, res);
   if (p === "/api/unlock" && method === "POST") return unlock(req, res);
   if (p === "/api/phone" && method === "POST") return phoneStart(res);
@@ -106,6 +110,7 @@ async function ai(req, res) {
   usage[day] = (usage[day] || 0) + 1;
   await writeJson(path.join(DATA, "usage.json"), usage);
   if (usage[day] > DAILY_LIMIT) return json(res, { error: "daily_limit" }, 429);
+  console.log(`Claude 呼叫：今天第 ${usage[day]} 次（上限 ${DAILY_LIMIT}）`);
 
   const content = [];
   for (const im of Array.isArray(body.images) ? body.images.slice(0, MAX_IMAGES) : []) {
@@ -118,8 +123,8 @@ async function ai(req, res) {
   // 回覆被截斷或不是 JSON 時自動再試一次。
   const ask = () => client.beta.messages.stream({
     model: MODEL,
-    max_tokens: 32000,
-    output_config: { effort: EFFORT },
+    max_tokens: SAVE ? 16000 : 32000,
+    output_config: { effort: SAVE ? SAVE_EFFORT : EFFORT },
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
     messages: [{ role: "user", content }],
@@ -484,6 +489,7 @@ server.listen(PORT, "127.0.0.1", () => {
   const link = `http://localhost:${PORT}/undertone/`;
   console.log(`\nUndertone 已啟動：${link}`);
   if (DEMO) console.log("示範模式：不會呼叫 Claude，不花錢。設計結果是假的，只用來調介面。");
+  if (SAVE) console.log(`省錢模式：提案用後台規則、元素用素材庫，只有讀照片和用說的修改才呼叫 Claude（思考深度 ${SAVE_EFFORT}）。`);
   else console.log(client ? `Claude 模型：${MODEL}（思考深度 ${EFFORT}，每天最多 ${DAILY_LIMIT} 次）` : "⚠ 還沒設定 API 金鑰（settings.txt），AI 功能不能用。");
   // 開啟時先確認金鑰能不能用（查模型資料，不花錢）
   if (client && !DEMO) client.models.retrieve(MODEL).then(

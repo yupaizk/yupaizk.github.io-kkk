@@ -28,8 +28,8 @@ if not exist "settings.txt" (
   notepad "settings.txt"
 )
 
-rem 展覽用：瀏覽器全螢幕（kiosk），沒有網址列和分頁。要關掉按 Alt+F4，再關掉黑色視窗。
+rem 展覽用（省錢模式：提案用規則、元素用素材庫，只有讀照片和用說的修改才呼叫 Claude）：瀏覽器全螢幕（kiosk），沒有網址列和分頁。要關掉按 Alt+F4，再關掉黑色視窗。
 rem 關掉這個視窗的「快速編輯」，點到視窗時程式才不會暫停（只影響標題叫 Undertone 的視窗）。
 reg add "HKCU\Console\Undertone" /v QuickEdit /t REG_DWORD /d 0 /f >nul 2>&1
-start "Undertone" cmd /k ""%NODE%" server.mjs --open --kiosk"
+start "Undertone" cmd /k ""%NODE%" server.mjs --open --kiosk --save"
 exit /b 0
