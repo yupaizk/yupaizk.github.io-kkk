@@ -377,17 +377,17 @@ body.expo .ig{pointer-events:none}
 @media (max-width:999px){.work-set{gap:12px}.work-set figure{border-radius:14px}.works-nav{width:40px;height:40px;font-size:15px}}
 
 /* 首頁右側的捲動軸：細線＋目前位置，四個段落的點可以點，最上面有「SCROLL」提示 */
-.home-rail{position:fixed;right:clamp(12px,1.6vw,28px);top:50%;transform:translateY(-50%);z-index:30;display:none;flex-direction:column;align-items:center;gap:18px;padding:18px 12px;border-radius:999px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 2px 14px rgba(0,0,0,.06);pointer-events:none}
+.home-rail{position:fixed;right:clamp(12px,1.6vw,28px);top:50%;transform:translateY(-50%);z-index:30;display:none;flex-direction:column;align-items:center;gap:16px;padding:16px 9px;border-radius:999px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 2px 14px rgba(0,0,0,.06);pointer-events:none}
 body.atHome .home-rail{display:flex}
 .rail-hint{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:10px;letter-spacing:.32em;color:var(--soft);writing-mode:vertical-rl;transition:opacity .4s}
 .rail-hint.gone{opacity:0}
-.rail-mouse{writing-mode:horizontal-tb;width:18px;height:28px;border:1.5px solid var(--soft);border-radius:10px;position:relative}
-.rail-mouse::after{content:'';position:absolute;left:50%;top:5px;width:2px;height:6px;margin-left:-1px;border-radius:1px;background:var(--ink);animation:wheel 1.6s ease-in-out infinite}
+.rail-mouse{width:14px;height:22px;border:1px solid var(--soft);border-radius:8px;position:relative}
+.rail-mouse::after{content:'';position:absolute;left:50%;top:4px;width:1.5px;height:5px;margin-left:-.75px;border-radius:1px;background:var(--ink);animation:wheel 1.6s ease-in-out infinite}
 @keyframes wheel{0%{transform:translateY(0);opacity:1}70%{transform:translateY(9px);opacity:0}100%{transform:translateY(0);opacity:0}}
 @media (prefers-reduced-motion:reduce){.rail-mouse::after{animation:none}}
-.rail-track{position:relative;width:2px;height:36vh;background:var(--line);border-radius:1px;pointer-events:auto;cursor:pointer}
-.rail-thumb{position:absolute;left:0;top:0;width:2px;border-radius:1px;background:var(--ink);transition:height .15s linear}
-.rail-dot{position:absolute;left:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;border:1.5px solid var(--soft);background:var(--bg);padding:0;cursor:pointer;transition:transform .2s,border-color .2s,background .2s}
+.rail-track{position:relative;width:1px;height:62vh;background:var(--line);border-radius:1px;pointer-events:auto;cursor:pointer}
+.rail-thumb{position:absolute;left:0;top:0;width:1px;border-radius:1px;background:var(--ink);transition:height .15s linear}
+.rail-dot{position:absolute;left:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;border:1px solid var(--soft);background:var(--bg);padding:0;cursor:pointer;transition:transform .2s,border-color .2s,background .2s}
 .rail-dot.done{border-color:var(--ink)}
 .rail-dot.on{border-color:var(--ink);background:var(--ink);transform:scale(1.2)}
 .rail-dot span{position:absolute;right:24px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:12px;letter-spacing:.12em;color:var(--soft);opacity:0;transition:opacity .2s;pointer-events:none}
@@ -469,7 +469,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
 </style>
 </head>
 <body>
-<nav class="home-rail" id="homeRail" aria-label="首頁段落"><div class="rail-hint" id="railHint" aria-hidden="true"><i class="rail-mouse"></i>SCROLL</div><div class="rail-track" id="railTrack"><div class="rail-thumb" id="railThumb"></div></div></nav>
+<nav class="home-rail" id="homeRail" aria-label="首頁段落"><div class="rail-hint" id="railHint" aria-hidden="true"><i class="rail-mouse"></i></div><div class="rail-track" id="railTrack"><div class="rail-thumb" id="railThumb"></div></div></nav>
 <div class="wrap">
   <header class="masthead">
   <button type="button" class="wordmark" id="homeBtn" aria-label="回到首頁">UNDERTONE</button>
@@ -3430,7 +3430,7 @@ $('#homeBtn2').onclick=()=>$('#homeBtn').onclick();
 // 首頁右側捲動軸：細線上的黑色那段是目前看到的範圍，點可以直接跳到那一段
 (()=>{const tr=$('#railTrack'),th=$('#railThumb'),hint=$('#railHint');
   const secs=[['作品','#works'],['UNDERTONE','.screen[data-step="home"] .hero'],['怎麼玩','#homeMore'],['Instagram','#ig']];
-  const dots=secs.map(([n,sel])=>{const b=document.createElement('button');b.type='button';b.className='rail-dot';b.setAttribute('aria-label',n);b.innerHTML=`<span>${n}</span>`;
+  const dots=secs.map(([n,sel])=>{const b=document.createElement('button');b.type='button';b.className='rail-dot';b.setAttribute('aria-label',n);
     b.onclick=e=>{e.stopPropagation();const i=dots.findIndex(d=>d[0]===b);scrollTo({top:stops()[i],behavior:'smooth'});};tr.appendChild(b);return [b,sel];});
   // 黑線是捲到哪裡；每一段的點放在「捲到那一段」的位置，經過的點會變黑
   const stops=()=>{const H=document.documentElement.scrollHeight,vh=innerHeight,max=Math.max(1,H-vh);
