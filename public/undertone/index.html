@@ -70,8 +70,8 @@ h2{font-weight:700;font-size:26px;line-height:1.3;margin:0 0 6px}
 #localPal{flex-wrap:wrap}
 #localPal button.rescol::after{content:'↺'}
 #localPal button.sgcol::after{content:'＋'}
-#localPal .addcol{position:relative;width:30px;height:30px;border-radius:50%;border:1px dashed var(--soft);display:inline-flex;align-items:center;justify-content:center;color:var(--soft);cursor:pointer;overflow:hidden}
-#localPal .addcol input{position:absolute;inset:0;opacity:0;cursor:pointer}
+#localPal .addcol,#cPal .addcol{position:relative;width:30px;height:30px;border-radius:50%;border:1px dashed var(--soft);display:inline-flex;align-items:center;justify-content:center;color:var(--soft);cursor:pointer;overflow:hidden}
+#localPal .addcol input,#cPal .addcol input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .imgcard img{cursor:crosshair}
 #localPal button::after{content:'✕';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;text-shadow:0 0 3px #000;opacity:.85}
 .modes{display:grid;gap:14px;margin-top:18px}
@@ -369,6 +369,10 @@ html{overflow-x:clip}
 body.expo .ig{pointer-events:none}
 @media (max-width:999px){.work-set{gap:12px}.work-set figure{border-radius:14px}.works-nav{width:40px;height:40px;font-size:15px}}
 
+/* 提案頁的顏色：可以刪、可以加 */
+#cPal .addcol{width:44px;height:44px}
+#cPal .pc{position:relative;display:inline-block}
+#cPal .pc-rm{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:12px;line-height:1;padding:0;cursor:pointer}
 /* 每一頁左上角同一個「上一頁」：標題左邊有空間就放旁邊，沒有就放在標題上面 */
 .wrap{position:relative}
 .page-back{position:absolute;z-index:5;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:8px 18px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
@@ -1546,9 +1550,13 @@ const ARR_NAME={alternate:'交替',accent:'重點指不同',gradient:'漸變'};
 function registerSpecial(sp,an){
   Object.keys(AES).forEach(k=>{if(AES[k].special){delete AES[k];delete AES_FORMS[k];delete AES_ILLUS[k];}});
   const name=String(sp.name).trim().slice(0,8)||'參考圖風格',key='特殊：'+name;
-  const pal=palList().slice(0,5);['#FFFFFF','#E8D5C4','#9A9A9A','#E6E6E6','#C9A99A'].filter(c=>!isRemoved(c)).forEach(c=>{if(pal.length<5)pal.push(c);});while(pal.length<5)pal.push('#E8D5C4');
+  // 模式 B 照圖做：只用圖上抓到或客人指定的顏色，不夠 5 個就重複用，不補別的顏色；一個都沒有就留空讓客人自己選
+  const real=palList().slice(0,5),strict=S.mode==='B';
+  const pal=strict?(real.length?Array.from({length:5},(_,i)=>real[i%real.length]):['#E8D5C4','#E8D5C4','#E8D5C4','#E8D5C4','#E8D5C4']):[...real];
+  if(!strict){['#FFFFFF','#E8D5C4','#9A9A9A','#E6E6E6','#C9A99A'].filter(c=>!isRemoved(c)).forEach(c=>{if(pal.length<5)pal.push(c);});while(pal.length<5)pal.push('#E8D5C4');}
+  const snap=h=>{if(!strict||!real.length||!isHex(h))return h;let b=real[0],bd=1e9;real.forEach(q=>{const d=hexDist(h,q);if(d<bd){bd=d;b=q;}});return b;};
   let themes=(Array.isArray(sp.themes)?sp.themes:[]).slice(0,3).map((t,i)=>{t=t||{};
-    const cols=(t.cols||[]).filter(isHex).slice(0,3);while(cols.length<3)cols.push(pal[(i+cols.length)%5]);
+    const cols=(t.cols||[]).filter(isHex).slice(0,3).map(snap);while(cols.length<3)cols.push(pal[(i+cols.length)%5]);if(isHex(t.accent))t.accent=snap(t.accent);if(isHex(t.sculptColor))t.sculptColor=snap(t.sculptColor);
     const metal=t.metal==='gold'?'gold':t.metal==='color'&&isHex(t.accent)?'th'+i:'silver';
     if(metal==='th'+i)METAL['th'+i]=[mixHex(t.accent,'#FFFFFF',.6),t.accent,mixHex(t.accent,'#000000',.45)];
     const nz=v=>v&&String(v).toLowerCase()!=='null'?String(v).slice(0,120):null;
@@ -1567,7 +1575,7 @@ function registerSpecial(sp,an){
   const els=[...new Set(themes.flatMap(t=>t.elements).concat(an.elements))];
   AES[key]={pal,motifs:themes.map(t=>t.base),fallback:themes.map(t=>t.base),els,shape:SHAPE_NAME[sp.shape]?sp.shape:'almond',len:LEN_NAME[sp.len]?sp.len:'long',stone:pal[2],
     plain:themes[0].base,perFinger:false,metal:(themes.find(t=>t.sculpt&&t.sculptMat!=='metal')||themes[0]).metal,dir:[],feel:[],moods:[],desc:String(sp.desc||'').slice(0,60)||'照參考圖的風格走',
-    special:{name,themes,arrangement:ARR_NAME[sp.arrangement]?sp.arrangement:'alternate',wet:false}};
+    special:{name,themes,arrangement:ARR_NAME[sp.arrangement]?sp.arrangement:'alternate',wet:false},realPal:strict?real:null};
   const FM={metal:['metal','outline'],flesh:['gel','emboss'],wet:['jelly','gel'],gel:['jelly','gel'],bone:['emboss','paint']};
   AES_FORMS[key]=themes.some(t=>t.sculpt)?[...new Set(themes.filter(t=>t.sculpt).flatMap(t=>FM[t.sculptMat]))]:['gel','paint'];
   {const achrom=pal.every(h=>{const q=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));return Math.max(...q)-Math.min(...q)<28;});if(achrom){AES_FORMS[key]=['metal'];themes.forEach(t=>{if(t.metal==='gold'&&!/金/.test(String(sp.desc||'')))t.metal='silver';});}}
@@ -1684,10 +1692,10 @@ function startRecB(){
   const fm=(AES_FORMS[key]||[])[0];
   els.forEach(k=>{const t=elTone(k);why[k]=t?`從你的${S.imgs.length?'參考圖':'描述'}抓到的；會用${hexName(t)}${a.special.themes.some(x=>x.sculptMat==='wet')?'、濕潤有光澤':''}的質感來做，不是金屬色`:`從你的${S.imgs.length?'參考圖':'描述'}抓到的${fm&&FORMABLE.includes(k)?`；會做成${FORM_NAME[fm]}`:''}`;});
   const T=a.special.themes;
-  const rec={basis:(S.analysis&&S.analysis.basis)||[],newTry:(S.analysis&&S.analysis.newTry)||[],aes:key,els,why,illus:[],focus:'both',shape:a.shape,len:a.len,accent:2,amount:A.amount,pal:[...a.pal],
+  const rec={basis:(S.analysis&&S.analysis.basis)||[],newTry:(S.analysis&&S.analysis.newTry)||[],aes:key,els,why,illus:[],focus:'both',shape:a.shape,len:a.len,accent:2,amount:A.amount,pal:a.realPal?[...a.realPal]:[...a.pal],
     say:(S.bRoute==='style'&&S.bTrend?`我保留你要的東西，換成「${S.bTrend}」的做法：「${a.special.name}」，${a.desc}。`:`我照你的${S.imgs.length?'圖':'描述'}整理成「${a.special.name}」：${a.desc}。`)+`${T.length>1?`拆成 ${T.length} 個主題（${T.map(t=>t.name).join('、')}），用「${ARR_NAME[a.special.arrangement]}」的方式排。`:''}`,by:S.bRoute==='style'?'參考＋後台風格':'參考圖'};
   S.rec=rec;S.answers=A;
-  S.choice={arr:null,live:!!SAMPLE&&!SAVE,illus:[],focus:'both',aes:key,els:[...els],shape:rec.shape,len:rec.len,accent:2,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:1};
+  S.choice={arr:null,live:!!SAMPLE&&!SAVE,illus:[],focus:'both',aes:key,els:[...els],shape:rec.shape,len:rec.len,accent:2,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:0};
   go(3);renderRec();
 }
 
@@ -1857,7 +1865,7 @@ async function analyze(textOnly){
   S.analyzing=true;S.analyzeFailed=false;renderAiBox();
   const base=Object.keys(AES).filter(k=>!AES[k].special);
   const prompt=`你是美甲設計助理。${useImg?`附上 ${S.imgs.length} 張使用者提供的「${S.imgType}」，依序是${roleTxt}。請仔細看每一張，並照每張勾選的項目取用：沒勾「元素」就不要從那張取東西，沒勾「顏色」就不要從那張取顏色，沒勾「圖樣材質」就不要從那張取圖樣和材質。`:(S.imgs.length?`使用者提供了 ${S.imgs.length} 張「${S.imgType}」（${roleTxt}），但你看不到圖，只能依照客人的描述。`:'使用者沒有給圖，只用文字描述客人想要的元素。下面說的「圖上看得到」都改成「客人描述裡提到的」。')}${desc?`客人自己的描述（跟你看圖的判斷衝突時，以客人的描述為準）：「${desc}」。`:''}${!useImg&&S.localColors.length?`從圖上抓到的顏色：${S.localColors.filter(h=>!isRemoved(h)).join(' ')}。`:''}${S.addCols.length?`客人自己指定的顏色（一定要用進 colors 和主題的 cols）：${S.addCols.join(' ')}。`:''}
-colors 只取主體（指甲、作品本身、客人要的東西）的顏色；照片的背景、桌面、手以外的環境顏色一律放進 bgColors，不能出現在 colors 或任何主題的 cols 裡。只從有勾「顏色」的圖取色；都沒勾就依客人的描述和風格自己配。
+colors 只取主體（指甲、作品本身、客人要的東西）的顏色；照片的背景、桌面、手以外的環境顏色一律放進 bgColors，不能出現在 colors 或任何主題的 cols 裡。只從有勾「顏色」的圖取色；${S.mode==='B'?'都沒勾、客人也沒說顏色，colors 就回空陣列，不要自己配色。\n客人說要照圖做：主題的 cols、sculptColor、accent 只能用 colors 裡的顏色或客人指定的顏色，不能另外加顏色；elements、others、surface、sculpt 只能寫圖上看得到或客人描述裡提到的東西，不要自己加。':'都沒勾就依客人的描述和風格自己配。'}
 只回傳一個 JSON 物件，不要其他文字：
 {"summary":"用繁體中文一到兩句描述這張圖給人的感覺，像美甲師跟客人聊天","colors":["3到5個主體顏色的 #RRGGBB，由多到少"],"bgColors":["背景的顏色 #RRGGBB，0 到 3 個"],"aes":"從 ${base.join('、')} 選最接近的一個","fits":true 或 false（這張圖的風格能不能被上面的風格好好代表；像電路板、金屬部落紋、萬聖節血肉、特定主題這種明顯不同的風格就是 false）,
 "elements":["圖上『看得到』的東西，對應到這些 key：${Object.keys(EL_NAME).filter(k=>!k.startsWith('u')).join(', ')}，0 到 4 個"],
@@ -2095,6 +2103,7 @@ ${illList}
 function renderRec(){
   const r=S.rec,c=S.choice,body=$('#recBody');
   const rec3=r.els,others=Object.keys(EL_NAME).filter(k=>!rec3.includes(k)&&!k.startsWith('u'));
+  const palBlock=`<div class="block"><h3>顏色</h3>${S.mode==='B'?'<p class="stat">只用你的圖上抓到、或你自己加的顏色。點色塊可以改，按 × 刪掉，按＋自己加。</p>':''}<div class="pal" id="cPal"></div><p class="note quiet" id="palNeed" ${c.pal.length?'hidden':''}>圖上沒有抓到顏色，請按＋選要用的顏色。</p></div>`;
   const lab=(obj,pick,fmt)=>Object.fromEntries(Object.entries(obj).map(([k,v])=>[k,k===pick?fmt(v)+'（推薦）':fmt(v)]));
   body.innerHTML=`
     <h2>UNDERTONE 的提案</h2>
@@ -2113,6 +2122,7 @@ function renderRec(){
     ${KB_USED.size?`<p class="stat" style="margin:4px 0 0">這次送給 Claude 的後台：${esc([...KB_USED].join('｜'))}</p>`:''}
     ${r.palFrom?`<p class="stat" style="margin:8px 0 0">配色照${esc(r.palFrom)}${r.palWarn?'｜'+esc(r.palWarn):''}</p>`:''}
     <p class="stat" style="margin:8px 0 0">${KB?`依據：${esc(((r.basis&&r.basis.length)?r.basis:['後台・'+kbName(c.aes)]).join('、'))}${r.newTry&&r.newTry.length?`｜<b>新嘗試（後台沒有）</b>：${esc(r.newTry.join('、'))}`:''}`:'後台資料讀取中…'}</p>
+    ${S.mode==='B'?palBlock:''}
     <details class="tune" id="tune" ${TUNE_OPEN?'open':''}><summary>想自己調整細節</summary><div class="tune-body">
     <div class="block" data-mb-hide><h3>風格</h3><div id="cAes"></div></div>
     <div class="block" id="y2kWrap" ${c.aes==='Y2K'?'':'hidden'}><h3>Y2K 方向</h3><p class="stat">${esc(Y2KV[c.y2k||'spicy'].desc)}（依據 ${Y2KV[c.y2k||'spicy'].ref}）。換方向會一起換配色、元素和甲型。</p><div class="chips" id="cY2k"></div></div>
@@ -2133,8 +2143,8 @@ function renderRec(){
     <div class="block"><h3>元素怎麼畫</h3><p class="stat">素材庫是固定的樣式；即時手繪會請 UNDERTONE 依今天的狀態重新畫，每次都不一樣，但要多等十幾秒。</p><div class="chips" id="cLive"></div></div>
     <div class="block"><h3>甲型</h3><div class="chips" id="cShape"></div></div>
     <div class="block"><h3>裝飾最多的那根</h3><div class="chips" id="cAcc"></div></div>
-    <div class="block"><h3>顏色</h3><div class="pal" id="cPal"></div></div>
-    <div class="block"><h3>留給 UNDERTONE 多少空間？</h3><p class="stat">UNDERTONE 也有自己的想法，可能會加、減或換掉一些東西。</p><div class="chips" id="cFree"></div></div>
+    ${S.mode==='B'?'':palBlock}
+    <div class="block" data-mb-hide><h3>留給 UNDERTONE 多少空間？</h3><p class="stat">UNDERTONE 也有自己的想法，可能會加、減或換掉一些東西。</p><div class="chips" id="cFree"></div></div>
     </div></details>
     <div class="actions pitch-go"><button class="btn main" id="toGen">生成</button><button class="btn ghost" id="back2" hidden>上一頁</button></div>
 `;
@@ -2145,7 +2155,7 @@ function renderRec(){
   chips('cFin',Object.keys(FINISH),'cFin',c.finish,'radio',Object.fromEntries(Object.entries(FINISH).map(([k,f])=>[k,f.name+(k===r.finish?'（推薦）':'')])));
   if($('#cArr')){const sp=AES[S.analysis.specialKey].special;chips('cArr',Object.keys(ARR_NAME),'cArr',c.arr||sp.arrangement,'radio',Object.fromEntries(Object.entries(ARR_NAME).map(([k,v])=>[k,k===sp.arrangement?v+'（推薦）':v])));}
   if($('#cBases')){const a=AES[c.aes],T=a.special.themes,tf=themeMap(T.length,c.arr||a.special.arrangement,c.accent),def=c.bases||autoBases(c,tf);
-    const opts=[...new Set([...T.map(t=>t.base),...BASE_CHOICES])];
+    const opts=[...new Set([...T.map(t=>t.base),...def.filter(Boolean)])];
     $('#cBases').innerHTML=FINGERS.map((f,i)=>`<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span style="width:4em">${f.n}</span><select data-fb="${i}" style="flex:1;font:inherit;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:var(--chip);color:var(--ink)">
       <option value="" ${!def[i]?'selected':''}>依主題（${esc(T[tf[i]].name)}・${esc(MOTIF_NAME[T[tf[i]].base]||T[tf[i]].base)}）</option>${opts.map(k=>`<option value="${k}" ${def[i]===k?'selected':''}>${esc(MOTIF_NAME[k]||k)}</option>`).join('')}</select></div>`).join('');}
   chips('cAmt',AMT_KEYS,'cAmt',String(c.amount),'radio',lab(AMT_LAB,String(r.amount),v=>v));
@@ -2161,17 +2171,24 @@ function renderRec(){
   $('#cEls').innerHTML=rec3.map(k=>`<label class="el rec"><input type="checkbox" name="cEls" value="${k}" ${c.els.includes(k)?'checked':''}><span><b>${esc(elLabel(k))}${elSwatch(k)}</b><small>${esc(r.why[k]||EL_WHY[k])}</small></span></label>`).join('');
   $('#cMore').innerHTML=Object.entries(EL_CAT).map(([cat,ks])=>{const list=ks.filter(k=>others.includes(k));if(!list.length)return '';
     return `<div class="cat"><h4>${cat}</h4><div class="chips">${list.map(k=>`<label><input type="checkbox" name="cEls" value="${k}" ${c.els.includes(k)?'checked':''}><span>${esc(elLabel(k))}${elSwatch(k)}</span></label>`).join('')}</div></div>`;}).join('');
-  $('#cPal').innerHTML=c.pal.map((h,i)=>`<input type="color" value="${h}" data-i="${i}" aria-label="顏色 ${i+1}">`).join('');
+  {const u=[...new Set(c.pal.filter(isHex).map(h=>h.toLowerCase()))];
+   $('#cPal').innerHTML=u.map((h,i)=>`<span class="pc"><input type="color" value="${h}" data-i="${i}" aria-label="顏色 ${i+1}"><button type="button" class="pc-rm" data-rm="${h}" aria-label="刪掉這個顏色">×</button></span>`).join('')
+     +(u.length<5?`<label class="addcol" title="自己加顏色" aria-label="自己加顏色">＋<input type="color" id="cPalAdd" value="#C8C8C8"></label>`:'');
+   const rerender=()=>{const y=window.scrollY;renderRec();window.scrollTo(0,y);};
+   $('#cPal').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{readChoice();S.choice.pal=S.choice.pal.filter(h=>h.toLowerCase()!==b.dataset.rm);rerender();});
+   const ad=$('#cPalAdd');if(ad)ad.addEventListener('change',()=>{readChoice();S.choice.pal=[...new Set([...S.choice.pal.map(h=>h.toLowerCase()),ad.value.toLowerCase()])];rerender();});}
   const fromPhoto=!!(S.img&&(S.localColors.length||(S.analysis&&S.analysis.colors.length)));
   const y2kSwitch=()=>{readChoice();const vk=S.choice.y2k||'spicy';const own=S.answers&&S.answers.colorPal&&S.answers.colorPal.length===5;
     applyY2K(S.choice,vk,fromPhoto||own,S.rec.why);if(own)S.choice.pal=fitPalette(S.answers.colorPal,Y2KV[vk].pal);S.rec.els=[...new Set([...S.choice.els,...S.rec.els.filter(k=>!Object.values(Y2KV).some(v=>v.els.includes(k)))])].slice(0,8);
     const y=window.scrollY;renderRec();window.scrollTo(0,y);};
   document.getElementById('cY2k').addEventListener('change',y2kSwitch);
   document.getElementById('cAes').addEventListener('change',()=>{if(val('cAes')==='Y2K'&&c.aes!=='Y2K'){y2kSwitch();return;}$('#y2kWrap').hidden=val('cAes')!=='Y2K';});
-  document.getElementById('cAes').addEventListener('change',()=>{if(val('cAes')==='Y2K')return;if(fromPhoto){if(S.imgType!=='風格參考圖'){const p=AES[val('cAes')].pal,ins=document.querySelectorAll('#cPal input');if(ins[3])ins[3].value=p[3];if(ins[4])ins[4].value=p[4];}return;}const p=[...AES[val('cAes')].pal];if(val('cFin')==='nude'){p[0]=NUDE[0];p[1]=NUDE[1];}
-    document.querySelectorAll('#cPal input').forEach((x,i)=>{x.value=p[i];});});
-  document.getElementById('cFin').addEventListener('change',()=>{if(fromPhoto||val('cFin')!=='nude')return;const ins=document.querySelectorAll('#cPal input');ins[0].value=NUDE[0];ins[1].value=NUDE[1];});
+  document.getElementById('cAes').addEventListener('change',()=>{if(val('cAes')==='Y2K')return;if(fromPhoto){if(S.imgType!=='風格參考圖'){const p=AES[val('cAes')].pal,ins=document.querySelectorAll('#cPal input[data-i]');if(ins[3])ins[3].value=p[3];if(ins[4])ins[4].value=p[4];}return;}const p=[...AES[val('cAes')].pal];if(val('cFin')==='nude'){p[0]=NUDE[0];p[1]=NUDE[1];}
+    document.querySelectorAll('#cPal input[data-i]').forEach((x,i)=>{x.value=p[i];});});
+  document.getElementById('cFin').addEventListener('change',()=>{if(fromPhoto||val('cFin')!=='nude')return;const ins=document.querySelectorAll('#cPal input[data-i]');ins[0].value=NUDE[0];ins[1].value=NUDE[1];});
   $('#toGen').onclick=()=>{readChoice();S.reroll=0;
+    if(!S.choice.pal.length){const m=$('#palNeed');if(m){m.hidden=false;m.scrollIntoView({behavior:'smooth',block:'center'});}return;}
+    {const u=[...S.choice.pal];S.choice.pal=Array.from({length:5},(_,i)=>u[i%u.length]);}
     try{go(4);build().catch(err=>{console.error(err);$('#recipe').textContent='生成時出錯了：'+(err&&err.message||err)+'。請截圖給 Claude。';});}catch(err){console.error(err);const n=document.createElement('p');n.className='note';n.textContent='生成時出錯了：'+(err&&err.message||err)+'。請截圖給 Claude。';$('#toGen').parentNode.after(n);}};
   $('#back2').onclick=()=>go(S.mode==='B'?1:2);
   renderCusList();
@@ -2248,7 +2265,7 @@ function readChoice(){
   const y2kPrev=S.choice&&S.choice.y2k;
   S.choice={y2k:val('cAes')==='Y2K'?(val('cY2k')||y2kPrev||'spicy'):null,arr:val('cArr'),live:val('cLive')==='live',illus:[...document.querySelectorAll('input[name="cIll"]:checked')].map(x=>x.value),focus:val('cFocus')||'both',forms:[...document.querySelectorAll('input[name="cForm"]:checked')].map(x=>x.value),freedom:+(val('cFree')||1),aes:val('cAes'),finish:val('cFin'),amount:+val('cAmt'),shape:val('cShape'),len:(()=>{const k=val('cAes');if(k==='Y2K'){const v=Y2KV[val('cY2k')||y2kPrev||'spicy'];if(v)return v.len;}return k===S.rec.aes?S.rec.len:(AES[k]?AES[k].len:S.rec.len);})(),accent:+val('cAcc'),
     els:[...document.querySelectorAll('input[name="cEls"]:checked')].map(x=>x.value),
-    pal:[...document.querySelectorAll('#cPal input')].map(x=>x.value),
+    pal:[...document.querySelectorAll('#cPal input[data-i]')].map(x=>x.value),
     bases:document.querySelectorAll('[data-fb]').length===5?[...document.querySelectorAll('[data-fb]')].map(x=>x.value):null};
 }
 function negotiation(){
@@ -2404,7 +2421,13 @@ function planSpecial(){
   const fb=(c.bases&&c.bases.length===5)?c.bases.map((b,i)=>b==='auto'?autoBases(c,tf)[i]:b):autoBases(c,tf);
   const nFull=[1,2,3,5,5][c.amount],others=shuffle([0,1,2,3,4].filter(i=>i!==accent)),full=new Set([accent,...others].slice(0,nFull));
   const allThemeEls=new Set(T.flatMap(t=>t.elements));
-  const rp=(S.rec&&S.rec.pal)||c.pal,remap=h=>{const k=nearestAny(h,rp);return k>=0&&c.pal[k]&&c.pal[k].toLowerCase()!==rp[k].toLowerCase()?c.pal[k]:h;};
+  const rp=(S.rec&&S.rec.pal)||c.pal,remap0=h=>{const k=nearestAny(h,rp);return k>=0&&c.pal[k]&&c.pal[k].toLowerCase()!==rp[k].toLowerCase()?c.pal[k]:h;};
+  // 模式 B 照圖做：最後一律落到客人這組顏色裡最接近的那個，不會出現別的顏色
+  const lc=x=>String(x).toLowerCase(),uc=[...new Set(c.pal.map(lc))],ur=[...new Set(rp.map(lc))],gone=ur.filter(h=>!uc.includes(h)),added=uc.filter(h=>!ur.includes(h));
+  const remap=h=>{if(S.mode!=='B'||!isHex(h)||!uc.length)return remap0(h);
+    // 刪掉的原色由新加的顏色頂替，其他一律落到客人這組顏色裡最接近的那個
+    const k=ur.length?nearestAny(h,ur):-1;if(k>=0&&gone.includes(ur[k])){const g=gone.indexOf(ur[k]);if(added[g])return added[g];}
+    let b=uc[0],bd=1e9;uc.forEach(q=>{const d=hexDist(h,q);if(d<bd){bd=d;b=q;}});return b;};
   const forms=c.forms.length?[...c.forms]:[...AES_FORMS[c.aes]];
   const dens=Math.min(1,c.amount/4*.7+(A.intensity-1)/4*.3);
   let extraEl=null,extraWhy='';if(fr>=1&&random()<.6){const prs=((KB&&KB.pairs)||[]).filter(pr=>c.els.includes(pr.a)&&!c.els.includes(pr.b)&&EL_3D.includes(pr.b)&&!((S.rec&&S.rec.els)||[]).filter(k=>!c.els.includes(k)).includes(pr.b));if(prs.length){const pr=random(prs);extraEl=pr.b;extraWhy=`依據 ${pr.ref}：${EL_NAME[pr.a]}常配${EL_NAME[pr.b]}，`;}}
@@ -2677,11 +2700,11 @@ async function drawSurfaces(){
   const c=S.choice,a=AES[c.aes],sp=a.special,idx=sp.themes.map((t,i)=>i).filter(i=>sp.themes[i].surface&&sp.themes[i].base!=='muscle');if(!idx.length)return;
   const prompt=`你是美甲師，要把「${sp.name}」風格的甲面圖樣畫出來。風格描述：${a.desc}。
 要畫的主題：
-${idx.map(i=>{const t=sp.themes[i];return `主題 ${i}「${t.name}」：底色 ${t.cols[0]}，圖樣：${t.surface}，可用顏色：${t.cols.join(' ')}${kbText('draw',S.choice.aes)}`;}).join('\n')}
+${idx.map(i=>{const t=sp.themes[i],nb=h=>{if(S.mode!=='B'||!c.pal.length)return h;let b=c.pal[0],bd=1e9;c.pal.forEach(q=>{const d=hexDist(h,q);if(d<bd){bd=d;b=q;}});return b;},cs=[...new Set(t.cols.map(nb))];return `主題 ${i}「${t.name}」：底色 ${cs[0]}，圖樣：${t.surface}，可用顏色：${cs.join(' ')}${kbText('draw',S.choice.aes)}`;}).join('\n')}
 每個主題畫 2 個版本：版本 0「滿版」整片畫滿、最有代表性；版本 1「局部」只出現在甲尖或一側。
 畫布是寬 100、高 200 的直式長方形，y=0 是甲尖、y=200 是甲根；之後會被裁成指甲形狀並疊在底色上，所以不要畫底色，主要內容放在 x 10 到 90 之間。
 只回傳 JSON，不要其他文字：{"themes":[{"i":主題編號,"surfaces":[{"layers":[{"d":"SVG path d","color":"#RRGGBB","alpha":0.2 到 1}]}]}]}
-規則：每個版本 4 到 14 層；只用 M L C Q A Z 指令與絕對座標，每條路徑要閉合，每條 d 不超過 1500 個字元；不要文字、漸層、描邊；線條請用細長的封閉形狀表現（寬 1 到 3）；細節要多、要精緻，像手繪美甲而不是卡通。`;
+規則：只能用上面列的可用顏色（可以有深淺），不要加別的顏色；每個版本 4 到 14 層；只用 M L C Q A Z 指令與絕對座標，每條路徑要閉合，每條 d 不超過 1500 個字元；不要文字、漸層、描邊；線條請用細長的封閉形狀表現（寬 1 到 3）；細節要多、要精緻，像手繪美甲而不是卡通。`;
   const r=await SAMPLE.json(prompt,{cache:false});
   (r.themes||[]).forEach(t=>{if(!t||!idx.includes(t.i))return;const vs=[];
     (t.surfaces||[]).slice(0,2).forEach(sv=>{const ls=cleanLayers(sv&&sv.layers,16);if(!ls.length)return;try{vs.push(toPaths(ls));}catch(e){}});
@@ -2788,7 +2811,7 @@ async function build(){
   const PATW=/格|紋|條紋|波點|點點|圓點|漸層|暈染|亮片|貓眼|底色|質感/;
   const inTheme=n=>{if(!isSp)return false;const tx=a.special.themes.map(t=>String(t.name||'')+String(t.surface||'')+String(t.sculpt||'')).join('|');for(let i=0;i<n.length-1;i++)if(tx.includes(n.slice(i,i+2)))return true;return false;};
   const extras=isSp&&S.analysis?(S.analysis.others||[]).filter(n=>!PATW.test(n)&&!inTheme(n)&&!Object.values(CUSTOM).some(x=>x.name===n)).slice(0,2):[];
-  if(SAVE){extras.length=0;}
+  if(SAVE||S.mode==='B'){extras.length=0;}
   if(SAMPLE&&(keys.length||extras.length||(isSp&&!SAVE))){
     $('#drawing').innerHTML=loader(isSp?`UNDERTONE 正在畫「${a.special.name}」的甲面和雕塑（約 20～40 秒）`:'UNDERTONE 正在畫今天的元素');
     $('#drawing').hidden=false;$('#reroll').disabled=true;
