@@ -1946,7 +1946,7 @@ colors 只取主體（指甲、作品本身、客人要的東西）的顏色；�
     if(r.special&&Array.isArray(r.special.themes))r.special.themes.forEach(t=>{if(t&&Array.isArray(t.cols))t.cols=t.cols.filter(h=>isHex(h)&&notBg(h)&&!isRemoved(h));});
     S.analysis.basis=(r.basis||[]).map(String).slice(0,6);S.analysis.newTry=(r.newTry||[]).map(String).slice(0,4);
     S.analysis.withAdd=S.addCols.length>0;S.analysis.colorsOrig=[...S.analysis.colors];
-    if(S.mode==='B'&&r.special&&r.special.name){S.analysis.rawSpecial=r.special;S.analysis.rawSpecialOrig=JSON.parse(JSON.stringify(r.special));S.analysis.specialKey=registerSpecial(r.special,S.analysis);}
+    if(S.mode==='B'&&r.special&&r.special.name){S.maxStep=Math.min(S.maxStep,1);S.analysis.rawSpecial=r.special;S.analysis.rawSpecialOrig=JSON.parse(JSON.stringify(r.special));S.analysis.specialKey=registerSpecial(r.special,S.analysis);}
   }catch(e){console.warn('analyze',e);S.analyzeFailed=true;S.analyzeErr=e&&e.code||'';if(e&&e.code==='not_granted')SAMPLE=null;}
   S.analyzing=false;renderAiBox();
   return !!S.analysis;
@@ -2324,6 +2324,7 @@ function readChoice(){
     els:[...document.querySelectorAll('input[name="cEls"]:checked')].map(x=>x.value),
     pal:[...document.querySelectorAll('#cPal [data-i]')].map(x=>x.dataset.hex),
     bases:document.querySelectorAll('[data-fb]').length===5?[...document.querySelectorAll('[data-fb]')].map(x=>x.value):null};
+  fixAes();
 }
 function negotiation(){
   const r=S.rec,c=S.choice;let total=6+r.els.length+r.pal.length+r.illus.length,changed=0;
@@ -2485,7 +2486,7 @@ function planSpecial(){
     // 刪掉的原色由新加的顏色頂替，其他一律落到客人這組顏色裡最接近的那個
     const k=ur.length?nearestAny(h,ur):-1;if(k>=0&&gone.includes(ur[k])){const g=gone.indexOf(ur[k]);if(added[g])return added[g];}
     let b=uc[0],bd=1e9;uc.forEach(q=>{const d=hexDist(h,q);if(d<bd){bd=d;b=q;}});return b;};
-  const forms=c.forms.length?[...c.forms]:[...AES_FORMS[c.aes]];
+  const forms=c.forms.length?[...c.forms]:[...(AES_FORMS[c.aes]||['gel','paint'])];
   const dens=Math.min(1,c.amount/4*.7+(A.intensity-1)/4*.3);
   let extraEl=null,extraWhy='';if(fr>=1&&random()<.6){const prs=((KB&&KB.pairs)||[]).filter(pr=>c.els.includes(pr.a)&&!c.els.includes(pr.b)&&EL_3D.includes(pr.b)&&!((S.rec&&S.rec.els)||[]).filter(k=>!c.els.includes(k)).includes(pr.b));if(prs.length){const pr=random(prs);extraEl=pr.b;extraWhy=`依據 ${pr.ref}：${EL_NAME[pr.a]}常配${EL_NAME[pr.b]}，`;}}
   const SPI=/螺旋|漩渦|spiral/i,spT=T.map(t=>{const nm=SPI.test(String(t.name||''));return {s:nm||SPI.test(String(t.surface||'')),k:nm||SPI.test(String(t.sculpt||''))};});
@@ -2628,7 +2629,7 @@ function plan(){
   const userEls=c.els.filter(k=>EL_3D.includes(k)),removedEls=((S.rec&&S.rec.els)||[]).filter(k=>!c.els.includes(k)),autoEls=[];
   if(!isSp)(sig.must||[]).forEach(k=>{if(c.amount>0&&!E.includes(k)&&EL_3D.includes(k)&&!removedEls.includes(k)){E.push(k);autoEls.push(k);}});
   const stoneCol=color(a.stone);
-  let forms=c.forms.length?[...c.forms]:[...new Set([...AES_FORMS[c.aes],...(fin&&fin.forms||[])])];
+  let forms=c.forms.length?[...c.forms]:[...new Set([...(AES_FORMS[c.aes]||['gel','paint']),...(fin&&fin.forms||[])])];
   if(!c.forms.length&&yv)forms=[...yv.forms];
   if(!c.forms.length&&c.focus==='illus')forms=['paint'];
   let amount=c.amount,perFinger=a.perFinger||(!isSp&&A.feel.includes('亂亂的')),accent=c.accent;
@@ -2861,7 +2862,12 @@ async function drawSculpts(){
     if(!out.length&&LIVEDRAW.left()>12){try{out=await drawSculptTheme(i,t,true);}catch(e){if(e&&e.code==='not_granted')throw e;}}
     if(out.length)TH_SCULPT[i]=out;}));
 }
+// 選的風格不見了（例如回第 1 步重新讀圖，照圖整理的特殊風格換了新的）就改用目前這一個，不要讓生成直接出錯
+function fixAes(){const c=S.choice;if(!c||AES[c.aes])return;
+  const k=[S.analysis&&S.analysis.specialKey,S.rec&&S.rec.aes].find(x=>x&&AES[x])||Object.keys(AES).find(x=>AES[x].special)||Object.keys(AES)[0];
+  console.warn('風格「'+c.aes+'」已經不在了，改用「'+k+'」');c.aes=k;if(S.rec&&!AES[S.rec.aes])S.rec.aes=k;}
 async function build(){
+  fixAes();
   const tk=++BUILD_TK;LIVE={};LIVE_NOTE='';LIVE_EXTRA=[];LIVE_THEME={};SURF=[];TH_SURF=[];TH_SCULPT=[];
   const c=S.choice,a=AES[c.aes],isSp=!!(a&&a.special);
   const keys=c.live?c.els.filter(k=>LIVE_OK.includes(k)).slice(0,4):[];
