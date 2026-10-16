@@ -98,18 +98,29 @@ async function api(req, res, p, url) {
 
 /* ---------- Claude ---------- */
 
+// 今天的呼叫次數：同時好幾個請求進來（生成時元素、甲面、雕塑會一起畫）也要一個一個算，不會算少或寫壞檔案
+let usageLock = Promise.resolve();
+function bumpUsage(day) {
+  const p = usageLock.then(async () => {
+    const usage = await readJson(path.join(DATA, "usage.json"), {});
+    usage[day] = (usage[day] || 0) + 1;
+    await writeJson(path.join(DATA, "usage.json"), usage);
+    return usage[day];
+  });
+  usageLock = p.catch(() => {});
+  return p;
+}
+
 async function ai(req, res) {
   if (DEMO) return demoReply(req, res);
   if (!client) return json(res, { error: "no_api_key" }, 500);
   const body = JSON.parse((await readBody(req)).toString("utf8") || "null");
   if (!body || typeof body.prompt !== "string" || !body.prompt) return json(res, { error: "bad_request" }, 400);
 
-  const usage = await readJson(path.join(DATA, "usage.json"), {});
   const day = new Date().toISOString().slice(0, 10);
-  usage[day] = (usage[day] || 0) + 1;
-  await writeJson(path.join(DATA, "usage.json"), usage);
-  if (usage[day] > DAILY_LIMIT) return json(res, { error: "daily_limit" }, 429);
-  console.log(`Claude 呼叫：今天第 ${usage[day]} 次（上限 ${DAILY_LIMIT}）`);
+  const count = await bumpUsage(day);
+  if (count > DAILY_LIMIT) return json(res, { error: "daily_limit" }, 429);
+  console.log(`Claude 呼叫：今天第 ${count} 次（上限 ${DAILY_LIMIT}）`);
 
   const content = [];
   for (const im of Array.isArray(body.images) ? body.images.slice(0, MAX_IMAGES) : []) {
@@ -120,14 +131,25 @@ async function ai(req, res) {
 
   // 用串流接收：圖多、想得久的時候不會因為連線太久被切斷。
   // 回覆被截斷或不是 JSON 時自動再試一次。
-  const ask = () => client.beta.messages.stream({
-    model: MODEL,
-    max_tokens: SAVE ? 16000 : 32000,
-    output_config: { effort: SAVE ? SAVE_EFFORT : EFFORT },
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
-    messages: [{ role: "user", content }],
-  }).finalMessage();
+  // 生成器可以指定這次要想多深：畫甲面、雕塑、元素這種畫圖工作用 low，回得快很多；沒指定就用設定的深度。
+  const effort = ["low", "medium", "high"].includes(body.effort) ? body.effort : (SAVE ? SAVE_EFFORT : EFFORT);
+  const task = String(body.task || "").slice(0, 20);
+  // 網頁那邊等太久放棄了（關掉連線），這邊也跟著停，不再繼續花錢
+  let stream = null, gaveUp = false;
+  res.on("close", () => { if (!res.writableEnded) { gaveUp = true; if (stream) stream.abort(); } });
+  const ask = () => {
+    stream = client.beta.messages.stream({
+      model: MODEL,
+      max_tokens: SAVE ? 16000 : 32000,
+      output_config: { effort },
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default",
+      messages: [{ role: "user", content }],
+    });
+    return stream.finalMessage();
+  };
+  const t0 = Date.now();
+  const took = () => `${((Date.now() - t0) / 1000).toFixed(1)} 秒`;
 
   let last = null;
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -135,6 +157,7 @@ async function ai(req, res) {
     try {
       msg = await ask();
     } catch (e) {
+      if (gaveUp) { console.log(`Claude ${task || '呼叫'}：網頁等太久先放棄了（${took()}），這次停掉`); return; }
       console.error(`Claude API 錯誤（第 ${attempt} 次）：`, e.message);
       if (e instanceof Anthropic.AuthenticationError) return json(res, { error: "bad_api_key", detail: e.message }, 500);
       if (e instanceof Anthropic.PermissionDeniedError) return json(res, { error: "no_permission", detail: e.message }, 500);
@@ -145,8 +168,9 @@ async function ai(req, res) {
     if (msg.stop_reason === "refusal") { console.error("Claude 拒絕回答這個請求"); return json(res, { error: "refused" }, 422); }
     const text = msg.content.filter(b => b.type === "text").map(b => b.text).join("");
     const result = parseJson(text);
-    if (result !== undefined) return json(res, { result, stop_reason: msg.stop_reason });
+    if (result !== undefined) { console.log(`Claude ${task || '回覆'}：${took()}（思考深度 ${effort}）`); return json(res, { result, stop_reason: msg.stop_reason }); }
     console.error(`Claude 回覆不是完整的 JSON（第 ${attempt} 次，stop_reason=${msg.stop_reason}）：`, text.slice(0, 300));
+    if (gaveUp) return;
     last = { error: msg.stop_reason === "max_tokens" ? "too_long" : "bad_json", detail: text.slice(0, 500) };
   }
   return json(res, last, last.error === "rate_limited" ? 429 : 502);
@@ -422,7 +446,8 @@ async function readJson(f, fallback) {
 
 async function writeJson(f, data) {
   await mkdir(path.dirname(f), { recursive: true });
-  const tmp = f + ".tmp";
+  // 每次用不同的暫存檔名：同時有兩個請求寫同一個檔時，才不會互相搶走對方的暫存檔而出錯
+  const tmp = `${f}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`;
   await writeFile(tmp, JSON.stringify(data, null, 1));
   await rename(tmp, f);
 }

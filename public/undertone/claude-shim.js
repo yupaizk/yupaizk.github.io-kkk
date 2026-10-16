@@ -57,9 +57,11 @@
         images.push({ media_type: b.type || 'image/jpeg', data: await toBase64(b) });
       }
       try {
-        const r = await call('/ai', sendJson('POST', { prompt, images }));
+        // effort：畫圖這類不用想太久的工作傳 'low'，回得快很多；signal：等太久時生成器可以喊停
+        const r = await call('/ai', Object.assign(sendJson('POST', { prompt, images, effort: opts.effort, task: opts.task }), opts.signal ? { signal: opts.signal } : {}));
         return r.result;
       } catch (e) {
+        if (e.name === 'AbortError') throw apiError('aborted');
         if (e.code === 'daily_limit') console.warn('今天的 Claude 呼叫次數已達上限');
         throw e;
       }

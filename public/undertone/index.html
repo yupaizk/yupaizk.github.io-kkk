@@ -369,6 +369,11 @@ html{overflow-x:clip}
 body.expo .ig{pointer-events:none}
 @media (max-width:999px){.work-set{gap:12px}.work-set figure{border-radius:14px}.works-nav{width:40px;height:40px;font-size:15px}}
 
+/* 等待畫面：實際秒數和每一部分的進度 */
+.loader .wait-t{font-size:13px;color:var(--soft);margin-top:6px;font-variant-numeric:tabular-nums}
+.wait-list{list-style:none;padding:0;margin:14px auto 0;max-width:280px;text-align:left;font-size:14px}
+.wait-list li{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--line)}
+.wait-list li span{color:var(--soft)}
 /* 提案頁的顏色：可以刪、可以加 */
 #cPal .addcol{width:44px;height:44px}
 #cPal .pc{position:relative;display:inline-block}
@@ -1828,7 +1833,14 @@ const AI_ERR={no_api_key:'settings.txt 裡還沒填 API 金鑰',bad_api_key:'API
   api_error:'Claude 那邊出錯，等一下再試',network:'連不上 Claude，檢查網路',refused:'Claude 不處理這組圖',
   too_long:'回覆太長被截斷',bad_json:'回覆格式不對',bad_request:'請求被 Claude 退回，黑色視窗裡有詳細原因',too_large:'圖片太大'};
 // 等待畫面：字標一個字母一個字母跳動
-function loader(msg){return `<div class="loader" role="status"><div class="bounce" aria-hidden="true">${[...'UNDERTONE'].map((ch,i)=>`<span style="animation-delay:${i*.09}s">${ch}</span>`).join('')}</div><p>${esc(msg)}</p></div>`;}
+// 等待畫面：不寫「約幾秒」這種猜的數字，只顯示實際已經等了幾秒；畫圖時再列出每一部分畫好了沒
+function loader(msg,extra){return `<div class="loader" role="status"><div class="bounce" aria-hidden="true">${[...'UNDERTONE'].map((ch,i)=>`<span style="animation-delay:${i*.09}s">${ch}</span>`).join('')}</div><p>${esc(msg)}</p>${extra||''}<p class="wait-t" data-t0="${Date.now()}">已經等了 0 秒</p></div>`;}
+setInterval(()=>document.querySelectorAll('.wait-t[data-t0]').forEach(e=>{if(!e.offsetParent)return;const n=Math.floor((Date.now()+0-e.dataset.t0)/1000),lim=+e.dataset.lim||0;
+  e.textContent=`已經等了 ${n} 秒`+(lim?`｜最多等 ${lim} 秒，來不及的部分先用素材庫的樣式`:'');}),500);
+// 即時手繪的時間上限：到了就停掉還沒回來的，用素材庫的樣式代替，不讓人一直等
+const DRAW_LIMIT=30;
+const LIVEDRAW={ac:null,t0:0,left(){return this.ac?DRAW_LIMIT-(Date.now()-this.t0)/1000:DRAW_LIMIT;}};
+function drawOpts(task){return {cache:false,effort:'low',task,signal:LIVEDRAW.ac?LIVEDRAW.ac.signal:undefined};}
 function renderAiBox(){
   const box=$('#aiBox'),dw=$('#descWrap');
   if(!S.imgs.length){
@@ -1875,7 +1887,7 @@ colors 只取主體（指甲、作品本身、客人要的東西）的顏色；�
 "keywords":["2到4個繁體中文形容詞"],"basis":["依據的後台條目或參考圖編號"],"newTry":["後台沒有、這次新嘗試的做法"]}
 多張圖時，不同圖的東西通常是不同主題；客人描述裡指定的位置或分配也要反映在 arrangement 和主題裡。themes 請拆成 1 到 3 個：如果這組指甲是由幾種不同做法的指甲組成（例如一種是煙燻底加金屬雕塑、一種是奶白底加電路線），每一種就是一個主題。${kbText('special','')}`;
   try{
-    const r=await SAMPLE.json(prompt,useImg?{images:S.imgs.map(x=>x.file)}:{});
+    const r=await SAMPLE.json(prompt,useImg?{images:S.imgs.map(x=>x.file),task:'讀圖'}:{task:'讀描述'});
     S.analysis={from:useImg?'image':'text',desc:desc||null,summary:String(r.summary||'').slice(0,160),colors:(r.colors||[]).filter(isHex).slice(0,5),
       aes:AES[r.aes]&&!AES[r.aes].special?r.aes:null,fits:r.fits!==false,elements:(r.elements||[]).filter(k=>EL_NAME[k]&&!k.startsWith('u')).slice(0,4),
       others:(r.others||[]).map(x=>String(x).trim().slice(0,8)).filter(Boolean).slice(0,3),keywords:(r.keywords||[]).slice(0,4)};
@@ -2077,7 +2089,7 @@ ${illList}
 格式：
 {"say":"用繁體中文兩到三句，像美甲師直接對客人說話，說明為什麼這樣配，要提到客人說過的具體內容","aes":"其中一個風格名稱","finish":"其中一個質感 key","elements":[{"key":"元素key","why":"繁體中文一句，說明這個元素跟客人今天的關係"}],"illus":["插畫key"],"shape":"square|squoval|round|oval|almond|coffin|stiletto","len":"short|mid|long|xlong","accent":0到4的整數（0拇指 1食指 2中指 3無名指 4小指，放最多裝飾的那根）,"palette":["5個 #RRGGBB；有指定配色時一定照指定配色（可以調整順序），否則有照片顏色時以照片顏色為主"],"basis":["你依據的後台條目，例如 後台・日系、R01、客人用語・冷冷的、不搭的組合・短甲多飾品"],"newTry":["用到後台沒有的東西就寫在這裡，沒有就空陣列"]}${kbText('rec')}`;
     try{
-      const r=await SAMPLE.json(prompt,{cache:false});
+      const r=await SAMPLE.json(prompt,{cache:false,task:'提案'});
       const els=(r.elements||[]).filter(e=>e&&EL_NAME[e.key]).slice(0,5);
       const why={};els.forEach(e=>why[e.key]=String(e.why||EL_WHY[e.key]).slice(0,80));
       const pal=(r.palette||[]).filter(isHex).slice(0,5);while(pal.length<5)pal.push(base.pal[pal.length]);
@@ -2140,7 +2152,7 @@ function renderRec(){
       <details class="more"><summary>更多圖案</summary><div id="cIllMore"></div></details></div>
     <div class="block"><h3>飾品和圖案的比重</h3><div class="chips" id="cFocus"></div></div>
     <div class="block"><h3>裝飾的做法</h3><p class="stat">同一個愛心可以是凝膠、金屬、浮雕或平面。不選就交給 UNDERTONE。</p><div class="chips" id="cForm"></div></div>
-    <div class="block"><h3>元素怎麼畫</h3><p class="stat">素材庫是固定的樣式；即時手繪會請 UNDERTONE 依今天的狀態重新畫，每次都不一樣，但要多等十幾秒。</p><div class="chips" id="cLive"></div></div>
+    <div class="block"><h3>元素怎麼畫</h3><p class="stat">素材庫是固定的樣式；即時手繪會請 UNDERTONE 依今天的狀態重新畫，每次都不一樣，但要多等一下（最多 ${DRAW_LIMIT} 秒）。</p><div class="chips" id="cLive"></div></div>
     <div class="block"><h3>甲型</h3><div class="chips" id="cShape"></div></div>
     <div class="block"><h3>裝飾最多的那根</h3><div class="chips" id="cAcc"></div></div>
     ${S.mode==='B'?'':palBlock}
@@ -2221,7 +2233,7 @@ async function addCustom(){
 - 顏色柔和、有質感`;
   let ok=false;
   try{
-    const r=await SAMPLE.json(prompt,{cache:false});
+    const r=await SAMPLE.json(prompt,{cache:false,effort:'low',task:'自訂元素'});
     const layers=(r.layers||[]).filter(l=>l&&typeof l.d==='string'&&l.d.length<5000&&SAFE_D.test(l.d)&&isHex(l.color)).slice(0,6);
     layers.forEach(l=>new Path2D(l.d));
     if(!layers.length)throw {code:'bad_shape'};
@@ -2688,7 +2700,7 @@ async function drawElements(keys,extras){
 - 用較深的層做陰影、較淺的層做高光，做出立體感；顏色以色盤為主，可以加深淺變化
 - 只用 M L C Q A Z 指令與絕對座標，每條路徑要閉合，每條 d 不超過 1500 個字元
 - 不要文字、漸層、描邊${kbText('draw',c.aes)}`;
-  const r=await SAMPLE.json(prompt,{cache:false});
+  const r=await SAMPLE.json(prompt,drawOpts('元素'));
   (r.items||[]).forEach(it=>{if(!it)return;const isKey=keys.includes(it.key),isEx=extras.includes(it.key);if(!isKey&&!isEx)return;
     const raw=(it.variants||[]).map(v=>cleanLayers(v&&v.layers,8)).filter(ls=>ls.length);const built=[];
     raw.forEach(ls=>{try{built.push({name:isKey?EL_NAME[it.key]:it.key,...toPaths(ls)});}catch(e){}});if(!built.length)return;
@@ -2705,7 +2717,7 @@ ${idx.map(i=>{const t=sp.themes[i],nb=h=>{if(S.mode!=='B'||!c.pal.length)return 
 畫布是寬 100、高 200 的直式長方形，y=0 是甲尖、y=200 是甲根；之後會被裁成指甲形狀並疊在底色上，所以不要畫底色，主要內容放在 x 10 到 90 之間。
 只回傳 JSON，不要其他文字：{"themes":[{"i":主題編號,"surfaces":[{"layers":[{"d":"SVG path d","color":"#RRGGBB","alpha":0.2 到 1}]}]}]}
 規則：只能用上面列的可用顏色（可以有深淺），不要加別的顏色；每個版本 4 到 14 層；只用 M L C Q A Z 指令與絕對座標，每條路徑要閉合，每條 d 不超過 1500 個字元；不要文字、漸層、描邊；線條請用細長的封閉形狀表現（寬 1 到 3）；細節要多、要精緻，像手繪美甲而不是卡通。`;
-  const r=await SAMPLE.json(prompt,{cache:false});
+  const r=await SAMPLE.json(prompt,drawOpts('甲面'));
   (r.themes||[]).forEach(t=>{if(!t||!idx.includes(t.i))return;const vs=[];
     (t.surfaces||[]).slice(0,2).forEach(sv=>{const ls=cleanLayers(sv&&sv.layers,16);if(!ls.length)return;try{vs.push(toPaths(ls));}catch(e){}});
     if(vs.length)TH_SURF[t.i]=vs;});
@@ -2794,14 +2806,14 @@ async function drawSculptTheme(i,t,simple){
 ${simple?'請畫 1 個就好，形狀簡單一點、元素少一點。':'請畫 2 個明顯不同的版本。'}
 只回傳 JSON，不要其他文字：{"sculpts":[每個版本照上面的回傳格式]}
 規則：座標都在畫布範圍內；paths 只用 M L C Q A Z 指令與絕對座標，每條 d 不超過 2000 個字元；數字最多一位小數。${kbText('draw',S.choice.aes)}`;
-  const r=await SAMPLE.json(prompt,{cache:false});
+  const r=await SAMPLE.json(prompt,drawOpts('雕塑'));
   return (r&&r.sculpts||[]).slice(0,3).map(x=>parseSculpt(x,t.sculptKind,t.sculptMat)).filter(Boolean);
 }
 async function drawSculpts(){
   const c=S.choice,a=AES[c.aes],sp=a.special,idx=sp.themes.map((t,i)=>i).filter(i=>sp.themes[i].sculpt);if(!idx.length)return;
   await Promise.all(idx.map(async i=>{const t=sp.themes[i];let out=[];
     try{out=await drawSculptTheme(i,t,false);}catch(e){if(e&&e.code==='not_granted')throw e;}
-    if(!out.length){try{out=await drawSculptTheme(i,t,true);}catch(e){if(e&&e.code==='not_granted')throw e;}}
+    if(!out.length&&LIVEDRAW.left()>12){try{out=await drawSculptTheme(i,t,true);}catch(e){if(e&&e.code==='not_granted')throw e;}}
     if(out.length)TH_SCULPT[i]=out;}));
 }
 async function build(){
@@ -2813,13 +2825,25 @@ async function build(){
   const extras=isSp&&S.analysis?(S.analysis.others||[]).filter(n=>!PATW.test(n)&&!inTheme(n)&&!Object.values(CUSTOM).some(x=>x.name===n)).slice(0,2):[];
   if(SAVE||S.mode==='B'){extras.length=0;}
   if(SAMPLE&&(keys.length||extras.length||(isSp&&!SAVE))){
-    $('#drawing').innerHTML=loader(isSp?`UNDERTONE 正在畫「${a.special.name}」的甲面和雕塑（約 20～40 秒）`:'UNDERTONE 正在畫今天的元素');
+    if(LIVEDRAW.ac)LIVEDRAW.ac.abort();LIVEDRAW.ac=new AbortController();LIVEDRAW.t0=Date.now();const ac=LIVEDRAW.ac;
+    const jobs=[];
+    if(keys.length||extras.length)jobs.push(['元素',()=>drawElements(keys,extras)]);
+    if(isSp&&!SAVE&&a.special.themes.some(t=>t.surface&&t.base!=='muscle'))jobs.push(['甲面圖樣',drawSurfaces]);
+    if(isSp&&!SAVE&&a.special.themes.some(t=>t.sculpt))jobs.push(['立體雕塑',drawSculpts]);
+    const list=`<ul class="wait-list">${jobs.map(([n],i)=>`<li data-job="${i}">${esc(n)}<span>畫圖中…</span></li>`).join('')}</ul>`;
+    $('#drawing').innerHTML=loader(isSp?`UNDERTONE 正在畫「${a.special.name}」`:'UNDERTONE 正在畫今天的元素',list);
+    {const w=$('#drawing .wait-t');if(w)w.dataset.lim=DRAW_LIMIT;}
     $('#drawing').hidden=false;$('#reroll').disabled=true;
-    const res=await Promise.allSettled([keys.length||extras.length?drawElements(keys,extras):Promise.resolve(),isSp&&!SAVE?drawSurfaces():Promise.resolve(),isSp&&!SAVE?drawSculpts():Promise.resolve()]);
+    const mark=(i,ok)=>{const li=$(`#drawing [data-job="${i}"] span`);if(li&&tk===BUILD_TK)li.textContent=ok?'✓ 畫好了':'來不及，用素材庫';};
+    const all=Promise.allSettled(jobs.map(([,fn],i)=>Promise.resolve().then(fn).then(()=>mark(i,true),e=>{mark(i,false);throw e;})));
+    let timer;const late=new Promise(r=>{timer=setTimeout(()=>{ac.abort();r('late');},DRAW_LIMIT*1000);});
+    const got=await Promise.race([all,late]);clearTimeout(timer);
+    const res=got==='late'?await all:got;
+    if(LIVEDRAW.ac===ac)LIVEDRAW.ac=null;
     if(tk!==BUILD_TK)return;$('#drawing').hidden=true;$('#reroll').disabled=false;
     const denied=res.some(r=>r.status==='rejected'&&r.reason&&r.reason.code==='not_granted');
     if(denied)LIVE_NOTE='沒有開放使用 Claude，改用素材庫的樣式。';
-    else{const miss=[];if((keys.length||extras.length)&&!Object.keys(LIVE).length)miss.push('元素');if(isSp&&!SAVE&&a.special.themes.some(t=>t.surface)&&!TH_SURF.some(Boolean))miss.push('甲面');if(isSp&&!SAVE&&a.special.themes.some(t=>t.sculpt)&&!TH_SCULPT.some(Boolean))miss.push('雕塑');if(miss.length)LIVE_NOTE=`這次 UNDERTONE 沒畫好${miss.join('和')}，先用素材庫的樣式代替。`;}
+    else{const miss=[];if((keys.length||extras.length)&&!Object.keys(LIVE).length)miss.push('元素');if(isSp&&!SAVE&&a.special.themes.some(t=>t.surface)&&!TH_SURF.some(Boolean))miss.push('甲面');if(isSp&&!SAVE&&a.special.themes.some(t=>t.sculpt)&&!TH_SCULPT.some(Boolean))miss.push('雕塑');if(miss.length)LIVE_NOTE=`這次 UNDERTONE ${ac.signal.aborted?`${DRAW_LIMIT} 秒內沒畫完`:'沒畫好'}${miss.join('和')}，先用素材庫的樣式代替。`;}
   }
   HIST=[];if($('#reviseOut'))$('#reviseOut').innerHTML='';
   if(isSp)registerThemeMotifs(a.special.themes);
@@ -2858,7 +2882,7 @@ async function oneSculpt(kind,mat,desc){
   const r=await SAMPLE.json(`你是美甲師，要設計一個指甲上的大型立體裝飾，只畫形狀，立體感和材質光澤由程式處理。
 畫布和指甲一樣：寬 100、高 200 的直式長方形，y=0 是甲尖、y=200 是甲根。裝飾佔甲面 60% 到 85%。
 內容：${sculptSpec(kind,mat,desc)}
-只回傳 JSON，照上面的回傳格式，不要其他文字。只用 M L C Q A Z 指令與絕對座標；每條 d 不超過 2500 個字元。`,{cache:false});
+只回傳 JSON，照上面的回傳格式，不要其他文字。只用 M L C Q A Z 指令與絕對座標；每條 d 不超過 2500 個字元。`,{cache:false,effort:'low',task:'雕塑'});
   return parseSculpt(r,kind,mat);
 }
 const FN=n=>n.map(i=>FINGERS[i].n).join('、');
@@ -2893,7 +2917,7 @@ $('#reviseBtn').onclick=async()=>{
 value 規則：pal＝5 個 #RRGGBB（照原本順序改）；shape／len＝key；motif＝甲面 key；baseColor＝#RRGGBB；matte＝true 或 false；addEls＝元素 key 陣列，新元素寫 "new:名稱"；removeEls＝元素 key 陣列；elForm＝做法 key（把這些手指上的元素都改成這個做法，例如不要金屬就改成 gel）；scale＝0.5 到 1.8；sculpt＝{"action":"remove|add|redraw","kind":"shape|piped","material":"metal|flesh|wet|gel|bone","color":"#RRGGBB","note":"要怎麼畫"}；sculptMat＝{"material":"...","color":"#RRGGBB"}（只換材質不重畫）；sculptColor＝#RRGGBB（只換立體裝飾的顏色，例如「增生不要紅色」就給一個不紅的膚色或粉色）；sculptPlace＝陣列，依序對應 fingers 裡有立體裝飾的手指，每個是 {"place":"base|middle|tip|left|right","rotate":-60 到 60 的角度,"scale":0.5 到 1.4,"flip":true 或 false}（移動、轉向、縮放立體裝飾；「交錯」「不同」「錯開」就讓每根的位置和方向都不一樣，例如甲根、中段偏右、甲尖輪流）。
 規則：手指編號 拇指=0 食指=1 中指=2 無名指=3 小指=4；「整體」「全部」代表 0 到 4。只改客人明確說要改的，客人沒提到的東西一律不要動，尤其不要拿掉。客人說「保留」「留著」「還是要有」某樣東西時：目前有就不動；目前沒有就代表要加回來（例如瘀青 → motif 設成 bruise）。要求比較模糊但不會刪東西時（例如「位置可以交錯」「再多一點」），就照最合理的方式直接做，不要只問問題；只有可能刪掉東西、又不確定指哪幾根時，才寫進 cannot 問。cannot 裡用「你」稱呼客人，不要寫成「客人」；不要出現任何程式代碼（例如 u1、th0_1、key 名稱），一律用中文名稱。「不要金屬」要同時處理立體裝飾的材質和元素做法。${kbText('revise',c.aes)}`;
   let r;
-  try{r=await SAMPLE.json(prompt,{cache:false});}catch(e){btn.disabled=false;btn.textContent='照這樣改';out.innerHTML=`<p class="note quiet">${e&&e.code==='not_granted'?'沒有開放使用 Claude。':'這次沒有理解成功，可以換個說法再試一次。'}</p>`;return;}
+  try{r=await SAMPLE.json(prompt,{cache:false,task:'用說的修改'});}catch(e){btn.disabled=false;btn.textContent='照這樣改';out.innerHTML=`<p class="note quiet">${e&&e.code==='not_granted'?'沒有開放使用 Claude。':'這次沒有理解成功，可以換個說法再試一次。'}</p>`;return;}
   btn.textContent='修改中…';
   HIST.push(snapPlan(text));if(HIST.length>10)HIST.shift();
   const clean=t=>String(t).replace(/\b(u\d+|th\d+_\w+|ov_\w+)\b/g,m=>EL_NAME[m]||MOTIF_NAME[m]||'').replace(/（\s*）|\(\s*\)/g,'').replace(/客人/g,'你').replace(/客人/g,'你');
