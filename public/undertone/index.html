@@ -342,33 +342,39 @@ body:not(.modeB) section[data-step="1"] .split{grid-template-columns:1fr;gap:0}
 body.atHome .wrap{padding-top:0}
 @media (max-width:999px){
   .screen.on[data-step="0"],.screen.on[data-step="2"],.screen.on[data-step="3"]{min-height:0}
-  .result-actions{flex-wrap:wrap}.result-actions .btn{flex:1 1 40%}
+  .result-actions{flex-wrap:wrap}.result-actions .btn{flex:1 1 40%}.result-actions .btn.main{flex-basis:100%}
   .s1-go{flex-wrap:wrap}
   .hero{min-height:calc(100vh - 40px)}
 }
 
 /* ---------- 首頁作品區：一套＝一支影片＋一張照片，五套輪播；最下面 IG ---------- */
-.works{margin:180px auto 0;max-width:1000px}
-.works-view{overflow:hidden;touch-action:pan-y}
-.works-track{display:flex;transition:transform .8s cubic-bezier(.6,0,.2,1)}
-.work-set{flex:0 0 100%;display:flex;justify-content:center;align-items:center;gap:24px;opacity:.25;transition:opacity .8s}
-.work-set.on{opacity:1}
-.work-set figure{margin:0;border-radius:20px;overflow:hidden;background:var(--panel);height:clamp(220px,calc((100vw - 64px)/1.33),580px)}
+.works{margin:180px 0 0;position:relative;width:100vw;margin-left:calc(50% - 50vw)}
+html{overflow-x:clip}
+.works-view{position:relative;overflow:hidden;touch-action:pan-y;height:var(--wh,580px)}
+.work-set{position:absolute;left:50%;top:0;display:flex;align-items:center;gap:24px;transition:transform .8s cubic-bezier(.6,0,.2,1),opacity .8s,filter .8s;opacity:0;pointer-events:none}
+.work-set.near{opacity:.55;filter:brightness(.55) saturate(.7);pointer-events:auto;cursor:pointer}
+.work-set.on{opacity:1;filter:none;pointer-events:auto}
+.work-set figure{margin:0;border-radius:20px;overflow:hidden;background:var(--panel);height:var(--wh,580px)}
 .work-set .wv{aspect-ratio:9/16}.work-set .wp{aspect-ratio:3/4}
 .works img,.works video{width:100%;height:100%;object-fit:cover;display:block}
-.works-bar{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:28px}
-.works-nav{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:16px;cursor:pointer;display:grid;place-items:center}
+.works-nav{position:absolute;top:calc(var(--wh,580px)/2);transform:translateY(-50%);z-index:2;width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:18px;cursor:pointer;display:grid;place-items:center;box-shadow:0 4px 18px rgba(0,0,0,.12)}
 .works-nav:hover{background:var(--panel)}
-.works-dots{display:flex;gap:10px}
+#worksPrev{right:calc(50% + var(--wa,440px))}#worksNext{left:calc(50% + var(--wa,440px))}
+.works-dots{display:flex;justify-content:center;gap:10px;margin-top:28px}
 .works-dots button{width:8px;height:8px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer;transition:width .3s,background .3s}
 .works-dots button[aria-current="true"]{width:26px;border-radius:4px;background:var(--ink)}
-.works-count{font-size:13px;letter-spacing:.2em;color:var(--soft);min-width:56px}
 .ig{display:inline-flex;flex-direction:column;align-items:center;gap:10px;margin-top:160px;color:var(--soft);text-decoration:none;font-size:14px;letter-spacing:.2em}
 .ig img{width:132px;height:132px;opacity:.78}
 .ig:hover img{opacity:1}
 body.expo .ig{pointer-events:none}
-@media (max-width:999px){.work-set{gap:12px}.work-set figure{border-radius:14px}}
+@media (max-width:999px){.work-set{gap:12px}.work-set figure{border-radius:14px}.works-nav{width:40px;height:40px;font-size:15px}}
 
+/* 每一頁左上角同一個「上一頁」：標題左邊有空間就放旁邊，沒有就放在標題上面 */
+.wrap{position:relative}
+.page-back{position:absolute;z-index:5;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:8px 18px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
+.page-back:hover{background:var(--panel)}
+.page-back[hidden]{display:none}
+.screen.backpad{padding-top:56px}
 /* 第 1 步：手機 QR code 面板 */
 .phone-panel[hidden],.camrow[hidden]{display:none}
 .phone-panel{display:flex;align-items:center;gap:36px;padding:28px 32px;background:var(--panel);border:1px solid var(--line);border-radius:24px}
@@ -440,20 +446,22 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
         <li><b>戴上試試</b><span>用文字修改，再用鏡頭試戴</span></li>
       </ol>
       <div class="works" id="works" role="region" aria-roledescription="輪播" aria-label="UNDERTONE 作品">
-        <div class="works-view"><div class="works-track" id="worksTrack"></div></div>
-        <div class="works-bar"><button type="button" class="works-nav" id="worksPrev" aria-label="上一套">←</button><div class="works-dots" id="worksDots"></div><span class="works-count" id="worksCount"></span><button type="button" class="works-nav" id="worksNext" aria-label="下一套">→</button></div>
+        <div class="works-view" id="worksTrack"></div>
+        <button type="button" class="works-nav" id="worksPrev" aria-label="上一套">←</button><button type="button" class="works-nav" id="worksNext" aria-label="下一套">→</button>
+        <div class="works-dots" id="worksDots"></div>
       </div>
       <a class="ig" id="ig" href="https://www.instagram.com/__voyupai/" target="_blank" rel="noopener">
         <img src="media/ig-qr.png" alt="Instagram QR code" loading="lazy"><span>@__VOYUPAI</span></a>
     </div>
   </section>
 
+  <button type="button" class="page-back" id="pageBack" hidden>← 上一頁</button>
   <section class="screen" data-step="0">
     <h2>從哪裡開始？</h2>
     <p class="lead">兩條路都會走到同一個地方：一組只屬於今天的指甲，最後還能用文字更改。</p>
     <div class="modes">
       <button class="mode" data-mode="A"><b>交給感覺</b><span>還沒有想法也沒關係。說說今天的心情，UNDERTONE 替你想。</span><em>可以用手機傳一張今天的穿搭，當作配色參考</em></button>
-      <button class="mode" data-mode="B"><b>我有想要的</b><span>心裡已經有元素或圖樣，像星星、鍊條、某張圖。給我圖，或直接寫下來。</span><em>可以忠於原圖，也可以換成某種風格</em></button>
+      <button class="mode" data-mode="B"><b>我有想要的</b><span>心裡已經有元素或圖樣，像星星、鍊條、某張圖。給我圖，或直接寫下來。</span><em>照你的圖還原造型和配色</em></button>
     </div>
   </section>
 
@@ -485,7 +493,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
         <textarea id="imgDesc" placeholder="這些圖的重點是…" style="min-height:74px"></textarea>
         <div class="actions" style="margin-top:10px"><button class="btn main" id="descDone">完成</button></div></div>
     </div>
-    <div class="block" id="bRouteWrap" data-ma-hide><h3>要怎麼做</h3><p class="stat">忠於原圖：照圖的造型和配色還原。套用風格：保留你要的元素，換成後台風格的做法。</p>
+    <div class="block" id="bRouteWrap" style="display:none"><h3>要怎麼做</h3><p class="stat">忠於原圖：照圖的造型和配色還原。套用風格：保留你要的元素，換成後台風格的做法。</p>
       <div class="chips" id="bRoute"></div>
       <div id="trendBox" hidden></div></div>
     <div class="block" id="bAmtWrap" data-ma-hide><h3>想要多繁複</h3><p class="stat">決定幾根指甲畫滿、元素放多少。</p><div class="chips" id="bAmt"></div></div>
@@ -493,7 +501,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
     <div class="actions s1-go">
       <button class="btn main" id="to2">下一步</button>
       <button class="btn ghost" id="skip1" data-mb-hide>先不放照片</button>
-      <button class="linkbtn" id="toMode">換一條路</button>
+      <button class="linkbtn" id="toMode" hidden>上一頁</button>
     </div>
   </section>
 
@@ -546,7 +554,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
       <textarea id="note" placeholder="例如：最近很累，但想要有一點點亮的東西"></textarea>
     </div>
     <div class="actions">
-      <button class="btn ghost" id="qBack">上一題</button>
+      <button class="btn ghost" id="qBack" hidden>上一頁</button>
       <button class="btn main" id="qNext">下一題</button>
     </div>
   </section>
@@ -561,7 +569,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
     <div class="actions result-actions">
       <button class="btn main" id="toTry">戴上手試試</button>
       <button class="btn ghost" id="reroll">再生一組</button>
-      <button class="btn ghost" id="back3">回去調整</button>
+      <button class="btn ghost" id="back3" hidden>上一頁</button>
       <button class="btn ghost" id="restart">重新開始</button>
     </div>
     </div><div class="split-side">
@@ -582,7 +590,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
     </div><div class="split-side">
     <div class="actions">
       <button class="btn main" id="tryShot" disabled>拍下來</button>
-      <button class="btn ghost" id="tryBack">回到成品</button>
+      <button class="btn ghost" id="tryBack" hidden>上一頁</button>
     </div>
     <div class="actions" style="margin-top:8px">
       <label class="linkbtn" style="position:relative;overflow:hidden">改用手的照片<input type="file" id="tryFile" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer"></label>
@@ -599,7 +607,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
     <h2>測試紀錄</h2>
     <p class="lead">每一組生成的指甲都在這裡，連同當時的回答和評分。</p>
     <div class="actions" style="margin-top:0">
-      <button class="btn ghost" id="logBack">回到剛剛的畫面</button>
+      <button class="btn ghost" id="logBack" hidden>上一頁</button>
       <button class="btn ghost" id="exportCsv">匯出全部（CSV）</button>
     </div>
     <div id="logList"><p class="loading">讀取中…</p></div>
@@ -1630,6 +1638,7 @@ function go(n){
     b.className=k===n?'now':(k<=S.maxStep?'done':'');b.disabled=k>S.maxStep;});
   window.scrollTo({top:0,behavior:'instant'});
   if(typeof loop==='function'){if(n===4){windowResized();loop();}else noLoop();}
+  if(typeof placeBack==='function')requestAnimationFrame(placeBack);
 }
 document.querySelectorAll('nav.steps button').forEach(b=>b.addEventListener('click',()=>{const k=+b.dataset.go;if(TRY.on&&k<=S.maxStep){closeTry();if(k!==4)go(k);return;}if(k<=S.maxStep&&k!==S.step)go(k);}));
 
@@ -1922,7 +1931,7 @@ $('#intensity').addEventListener('input',e=>$('#intVal').textContent=e.target.va
 const Q_ORDER=[0,1,2,3,4,6],QN=Q_ORDER.length; // 比重（5）不問了，用預設值，可在提案頁細調
 chips('focusQ',Object.keys(FOCUS),'focusQ','both','radio',FOCUS);document.getElementById('focusQ').style.flexDirection='column';document.getElementById('focusQ').style.alignItems='flex-start';
 function showQ(i){S.q=i;document.querySelectorAll('.q').forEach(q=>{const on=+q.dataset.q===Q_ORDER[i];q.classList.toggle('on',on);if(on)q.querySelector('.qcount').textContent=`${i+1}／${QN}`;});
-  $('#qBack').textContent=i===0?'回到照片':'上一題';$('#qNext').textContent=i===QN-1?'看推薦':'下一題';}
+$('#qNext').textContent=i===QN-1?'看推薦':'下一題';}
 showQ(0);
 $('#qBack').onclick=()=>S.q===0?go(1):showQ(S.q-1);
 $('#qNext').onclick=()=>S.q<QN-1?showQ(S.q+1):startRec();
@@ -2127,7 +2136,7 @@ function renderRec(){
     <div class="block"><h3>顏色</h3><div class="pal" id="cPal"></div></div>
     <div class="block"><h3>留給 UNDERTONE 多少空間？</h3><p class="stat">UNDERTONE 也有自己的想法，可能會加、減或換掉一些東西。</p><div class="chips" id="cFree"></div></div>
     </div></details>
-    <div class="actions pitch-go"><button class="btn main" id="toGen">生成</button><button class="btn ghost" id="back2">回去改答案</button></div>
+    <div class="actions pitch-go"><button class="btn main" id="toGen">生成</button><button class="btn ghost" id="back2" hidden>上一頁</button></div>
 `;
   $('#tune').addEventListener('toggle',e=>{TUNE_OPEN=e.target.open;});
   {const groups={};Object.keys(AES).forEach(k=>{const g=AES[k].group||'照片風格';(groups[g]=groups[g]||[]).push(k);});
@@ -3035,7 +3044,7 @@ let LOG=[];
 function openLog(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.dataset.step==='log'));
   document.querySelector('nav.steps').style.display='none';$('#openLog').style.visibility='hidden';
-  if(typeof noLoop==='function')noLoop();window.scrollTo({top:0,behavior:'instant'});loadLog();
+  if(typeof noLoop==='function')noLoop();window.scrollTo({top:0,behavior:'instant'});loadLog();requestAnimationFrame(placeBack);
 }
 function closeLog(){document.querySelector('nav.steps').style.display='';$('#openLog').style.visibility='';go(S.step);}
 $('#openLog').onclick=openLog;$('#logBack').onclick=closeLog;
@@ -3248,7 +3257,7 @@ function openTry(){
   $('#openLog').style.visibility='hidden';
   window.scrollTo({top:0,behavior:'instant'});
   TRY.on=true;TRY.shots=[];renderShots();$('#tryShot').disabled=true;$('#tryCam').hidden=true;
-  placeCanvas('tryStage');$('#tryStage').style.aspectRatio='3/4';windowResized();loop();
+  placeCanvas('tryStage');$('#tryStage').style.aspectRatio='3/4';windowResized();loop();requestAnimationFrame(placeBack);
   startCam();
 }
 function closeTry(){
@@ -3281,10 +3290,16 @@ const WORKS=[{d:'Day 12–14',alt:'穿搭照片和五指黑底藍白液態設計
     el.innerHTML=`<figure class="wv"><video muted playsinline preload="${i?'none':'auto'}" poster="media/set-${n}-poster.jpg" aria-label="${w.d} 過程影片"><source src="media/set-${n}.mp4" type="video/mp4"></video></figure><figure class="wp"><img src="media/set-${n}.jpg" alt="${w.alt}" loading="lazy"></figure>`;
     tr.appendChild(el);const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`第 ${n} 套`);b.onclick=()=>show(i);dots.appendChild(b);
     el.querySelector('video').addEventListener('ended',()=>show(cur+1));});
-  const sets=[...tr.children],vids=sets.map(e=>e.querySelector('video'));
-  function show(i){cur=(i+WORKS.length)%WORKS.length;tr.style.transform=`translateX(${-cur*100}%)`;
-    sets.forEach((e,k)=>e.classList.toggle('on',k===cur));[...dots.children].forEach((b,k)=>b.setAttribute('aria-current',k===cur));
-    $('#worksCount').textContent=`${String(cur+1).padStart(2,'0')} / ${String(WORKS.length).padStart(2,'0')}`;
+  const sets=[...tr.children],vids=sets.map(e=>e.querySelector('video')),N=WORKS.length;
+  sets.forEach((e,k)=>e.addEventListener('click',()=>{if(k!==cur)show(k);}));
+  // 前一套、後一套在兩側壓暗露出來；照片和影片一樣高，高度跟著視窗寬
+  function layout(){const W=$('#works').clientWidth||window.innerWidth,h=Math.round(Math.max(220,Math.min(580,(W-(W<1000?60:420))/1.33)));
+    $('#works').style.setProperty('--wh',h+'px');const sw=sets[cur].offsetWidth,gap=W<1000?16:96,step=sw*.93+gap;
+    $('#works').style.setProperty('--wa',(W<1000?Math.min(sw/2-20,W/2-48):sw/2+gap/2-26)+'px');
+    sets.forEach((e,k)=>{let d=(k-cur+N)%N;if(d>N/2)d-=N;e.classList.toggle('on',d===0);e.classList.toggle('near',Math.abs(d)===1);
+      e.style.transform=`translateX(calc(-50% + ${d*step}px)) scale(${d?.86:1})`;});}
+  new ResizeObserver(()=>layout()).observe($('#works'));
+  function show(i){cur=(i+N)%N;layout();[...dots.children].forEach((b,k)=>b.setAttribute('aria-current',k===cur));
     vids.forEach((v,k)=>{if(k!==cur){v.pause();return;}v.preload='auto';v.currentTime=0;if(seen)v.play().catch(()=>{});});
     const nx=vids[(cur+1)%vids.length];if(nx.preload==='none')nx.preload='metadata';}
   $('#worksPrev').onclick=()=>show(cur-1);$('#worksNext').onclick=()=>show(cur+1);
@@ -3294,6 +3309,20 @@ const WORKS=[{d:'Day 12–14',alt:'穿搭照片和五指黑底藍白液態設計
   show(0);})();
 $('#homeLog').onclick=()=>openLog();
 $('#homeBtn2').onclick=()=>$('#homeBtn').onclick();
+// 統一的「上一頁」：照目前在哪一頁決定回去哪裡（原本各頁的返回按鈕留著當動作，畫面上藏起來）
+$('#pageBack').onclick=()=>{const st=S.step,c=id=>{const b=$(id);if(b)b.click();};
+  const on=(document.querySelector('.screen.on')||{dataset:{}}).dataset.step;if(on==='try')return c('#tryBack');if(on==='log')return c('#logBack');
+  ({0:()=>$('#homeBtn').onclick(),1:()=>c('#toMode'),2:()=>c('#qBack'),3:()=>c('#back2'),4:()=>c('#back3')}[st]||(()=>{}))();};
+function placeBack(){const b=$('#pageBack'),sc=document.querySelector('.screen.on'),wrap=b.parentElement;
+  if(!sc||S.step==='home'||sc.dataset.step==='home'){b.hidden=true;return;}b.hidden=false;
+  document.querySelectorAll('.screen.backpad').forEach(e=>{if(e!==sc)e.classList.remove('backpad');});
+  const wr=wrap.getBoundingClientRect(),pl=parseFloat(getComputedStyle(wrap).paddingLeft)||0,x0=wr.left+pl,bw=b.offsetWidth,bh=b.offsetHeight;
+  sc.classList.remove('backpad');const st=sc.getBoundingClientRect().top;
+  const h=[...sc.querySelectorAll('h2')].filter(e=>e.offsetParent).sort((a,c)=>a.getBoundingClientRect().top-c.getBoundingClientRect().top)[0];
+  const hr=h&&h.getBoundingClientRect();
+  if(h&&hr.top-st<160&&hr.left-x0>=bw+24){b.style.left=pl+'px';b.style.top=(hr.top-wr.top+(Math.min(hr.height,60)-bh)/2)+'px';return;}
+  sc.classList.add('backpad');const sr=sc.getBoundingClientRect();b.style.left=(Math.max(x0,sr.left)-wr.left)+'px';b.style.top=(sr.top-wr.top+4)+'px';}
+new ResizeObserver(()=>placeBack()).observe($('#pageBack').parentElement);addEventListener('resize',placeBack);
 $('#homeBtn').onclick=()=>{
   if(S.step==='home')return;
   const d=sheet(`<h3>回到首頁？</h3><p class="stat">這組還沒完成的設計會清掉；已經存進紀錄的不會不見。</p>
