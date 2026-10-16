@@ -395,6 +395,23 @@ body.atHome .home-rail{display:flex}
 .rail-dot.on span{color:var(--ink)}
 @media (max-width:760px){.home-rail{display:none!important}}
 @media (min-width:761px){html:has(body.atHome){scrollbar-width:none}html:has(body.atHome)::-webkit-scrollbar{display:none}}
+/* 頁面裡的取色盤 */
+button.addcol{background:none;font:inherit;padding:0;cursor:pointer}
+.swb{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);padding:0;cursor:pointer;background:var(--chip)}
+.swb.add{border-style:dashed;color:var(--soft);font-size:18px}
+#famOwnPal .swb{width:40px;height:40px}
+.pick-sw{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+.pick-sw button{aspect-ratio:1;border-radius:50%;border:1px solid var(--line);padding:0;cursor:pointer}
+.pick-sw button.on{outline:2px solid var(--ink);outline-offset:2px}
+.pick-row{display:flex;align-items:center;gap:12px;margin-top:14px;font-size:14px;color:var(--soft)}
+.pick-row span{width:3em;flex:none}
+.pick-row input{flex:1;-webkit-appearance:none;appearance:none;height:14px;border-radius:7px;border:1px solid var(--line);margin:0}
+.pick-row input::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.pick-row input::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--ink)}
+.pick-h{background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
+.pick-now{display:flex;align-items:center;gap:12px;margin-top:16px;font-size:14px;color:var(--soft);font-variant-numeric:tabular-nums}
+.pick-now i{width:44px;height:44px;border-radius:50%;border:1px solid var(--line)}
+.sheet-card:has(.pick-sw){max-width:480px}
 /* 等待畫面：實際秒數和每一部分的進度 */
 .loader .wait-t{font-size:13px;color:var(--soft);margin-top:6px;font-variant-numeric:tabular-nums}
 .wait-list{list-style:none;padding:0;margin:14px auto 0;max-width:280px;text-align:left;font-size:14px}
@@ -433,7 +450,7 @@ body.atHome .home-rail{display:flex}
 /* 題目頁：題號放左上角，字和選項放大、拉開距離，按鈕不要一條長黑棒 */
 section[data-step="2"]{max-width:none;position:relative}
 section[data-step="2"]>.q,section[data-step="2"]>.actions{max-width:860px;margin-inline:auto;width:100%}
-section[data-step="2"] .qcount{position:absolute;top:0;left:0;font-size:15px;letter-spacing:.16em;margin:0}
+section[data-step="2"] .qcount{font-size:15px;letter-spacing:.16em;margin:0 0 8px}
 section[data-step="2"] h2{font-size:44px;margin-bottom:12px}
 section[data-step="2"] .lead{margin-bottom:40px}
 section[data-step="2"] .chips{gap:12px}
@@ -566,9 +583,10 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
       <h2>今天想穿什麼顏色？</h2>
       <p class="lead">最多選兩組疊在一起，例如冷色加深色。不選就交給 UNDERTONE。</p>
       <div id="famChips" class="famgrid"></div>
+      <div class="actions" style="margin-top:14px"><button class="btn ghost" id="famOwn" type="button">自己挑顏色</button></div>
+      <div class="block" id="famOwnBox" hidden><h3>自己挑的顏色</h3><p class="stat">點＋挑顏色，最多 3 個；挑了就以你挑的為主。點已經挑的顏色可以換掉。</p><div class="pal" id="famOwnPal"></div></div>
       <div class="block" id="famPrev" hidden><h3>這組配色</h3><div class="pal" id="famPal"></div>
-        <div class="actions" style="margin-top:10px"><button class="btn ghost" id="famShuffle" type="button">換一組</button><button class="btn ghost" id="famOwn" type="button">自己挑</button></div>
-        <div id="famOwnBox" hidden style="margin-top:10px"><p class="stat">點色塊挑顏色，最多 3 個；挑了就以你挑的為主。</p><div class="pal" id="famOwnPal"></div></div></div>
+        <div class="actions" style="margin-top:10px"><button class="btn ghost" id="famShuffle" type="button">換一組</button></div></div>
     </div>
     <div class="q" data-q="4">
       <div class="qcount"></div>
@@ -1780,8 +1798,8 @@ function renderPal(){
   $('#localPal').querySelectorAll('[data-rescol]').forEach(b=>b.onclick=()=>restoreCol(b.dataset.rescol));
   const sg=suggestCols();if(sg.length)$('#localPal').insertAdjacentHTML('beforeend',`<span class="stat" style="align-self:center;margin-left:8px;flex-basis:100%;margin-top:6px">圖上還有這些顏色，點一下加進配色：</span>${sg.map(c=>`<button type="button" data-sgcol="${c}" style="background:${c}" class="sgcol" aria-label="加入 ${c}" title="加入 ${c}"></button>`).join('')}`);
   $('#localPal').querySelectorAll('[data-sgcol]').forEach(b=>b.onclick=()=>addCol(b.dataset.sgcol));
-  if(S.imgs.length||S.mode==='B'){$('#localPal').insertAdjacentHTML('beforeend',`<label class="addcol" title="自己加顏色" aria-label="自己加顏色">＋<input type="color" id="addColIn" value="#6a8fd0"></label>`);
-    $('#addColIn').onchange=e=>addCol(e.target.value);}
+  if(S.imgs.length||S.mode==='B'){$('#localPal').insertAdjacentHTML('beforeend',`<button type="button" class="addcol" id="addColIn" title="自己加顏色" aria-label="自己加顏色">＋</button>`);
+    $('#addColIn').onclick=async()=>{const h=await pickColor();if(h)addCol(h);};}
   $('#palHint').hidden=!(S.imgs.length||S.mode==='B');
   $('#palHint').textContent=S.analysis&&S.addCols.length&&!S.analysis.withAdd?'點色塊可以刪掉；點上面的照片放大取色；按「＋」自己加色。加了新顏色後，按下面的「完成」重新解析，主題才會用上。':'點色塊可以刪掉不要的顏色（例如背景）；點上面的照片放大取色；按「＋」自己加色。';
 }
@@ -2004,16 +2022,16 @@ function renderFam(){
   $('#famChips').querySelectorAll('[data-fam]').forEach(b=>b.onclick=()=>{const k=b.dataset.fam;
     if(k==='none')S.fam.keys=[];else if(S.fam.keys.includes(k))S.fam.keys=S.fam.keys.filter(x=>x!==k);else{S.fam.keys.push(k);if(S.fam.keys.length>2)S.fam.keys.shift();}
     S.fam.seed=1;renderFam();});
-  const on=S.fam.keys.length>0||S.fam.own.length>0;$('#famPrev').hidden=!on;
+  $('#famPrev').hidden=!S.fam.keys.length;if(S.fam.own.length)$('#famOwnBox').hidden=false;
   const pal=S.fam.keys.length?famPalette(S.fam.keys,S.fam.seed):[];
   $('#famPal').innerHTML=pal.map(c=>`<i style="background:${c}" title="${c}"></i>`).join('');
   $('#famShuffle').hidden=!S.fam.keys.length;
-  $('#famOwnPal').innerHTML=[0,1,2].map(i=>`<label style="background:${S.fam.own[i]||'transparent'};${S.fam.own[i]?'':'border-style:dashed'}" title="${S.fam.own[i]?'換這個顏色':'加一個顏色'}">${S.fam.own[i]?'':'<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--soft)">＋</span>'}<input type="color" data-own="${i}" value="${S.fam.own[i]||'#9fb3c8'}"></label>`).join('')+(S.fam.own.length?'<button type="button" class="linkbtn" id="famOwnClear" style="margin-left:8px">清掉</button>':'');
-  $('#famOwnPal').querySelectorAll('[data-own]').forEach(inp=>inp.onchange=()=>{const i=+inp.dataset.own;S.fam.own[i]=inp.value;S.fam.own=S.fam.own.filter(Boolean).slice(0,3);renderFam();});
+  $('#famOwnPal').innerHTML=[0,1,2].map(i=>S.fam.own[i]?`<button type="button" class="swb" data-own="${i}" style="background:${S.fam.own[i]}" aria-label="換掉第 ${i+1} 個顏色"></button>`:(i===S.fam.own.length?`<button type="button" class="swb add" data-own="${i}" aria-label="加一個顏色">＋</button>`:'')).join('')+(S.fam.own.length?'<button type="button" class="linkbtn" id="famOwnClear" style="align-self:center;margin-left:8px">清掉</button>':'');
+  $('#famOwnPal').querySelectorAll('[data-own]').forEach(b=>b.onclick=async()=>{const i=+b.dataset.own;const h=await pickColor(S.fam.own[i]);if(!h)return;S.fam.own[i]=h;S.fam.own=S.fam.own.filter(Boolean).slice(0,3);renderFam();});
   if($('#famOwnClear'))$('#famOwnClear').onclick=()=>{S.fam.own=[];renderFam();};
 }
 $('#famShuffle').onclick=()=>{S.fam.seed++;renderFam();};
-$('#famOwn').onclick=()=>{$('#famOwnBox').hidden=!$('#famOwnBox').hidden;$('#famPrev').hidden=false;};
+$('#famOwn').onclick=()=>{$('#famOwnBox').hidden=!$('#famOwnBox').hidden;};
 renderFam();
 const SIMILAR={spiral:/漩渦|螺旋|渦|旋/,stars:/星/,sunstar:/放射|太陽|八角/,dot1:/點|圓點/,loopline:/捲|圈/,plaid:/格/};
 function drawAccents(g,cols,n,metal,seed){const x=g.drawingContext;let st=seed*9301+49297;const Rn=()=>{st=(st*16807)%2147483647;return st/2147483647;};
@@ -2210,20 +2228,21 @@ function renderRec(){
   $('#cMore').innerHTML=Object.entries(EL_CAT).map(([cat,ks])=>{const list=ks.filter(k=>others.includes(k));if(!list.length)return '';
     return `<div class="cat"><h4>${cat}</h4><div class="chips">${list.map(k=>`<label><input type="checkbox" name="cEls" value="${k}" ${c.els.includes(k)?'checked':''}><span>${esc(elLabel(k))}${elSwatch(k)}</span></label>`).join('')}</div></div>`;}).join('');
   {const u=[...new Set(c.pal.filter(isHex).map(h=>h.toLowerCase()))];
-   $('#cPal').innerHTML=u.map((h,i)=>`<span class="pc"><input type="color" value="${h}" data-i="${i}" aria-label="顏色 ${i+1}"><button type="button" class="pc-rm" data-rm="${h}" aria-label="刪掉這個顏色">×</button></span>`).join('')
-     +(u.length<5?`<label class="addcol" title="自己加顏色" aria-label="自己加顏色">＋<input type="color" id="cPalAdd" value="#C8C8C8"></label>`:'');
+   $('#cPal').innerHTML=u.map((h,i)=>`<span class="pc"><button type="button" class="swb" data-i="${i}" data-hex="${h}" style="background:${h}" aria-label="換掉顏色 ${i+1}"></button><button type="button" class="pc-rm" data-rm="${h}" aria-label="刪掉這個顏色">×</button></span>`).join('')
+     +(u.length<5?`<button type="button" class="addcol" id="cPalAdd" title="自己加顏色" aria-label="自己加顏色">＋</button>`:'');
+   $('#cPal').querySelectorAll('.swb[data-i]').forEach(b=>b.onclick=async()=>{const h=await pickColor(b.dataset.hex);if(h){b.dataset.hex=h;b.style.background=h;}});
    const rerender=()=>{const y=window.scrollY;renderRec();window.scrollTo(0,y);};
    $('#cPal').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{readChoice();S.choice.pal=S.choice.pal.filter(h=>h.toLowerCase()!==b.dataset.rm);rerender();});
-   const ad=$('#cPalAdd');if(ad)ad.addEventListener('change',()=>{readChoice();S.choice.pal=[...new Set([...S.choice.pal.map(h=>h.toLowerCase()),ad.value.toLowerCase()])];rerender();});}
+   const ad=$('#cPalAdd');if(ad)ad.onclick=async()=>{const h=await pickColor();if(!h)return;readChoice();S.choice.pal=[...new Set([...S.choice.pal.map(x=>x.toLowerCase()),h.toLowerCase()])];rerender();};}
   const fromPhoto=!!(S.img&&(S.localColors.length||(S.analysis&&S.analysis.colors.length)));
   const y2kSwitch=()=>{readChoice();const vk=S.choice.y2k||'spicy';const own=S.answers&&S.answers.colorPal&&S.answers.colorPal.length===5;
     applyY2K(S.choice,vk,fromPhoto||own,S.rec.why);if(own)S.choice.pal=fitPalette(S.answers.colorPal,Y2KV[vk].pal);S.rec.els=[...new Set([...S.choice.els,...S.rec.els.filter(k=>!Object.values(Y2KV).some(v=>v.els.includes(k)))])].slice(0,8);
     const y=window.scrollY;renderRec();window.scrollTo(0,y);};
   document.getElementById('cY2k').addEventListener('change',y2kSwitch);
   document.getElementById('cAes').addEventListener('change',()=>{if(val('cAes')==='Y2K'&&c.aes!=='Y2K'){y2kSwitch();return;}$('#y2kWrap').hidden=val('cAes')!=='Y2K';});
-  document.getElementById('cAes').addEventListener('change',()=>{if(val('cAes')==='Y2K')return;if(fromPhoto){if(S.imgType!=='風格參考圖'){const p=AES[val('cAes')].pal,ins=document.querySelectorAll('#cPal input[data-i]');if(ins[3])ins[3].value=p[3];if(ins[4])ins[4].value=p[4];}return;}const p=[...AES[val('cAes')].pal];if(val('cFin')==='nude'){p[0]=NUDE[0];p[1]=NUDE[1];}
-    document.querySelectorAll('#cPal input[data-i]').forEach((x,i)=>{x.value=p[i];});});
-  document.getElementById('cFin').addEventListener('change',()=>{if(fromPhoto||val('cFin')!=='nude')return;const ins=document.querySelectorAll('#cPal input[data-i]');ins[0].value=NUDE[0];ins[1].value=NUDE[1];});
+  document.getElementById('cAes').addEventListener('change',()=>{if(val('cAes')==='Y2K')return;if(fromPhoto){if(S.imgType!=='風格參考圖'){const p=AES[val('cAes')].pal,ins=document.querySelectorAll('#cPal [data-i]');[3,4].forEach(k=>{if(ins[k]){ins[k].dataset.hex=p[k];ins[k].style.background=p[k];}});}return;}const p=[...AES[val('cAes')].pal];if(val('cFin')==='nude'){p[0]=NUDE[0];p[1]=NUDE[1];}
+    document.querySelectorAll('#cPal [data-i]').forEach((x,i)=>{x.dataset.hex=p[i];x.style.background=p[i];});});
+  document.getElementById('cFin').addEventListener('change',()=>{if(fromPhoto||val('cFin')!=='nude')return;const ins=document.querySelectorAll('#cPal [data-i]');[0,1].forEach(k=>{if(ins[k]){ins[k].dataset.hex=NUDE[k];ins[k].style.background=NUDE[k];}});});
   $('#toGen').onclick=()=>{readChoice();S.reroll=0;
     if(!S.choice.pal.length){const m=$('#palNeed');if(m){m.hidden=false;m.scrollIntoView({behavior:'smooth',block:'center'});}return;}
     {const u=[...S.choice.pal];S.choice.pal=Array.from({length:5},(_,i)=>u[i%u.length]);}
@@ -2303,7 +2322,7 @@ function readChoice(){
   const y2kPrev=S.choice&&S.choice.y2k;
   S.choice={y2k:val('cAes')==='Y2K'?(val('cY2k')||y2kPrev||'spicy'):null,arr:val('cArr'),live:val('cLive')==='live',illus:[...document.querySelectorAll('input[name="cIll"]:checked')].map(x=>x.value),focus:val('cFocus')||'both',forms:[...document.querySelectorAll('input[name="cForm"]:checked')].map(x=>x.value),freedom:+(val('cFree')||1),aes:val('cAes'),finish:val('cFin'),amount:+val('cAmt'),shape:val('cShape'),len:(()=>{const k=val('cAes');if(k==='Y2K'){const v=Y2KV[val('cY2k')||y2kPrev||'spicy'];if(v)return v.len;}return k===S.rec.aes?S.rec.len:(AES[k]?AES[k].len:S.rec.len);})(),accent:+val('cAcc'),
     els:[...document.querySelectorAll('input[name="cEls"]:checked')].map(x=>x.value),
-    pal:[...document.querySelectorAll('#cPal input[data-i]')].map(x=>x.value),
+    pal:[...document.querySelectorAll('#cPal [data-i]')].map(x=>x.dataset.hex),
     bases:document.querySelectorAll('[data-fb]').length===5?[...document.querySelectorAll('[data-fb]')].map(x=>x.value):null};
 }
 function negotiation(){
@@ -3348,6 +3367,33 @@ $('#tryCam').onclick=()=>{TRY.img=null;startCam();};
 
 /* ---------- 首頁、展覽模式、鏡頭拍照 ---------- */
 // 對話框：回首頁確認、閒置倒數、拍照共用
+// 自己挑顏色：不用瀏覽器內建的取色視窗（Windows 會跳出另一個系統視窗，展覽全螢幕時會被擋住或打不開），改成頁面裡的取色盤
+const PICK_SW=['#F6E3DC','#EBCBBE','#D9A891','#B97F66','#8A5A44','#4E3227','#FBD3DC','#F49AB0','#E5577E','#B3122E','#7A0F24','#3A0A12',
+  '#FFE2C6','#FDB27A','#F07B3F','#C9A45C','#E8D27A','#FFF3B0','#DDEBC8','#A8C79A','#5E8C61','#0F4D3A','#C9E6E4','#7FC7C2',
+  '#D6E6F5','#9DB6CC','#6A8FD0','#2F5E96','#1A2A5A','#E3D8F1','#B7A3D9','#7D5BA6','#3D2B5A','#FFFFFF','#E6E6E6','#B9B9B9',
+  '#7C7C7C','#3A3A3A','#111111','#C3C8D0','#D8B25E','#E8C2B0'];
+function hsvHex(h,s2,v){const f=n=>{const k=(n+h/60)%6;return v-v*s2*Math.max(0,Math.min(k,4-k,1));};return '#'+[f(5),f(3),f(1)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');}
+function hexHsv(hx){const q=[1,3,5].map(i=>parseInt(hx.slice(i,i+2),16)/255),mx=Math.max(...q),mn=Math.min(...q),d=mx-mn;let h=0;
+  if(d){h=mx===q[0]?((q[1]-q[2])/d)%6:mx===q[1]?(q[2]-q[0])/d+2:(q[0]-q[1])/d+4;h*=60;if(h<0)h+=360;}return [h,mx?d/mx:0,mx];}
+function pickColor(cur){return new Promise(done=>{
+  let [h,sa,v]=isHex(cur)?hexHsv(cur):[210,.35,.8];
+  const sh=sheet(`<h3>挑一個顏色</h3><p class="stat" style="margin:0 0 12px">點下面的色塊，或用三條拉桿自己調。</p>
+    <div class="pick-sw">${PICK_SW.map(c=>`<button type="button" data-c="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div>
+    <div class="pick-row"><span>色相</span><input type="range" min="0" max="359" data-k="h" class="pick-h"></div>
+    <div class="pick-row"><span>濃淡</span><input type="range" min="0" max="100" data-k="s"></div>
+    <div class="pick-row"><span>深淺</span><input type="range" min="0" max="100" data-k="v"></div>
+    <div class="pick-now"><i></i><span></span></div>
+    <div class="actions"><button type="button" class="btn main" data-k="ok">用這個顏色</button><button type="button" class="btn ghost" data-k="no">取消</button></div>`);
+  const el=sh.el,R=k=>el.querySelector(`input[data-k="${k}"]`);
+  const show=()=>{const hx=hsvHex(h,sa,v);el.querySelector('.pick-now i').style.background=hx;el.querySelector('.pick-now span').textContent=hx.toUpperCase();
+    R('h').value=Math.round(h);R('s').value=Math.round(sa*100);R('v').value=Math.round(v*100);
+    R('s').style.background=`linear-gradient(90deg,${hsvHex(h,0,v)},${hsvHex(h,1,v)})`;R('v').style.background=`linear-gradient(90deg,#000,${hsvHex(h,sa,1)})`;
+    el.querySelectorAll('.pick-sw button').forEach(b=>b.classList.toggle('on',b.dataset.c.toLowerCase()===hx));};
+  el.querySelectorAll('.pick-sw button').forEach(b=>b.onclick=()=>{[h,sa,v]=hexHsv(b.dataset.c);show();});
+  R('h').oninput=e=>{h=+e.target.value;show();};R('s').oninput=e=>{sa=e.target.value/100;show();};R('v').oninput=e=>{v=e.target.value/100;show();};
+  const end=r=>{sh.close();done(r);};
+  el.querySelector('[data-k="ok"]').onclick=()=>end(hsvHex(h,sa,v));el.querySelector('[data-k="no"]').onclick=()=>end(null);
+  el.addEventListener('click',e=>{if(e.target===el)end(null);});show();});}
 function sheet(html){
   const w=document.createElement('div');w.className='sheet';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
   w.innerHTML=`<div class="sheet-card">${html}</div>`;document.body.appendChild(w);
