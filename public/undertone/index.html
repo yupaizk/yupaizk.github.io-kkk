@@ -340,8 +340,8 @@ body:not(.modeB) section[data-step="1"] .split{grid-template-columns:1fr;gap:0}
 .hero-lead{margin-left:auto;margin-right:auto}
 .hero-actions{justify-content:center}
 @keyframes cue{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
-.home-more{max-width:1080px;margin:0 auto;padding:96px 0 120px;text-align:center}
-.home-more .hero-steps{margin-top:24px;text-align:left}
+.home-more{max-width:1080px;margin:0 auto;padding:clamp(120px,18vh,200px) 0 160px;text-align:center}
+.home-more .hero-steps{margin-top:40px;text-align:left}
 body.atHome .wrap{padding-top:0}
 @media (max-width:999px){
   .screen.on[data-step="0"],.screen.on[data-step="2"],.screen.on[data-step="3"]{min-height:0}
@@ -353,8 +353,9 @@ body.atHome .wrap{padding-top:0}
 /* ---------- 首頁作品區：一套＝一支影片＋一張照片，五套輪播；最下面 IG ---------- */
 .works{margin:0;position:relative;width:100vw;margin-left:calc(50% - 50vw)}
 /* 首頁：左上小標 → 作品輪播 → 標題。第一屏刻意切到標題，讓人知道下面還有東西 */
-.home-label{text-align:left;margin:24px 0 20px}
-.screen[data-step="home"] .hero{min-height:0;padding:56px 0 24px}
+.home-label{text-align:left;margin:28px 0 36px}
+.screen[data-step="home"] .hero{min-height:0;padding:clamp(72px,11vh,130px) 0 24px}
+.screen[data-step="home"] .hero-actions{margin-top:56px}
 html{overflow-x:clip}
 .works-view{position:relative;overflow:hidden;touch-action:pan-y;height:var(--wh,580px)}
 .work-set{position:absolute;left:50%;top:0;display:flex;align-items:center;gap:24px;transition:transform .8s cubic-bezier(.6,0,.2,1),opacity .8s,filter .8s;opacity:0;pointer-events:none}
@@ -366,15 +367,34 @@ html{overflow-x:clip}
 .works-nav{position:absolute;top:calc(var(--wh,580px)/2);transform:translateY(-50%);z-index:2;width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:18px;cursor:pointer;display:grid;place-items:center;box-shadow:0 4px 18px rgba(0,0,0,.12)}
 .works-nav:hover{background:var(--panel)}
 #worksPrev{right:calc(50% + var(--wa,440px))}#worksNext{left:calc(50% + var(--wa,440px))}
-.works-dots{display:flex;justify-content:center;gap:10px;margin-top:28px}
+.works-dots{display:flex;justify-content:center;gap:10px;margin-top:36px}
 .works-dots button{width:8px;height:8px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer;transition:width .3s,background .3s}
 .works-dots button[aria-current="true"]{width:26px;border-radius:4px;background:var(--ink)}
-.ig{display:inline-flex;flex-direction:column;align-items:center;gap:10px;margin-top:160px;color:var(--soft);text-decoration:none;font-size:14px;letter-spacing:.2em}
+.ig{display:inline-flex;flex-direction:column;align-items:center;gap:10px;margin-top:clamp(160px,22vh,240px);color:var(--soft);text-decoration:none;font-size:14px;letter-spacing:.2em}
 .ig img{width:132px;height:132px;opacity:.78}
 .ig:hover img{opacity:1}
 body.expo .ig{pointer-events:none}
 @media (max-width:999px){.work-set{gap:12px}.work-set figure{border-radius:14px}.works-nav{width:40px;height:40px;font-size:15px}}
 
+/* 首頁右側的捲動軸：細線＋目前位置，四個段落的點可以點，最上面有「SCROLL」提示 */
+.home-rail{position:fixed;right:clamp(12px,1.6vw,28px);top:50%;transform:translateY(-50%);z-index:30;display:none;flex-direction:column;align-items:center;gap:18px;padding:18px 12px;border-radius:999px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 2px 14px rgba(0,0,0,.06);pointer-events:none}
+body.atHome .home-rail{display:flex}
+.rail-hint{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:10px;letter-spacing:.32em;color:var(--soft);writing-mode:vertical-rl;transition:opacity .4s}
+.rail-hint.gone{opacity:0}
+.rail-mouse{writing-mode:horizontal-tb;width:18px;height:28px;border:1.5px solid var(--soft);border-radius:10px;position:relative}
+.rail-mouse::after{content:'';position:absolute;left:50%;top:5px;width:2px;height:6px;margin-left:-1px;border-radius:1px;background:var(--ink);animation:wheel 1.6s ease-in-out infinite}
+@keyframes wheel{0%{transform:translateY(0);opacity:1}70%{transform:translateY(9px);opacity:0}100%{transform:translateY(0);opacity:0}}
+@media (prefers-reduced-motion:reduce){.rail-mouse::after{animation:none}}
+.rail-track{position:relative;width:2px;height:36vh;background:var(--line);border-radius:1px;pointer-events:auto;cursor:pointer}
+.rail-thumb{position:absolute;left:0;top:0;width:2px;border-radius:1px;background:var(--ink);transition:height .15s linear}
+.rail-dot{position:absolute;left:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;border:1.5px solid var(--soft);background:var(--bg);padding:0;cursor:pointer;transition:transform .2s,border-color .2s,background .2s}
+.rail-dot.done{border-color:var(--ink)}
+.rail-dot.on{border-color:var(--ink);background:var(--ink);transform:scale(1.2)}
+.rail-dot span{position:absolute;right:24px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:12px;letter-spacing:.12em;color:var(--soft);opacity:0;transition:opacity .2s;pointer-events:none}
+.rail-dot:hover span,.rail-dot.on span{opacity:1}
+.rail-dot.on span{color:var(--ink)}
+@media (max-width:760px){.home-rail{display:none!important}}
+@media (min-width:761px){html:has(body.atHome){scrollbar-width:none}html:has(body.atHome)::-webkit-scrollbar{display:none}}
 /* 等待畫面：實際秒數和每一部分的進度 */
 .loader .wait-t{font-size:13px;color:var(--soft);margin-top:6px;font-variant-numeric:tabular-nums}
 .wait-list{list-style:none;padding:0;margin:14px auto 0;max-width:280px;text-align:left;font-size:14px}
@@ -432,6 +452,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
 </style>
 </head>
 <body>
+<nav class="home-rail" id="homeRail" aria-label="首頁段落"><div class="rail-hint" id="railHint" aria-hidden="true"><i class="rail-mouse"></i>SCROLL</div><div class="rail-track" id="railTrack"><div class="rail-thumb" id="railThumb"></div></div></nav>
 <div class="wrap">
   <header class="masthead">
   <button type="button" class="wordmark" id="homeBtn" aria-label="回到首頁">UNDERTONE</button>
@@ -3360,6 +3381,21 @@ const WORKS=[{d:'Day 12–14',alt:'穿搭照片和五指黑底藍白液態設計
   show(0);})();
 $('#homeLog').onclick=()=>openLog();
 $('#homeBtn2').onclick=()=>$('#homeBtn').onclick();
+// 首頁右側捲動軸：細線上的黑色那段是目前看到的範圍，點可以直接跳到那一段
+(()=>{const tr=$('#railTrack'),th=$('#railThumb'),hint=$('#railHint');
+  const secs=[['作品','#works'],['UNDERTONE','.screen[data-step="home"] .hero'],['怎麼玩','#homeMore'],['Instagram','#ig']];
+  const dots=secs.map(([n,sel])=>{const b=document.createElement('button');b.type='button';b.className='rail-dot';b.setAttribute('aria-label',n);b.innerHTML=`<span>${n}</span>`;
+    b.onclick=e=>{e.stopPropagation();const i=dots.findIndex(d=>d[0]===b);scrollTo({top:stops()[i],behavior:'smooth'});};tr.appendChild(b);return [b,sel];});
+  // 黑線是捲到哪裡；每一段的點放在「捲到那一段」的位置，經過的點會變黑
+  const stops=()=>{const H=document.documentElement.scrollHeight,vh=innerHeight,max=Math.max(1,H-vh);
+    return dots.map(([,sel])=>{const el=document.querySelector(sel);if(!el)return 0;const top=el.getBoundingClientRect().top+scrollY;return Math.max(0,Math.min(max,top-vh*.45));});};
+  function upd(){if(!document.body.classList.contains('atHome'))return;const H=document.documentElement.scrollHeight,vh=innerHeight,T=tr.clientHeight,max=H-vh;
+    if(max<=4){$('#homeRail').style.visibility='hidden';return;}$('#homeRail').style.visibility='';
+    const p=Math.min(1,scrollY/max);th.style.height=T*p+'px';hint.classList.toggle('gone',scrollY>60);
+    const st=stops();let cur=0;st.forEach((v,i)=>{if(scrollY>=v-2)cur=i;});
+    dots.forEach(([b],i)=>{b.style.top=T*st[i]/max+'px';b.classList.toggle('on',i===cur);b.classList.toggle('done',scrollY>=st[i]-2);});}
+  tr.addEventListener('click',e=>{const r=tr.getBoundingClientRect(),H=document.documentElement.scrollHeight;scrollTo({top:(e.clientY-r.top)/r.height*(H-innerHeight),behavior:'smooth'});});
+  addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);new ResizeObserver(upd).observe(document.body);setTimeout(upd,300);})();
 // 統一的「上一頁」：照目前在哪一頁決定回去哪裡（原本各頁的返回按鈕留著當動作，畫面上藏起來）
 $('#pageBack').onclick=()=>{const st=S.step,c=id=>{const b=$(id);if(b)b.click();};
   const on=(document.querySelector('.screen.on')||{dataset:{}}).dataset.step;if(on==='try')return c('#tryBack');if(on==='log')return c('#logBack');
