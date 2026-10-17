@@ -4,7 +4,7 @@
 // 另外開一個手機上傳用的小伺服器（同一個 Wi-Fi 的手機掃 QR code 傳照片），只收照片、不給看任何資料。
 import http from "node:http";
 import { readFile, writeFile, mkdir, readdir, rm, copyFile, rename, stat } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync, openSync, readSync, closeSync, renameSync, readdirSync } from "node:fs";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { exec, spawn } from "node:child_process";
 import path from "node:path";
@@ -211,12 +211,47 @@ function lanAddress() {
 // 不同網路也能上傳：資料夾裡有 cloudflared（Cloudflare 的免費通道程式）就自動開一條臨時的公開網址，
 // 手機用自己的 4G／5G 也連得到，只會通到手機上傳頁。沒有就只能用同一個 Wi-Fi。
 let TUNNEL = null, tunnelStarting = false;
+// 解壓縮到新的資料夾時，金鑰（settings.txt）和紀錄（data）還在舊資料夾。往上找兩層，有就在視窗上提醒。
+function findOldCopies() {
+  const found = [], seen = new Set([path.resolve(ROOT)]);
+  const look = (dir, depth) => {
+    if (depth < 0 || found.length >= 3) return;
+    let list = [];
+    try { list = readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const d of list) {
+      if (!d.isDirectory() || /^(node_modules|\.|data$|public$|runtime$)/.test(d.name)) continue;
+      const sub = path.join(dir, d.name);
+      if (seen.has(path.resolve(sub))) continue; seen.add(path.resolve(sub));
+      const f = path.join(sub, "settings.txt");
+      try { if (/^\s*ANTHROPIC_API_KEY\s*=\s*\S+/m.test(readFileSync(f, "utf8")) && existsSync(path.join(sub, "server.mjs"))) { found.push(sub); continue; } } catch {}
+      look(sub, depth - 1);
+    }
+  };
+  look(path.dirname(ROOT), 1);
+  look(path.dirname(path.dirname(ROOT)), 2);
+  return found;
+}
+
 function startTunnel() {
   const exe = [path.join(ROOT, "cloudflared.exe"), path.join(ROOT, "cloudflared")].find(f => existsSync(f));
   if (!exe) return;
+  // 下載不完整或下載到錯的檔案時，Windows 會拒絕執行（EFTYPE）。先檢查，壞掉就改名成 .bad，下次點兩下 .bat 會重新下載；手機上傳先改用同一個 Wi-Fi
+  const bad = why => {
+    try { renameSync(exe, exe + ".bad"); } catch {}
+    console.log(`手機上傳：通道程式 cloudflared 壞掉了（${why}），先改用同一個 Wi-Fi。已改名成 ${path.basename(exe)}.bad，下次重新點兩下啟動檔會重新下載。`);
+  };
+  try {
+    const size = statSync(exe).size, head = Buffer.alloc(4), fd = openSync(exe, "r");
+    readSync(fd, head, 0, 4, 0); closeSync(fd);
+    const ok = exe.endsWith(".exe") ? head.toString("latin1", 0, 2) === "MZ" : head[0] === 0x7f && head.toString("latin1", 1, 4) === "ELF";
+    if (size < 5e6 || !ok) return bad(size < 5e6 ? `檔案只有 ${Math.round(size / 1024)} KB，沒下載完整` : "不是可以執行的程式檔");
+  } catch (e) { return bad(e.message); }
   console.log("手機上傳：正在開不用同一個 Wi-Fi 的通道（cloudflared）…");
   tunnelStarting = true;
-  const cf = spawn(exe, ["tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${PHONE_PORT}`], { stdio: ["ignore", "pipe", "pipe"] });
+  let cf;
+  try {
+    cf = spawn(exe, ["tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${PHONE_PORT}`], { stdio: ["ignore", "pipe", "pipe"] });
+  } catch (e) { tunnelStarting = false; return bad(e.code || e.message); }
   const read = buf => {
     const m = String(buf).match(/https:\/\/(?!api\.)[a-z0-9-]+\.trycloudflare\.com/);
     if (m && !TUNNEL) { TUNNEL = m[0]; console.log(`手機上傳：通道開好了，手機不用連同一個 Wi-Fi 也能傳（${TUNNEL}）。`); }
@@ -507,6 +542,7 @@ server.listen(PORT, "127.0.0.1", () => {
   if (DEMO) console.log("示範模式：不會呼叫 Claude，不花錢。設計結果是假的，只用來調介面。");
   if (SAVE) console.log(`省錢模式：提案用後台規則、元素用素材庫，只有讀照片和用說的修改才呼叫 Claude（思考深度 ${SAVE_EFFORT}）。`);
   else console.log(client ? `Claude 模型：${MODEL}（思考深度 ${EFFORT}，每天最多 ${DAILY_LIMIT} 次）` : "⚠ 還沒設定 API 金鑰（settings.txt），AI 功能不能用。");
+  if (!client) for (const dir of findOldCopies()) console.log(`   找到舊版的資料夾：${dir}\n   把裡面的 settings.txt 和 data 資料夾複製到這個資料夾（${ROOT}），再重新點兩下啟動檔。`);
   // 開啟時先確認金鑰能不能用（查模型資料，不花錢）
   if (client && !DEMO) client.models.retrieve(MODEL).then(
     () => console.log("✓ API 金鑰可以用"),
