@@ -6,6 +6,7 @@
 - 生成器讀的是 `public/undertone/kb/backend.json`（和原本 claude.ai 上 `kb/backend` 的資料結構一樣）。
 - 使用者改了 `backend.md` 後，要把改動整理進 `backend.json`：維持既有欄位結構（styles、refs、pairs、avoid、special、liquidMetal…），`version` 加 1，`updated` 寫日期和這次改了什麼。並在 `backend.md`「生成器怎麼讀後台」那段記下同步日期和版本。
 - 生成器的版本紀錄（v18、v19…）也寫在 `backend.md` 最後面，沿用同樣的格式（使用者說／改了什麼／狀態）。
+- 每次改版也要把 `public/undertone/index.html` 裡的 `VERSION`（例如 `雙模式 v59`）改成同一個版號，測試紀錄靠它分辨是哪一版做的。
 
 ## 生成器
 
