@@ -3072,7 +3072,7 @@ $('#restart').onclick=()=>location.reload();
 
 /* ---------- 存檔與測試紀錄 ---------- */
 // 生成器版本：每次改版都要跟 kb/backend.md 最後一筆版本紀錄一起改，測試紀錄才看得出是哪一版做的
-const VERSION='雙模式 v62';
+const VERSION='雙模式 v63';
 let DB=null,ASSETS=null,DL=null,CUR=null,SAVE_TOKEN=0,PHOTO={file:null,id:null};
 (async()=>{if(!window.claude||!claude.use)return;
   try{DB=await claude.use('db');}catch(e){DB=null;}
@@ -3395,13 +3395,14 @@ function renderShots(){
 async function showShare(shot){
   if(!shot||!PHONE||!PHONE.share){$('#shareBox').hidden=true;return;}
   TRY.sel=shot;renderShots();$('#shareBox').hidden=false;
-  if(!shot.share){$('#shareQr').innerHTML='';$('#shareMsg').textContent='準備 QR code…';
+  // 只有走通道（不用同一個 Wi-Fi）的 QR code 才留著；同一個 Wi-Fi 的下次點照片會再試一次通道
+  if(!shot.share||!shot.share.remote){$('#shareQr').innerHTML='';$('#shareMsg').textContent='準備 QR code…';
     try{const jpg=await new Promise(r=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);c.toBlob(r,'image/jpeg',.92);};im.onerror=()=>r(shot.blob);im.src=shot.url;});
       shot.share=await PHONE.share(jpg||shot.blob);}
-    catch(e){if(TRY.sel===shot)$('#shareMsg').textContent=e&&e.code==='no_lan'?'這台電腦沒有連上網路，沒辦法做 QR code。':'QR code 沒有做成功，再按一次照片試試。';return;}}
+    catch(e){if(TRY.sel===shot)$('#shareMsg').textContent=e&&e.code==='no_lan'?'這台電腦沒有連上網路，沒辦法做 QR code。':e&&(e.code==='not_found'||e.status===404)?'伺服器還是舊版：關掉黑色視窗，重新點兩下啟動檔再試。':`QR code 沒有做成功（${e&&(e.code||e.message)||'不明原因'}），再按一次照片試試。`;return;}}
   if(TRY.sel!==shot)return;const sh=shot.share;
   $('#shareQr').innerHTML=(sh.wifi&&sh.wifi.ssid?`<div>${qrSvg(`WIFI:T:${sh.wifi.pass?'WPA':'nopass'};S:${sh.wifi.ssid};${sh.wifi.pass?`P:${sh.wifi.pass};`:''};`)}<span>先連 Wi-Fi</span></div>`:'')+`<div>${qrSvg(sh.url)}<span>${sh.wifi&&sh.wifi.ssid?'再掃這個':'用手機相機掃'}</span></div>`;
-  $('#shareMsg').textContent=sh.remote?'用手機相機掃，打開後長按照片存到相簿。手機用自己的網路就可以，照片放 3 天。':'手機要連上和這台電腦一樣的 Wi-Fi 才打得開（通道沒有開成）。打開後長按照片存到相簿。';
+  $('#shareMsg').textContent=sh.remote?'用手機相機掃，打開後長按照片存到相簿，或按「下載照片」。手機用自己的網路就可以，照片放 3 天。':'通道還沒開好，這個 QR code 要連同一個 Wi-Fi 才打得開。等一下再點一次照片，通道好了就會換成不用同一個 Wi-Fi 的。';
 }
 function captureTry(){return new Promise(res=>{const cv=document.querySelector('#tryStage canvas');if(!cv){res(null);return;}cv.toBlob(b=>res(b),'image/png');});}
 async function tryShot(){

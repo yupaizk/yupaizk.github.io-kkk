@@ -28,7 +28,7 @@
 
 ## 展覽怎麼開
 
-1. 先在 `settings.txt` 加一行 `EXPO_PIN=你的安全碼`（只有你知道的數字或文字），存檔。
+1. 安全碼預設是 `1829`；想換的話在 `settings.txt` 加一行 `EXPO_PIN=新的安全碼`，存檔。
 2. 點兩下 **`展覽啟動.bat`**：瀏覽器會全螢幕打開（kiosk 模式），沒有網址列和分頁，觀眾按 F11 也退不出來。
 3. 第一次用鏡頭時允許相機，之後會記住。
 4. 展覽模式下畫面上沒有開關，測試紀錄也藏起來；閒置一段時間會自動回首頁。
@@ -51,7 +51,7 @@
 | `CLAUDE_MODEL` | `claude-opus-5-5` | 用哪個 Claude 模型 |
 | `CLAUDE_EFFORT` | `medium` | 思考深度：`low`／`medium`／`high`／`xhigh`／`max`，越高越慢越貴 |
 | `DAILY_AI_LIMIT` | `300` | 每天最多呼叫幾次 Claude |
-| `EXPO_PIN` | — | 展覽安全碼：展覽時打開測試紀錄、離開展覽模式要輸入 |
+| `EXPO_PIN` | 1829 | 展覽安全碼：展覽時打開測試紀錄、離開展覽模式要輸入 |
 | `PHONE_WIFI_SSID`／`PHONE_WIFI_PASS` | — | 手機上傳時一起顯示的 Wi-Fi（選填） |
 | `PHONE_HOST` | 自動 | 手機上傳用哪個網路位址（選填） |
 

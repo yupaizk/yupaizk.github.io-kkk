@@ -12,7 +12,7 @@ CLAUDE_EFFORT=medium
 DAILY_AI_LIMIT=300
 
 # 展覽安全碼：展覽時按 Ctrl+Shift+L，輸入這組才能打開測試紀錄或離開展覽模式
-EXPO_PIN=
+EXPO_PIN=1829
 
 # 手機上傳：觀眾用手機掃 QR code 傳照片，手機要和這台電腦連同一個 Wi-Fi。
 # 填了 Wi-Fi 名稱和密碼，QR code 旁邊會多一個「掃了就連上 Wi-Fi」的 QR（例如用電腦開的行動熱點）。

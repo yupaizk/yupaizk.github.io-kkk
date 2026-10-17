@@ -4,7 +4,7 @@
 // 另外開一個手機上傳用的小伺服器（同一個 Wi-Fi 的手機掃 QR code 傳照片），只收照片、不給看任何資料。
 import http from "node:http";
 import { readFile, writeFile, mkdir, readdir, rm, copyFile, rename, stat } from "node:fs/promises";
-import { existsSync, readFileSync, statSync, openSync, readSync, closeSync, renameSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, statSync, openSync, readSync, closeSync, renameSync, readdirSync, copyFileSync, cpSync, chmodSync, writeFileSync } from "node:fs";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { exec, spawn } from "node:child_process";
 import path from "node:path";
@@ -24,6 +24,24 @@ const MAX_BODY = 30 * 1024 * 1024;
 
 /* ---------- 設定 ---------- */
 
+// 解壓縮到新的資料夾時：這裡沒有金鑰（settings.txt）或紀錄（data），就從舊版資料夾自動複製過來，不用每次重貼。
+// 啟動檔會先用 --migrate 跑一次，再決定要不要打開記事本。
+function migrateFromOld() {
+  const here = path.join(ROOT, "settings.txt");
+  const hasKey = f => { try { return /^\s*ANTHROPIC_API_KEY\s*=\s*["']?sk-/m.test(readFileSync(f, "utf8")); } catch { return false; } };
+  if (hasKey(here) && existsSync(DATA)) return;
+  const old = findOldCopies()[0];
+  if (!old) return;
+  if (!hasKey(here)) { copyFileSync(path.join(old, "settings.txt"), here); console.log(`已從舊版資料夾複製 settings.txt（金鑰和安全碼）：${old}`); }
+  if (!existsSync(path.join(DATA, "db")) && existsSync(path.join(old, "data"))) {
+    try { cpSync(path.join(old, "data"), DATA, { recursive: true }); console.log(`已從舊版資料夾複製 data（測試紀錄和照片）：${old}`); }
+    catch (e) { console.log(`複製舊版的 data 沒有成功（${e.message}），可以自己把舊資料夾的 data 複製過來。`); }
+  }
+  for (const f of ["cloudflared.exe", "cloudflared"]) if (!existsSync(path.join(ROOT, f)) && existsSync(path.join(old, f))) { try { copyFileSync(path.join(old, f), path.join(ROOT, f)); } catch {} }
+}
+try { migrateFromOld(); } catch (e) { console.log("找舊版設定時出錯：" + e.message); }
+if (process.argv.includes("--migrate")) process.exit(0);
+
 function loadSettings() {
   const file = path.join(ROOT, "settings.txt");
   const out = {};
@@ -42,7 +60,7 @@ const MODEL = settings.CLAUDE_MODEL || "claude-opus-5-5";
 const EFFORT = settings.CLAUDE_EFFORT || "medium";
 const DAILY_LIMIT = parseInt(settings.DAILY_AI_LIMIT || "300", 10);
 // 展覽安全碼：展覽時打開測試紀錄、離開展覽模式都要輸入
-const EXPO_PIN = (settings.EXPO_PIN || "").trim();
+const EXPO_PIN = (settings.EXPO_PIN || "1829").trim();
 const KIOSK = process.argv.includes("--kiosk");
 // 示範模式：不呼叫 Claude、不花錢，回假的設計結果，用來調介面。用「調介面（不花錢）.bat」開，或 settings.txt 寫 AI_MODE=demo
 const DEMO = process.argv.includes("--demo") || /^demo$/i.test((settings.AI_MODE || "").trim());
@@ -233,35 +251,80 @@ function findOldCopies() {
   return found;
 }
 
-function startTunnel() {
-  const exe = [path.join(ROOT, "cloudflared.exe"), path.join(ROOT, "cloudflared")].find(f => existsSync(f));
-  if (!exe) return;
-  // 下載不完整或下載到錯的檔案時，Windows 會拒絕執行（EFTYPE）。先檢查，壞掉就改名成 .bad，下次點兩下 .bat 會重新下載；手機上傳先改用同一個 Wi-Fi
-  const bad = why => {
-    try { renameSync(exe, exe + ".bad"); } catch {}
-    console.log(`手機上傳：通道程式 cloudflared 壞掉了（${why}），先改用同一個 Wi-Fi。已改名成 ${path.basename(exe)}.bad，下次重新點兩下啟動檔會重新下載。`);
-  };
+// cloudflared：手機不用同一個 Wi-Fi 也能掃 QR code（上傳照片、存試戴照片）。沒有或壞掉就自己下載一份並檢查，斷了會自己重開。
+const CF_NAME = process.platform === "win32" ? "cloudflared.exe" : "cloudflared";
+const CF_URL = process.platform === "win32" ? `https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-${process.arch === "ia32" ? "386" : "amd64"}.exe`
+  : process.platform === "linux" ? `https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${process.arch === "arm64" ? "arm64" : "amd64"}` : null;
+function cfCheck(f) {
   try {
-    const size = statSync(exe).size, head = Buffer.alloc(4), fd = openSync(exe, "r");
+    const size = statSync(f).size, head = Buffer.alloc(4), fd = openSync(f, "r");
     readSync(fd, head, 0, 4, 0); closeSync(fd);
-    const ok = exe.endsWith(".exe") ? head.toString("latin1", 0, 2) === "MZ" : head[0] === 0x7f && head.toString("latin1", 1, 4) === "ELF";
-    if (size < 5e6 || !ok) return bad(size < 5e6 ? `檔案只有 ${Math.round(size / 1024)} KB，沒下載完整` : "不是可以執行的程式檔");
-  } catch (e) { return bad(e.message); }
-  console.log("手機上傳：正在開不用同一個 Wi-Fi 的通道（cloudflared）…");
+    const ok = f.endsWith(".exe") || process.platform === "win32" ? head.toString("latin1", 0, 2) === "MZ" : head[0] === 0x7f && head.toString("latin1", 1, 4) === "ELF";
+    return size < 5e6 ? `檔案只有 ${Math.round(size / 1024)} KB，沒下載完整` : ok ? null : "不是可以執行的程式檔";
+  } catch (e) { return e.message; }
+}
+async function ensureCloudflared() {
+  const exe = path.join(ROOT, CF_NAME);
+  if (existsSync(exe)) {
+    const why = cfCheck(exe);
+    if (!why) return exe;
+    try { renameSync(exe, exe + ".bad"); } catch {}
+    console.log(`手機掃碼：通道程式 cloudflared 壞掉了（${why}），重新下載…`);
+  }
+  if (!CF_URL) return null;
+  console.log("手機掃碼：正在下載通道程式 cloudflared（約 30 MB，第一次才需要）…");
+  try {
+    const r = await fetch(CF_URL, { redirect: "follow", signal: AbortSignal.timeout(180000) });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const part = exe + ".part";
+    writeFileSync(part, Buffer.from(await r.arrayBuffer()));
+    const why = cfCheck(part);
+    if (why) { await rm(part, { force: true }); throw new Error(why); }
+    renameSync(part, exe);
+    if (process.platform !== "win32") chmodSync(exe, 0o755);
+    console.log("手機掃碼：通道程式下載好了。");
+    return exe;
+  } catch (e) {
+    console.log(`手機掃碼：通道程式下載失敗（${e.message}），先用同一個 Wi-Fi。可以重新啟動再試一次，或確認這台電腦連得上 github.com。`);
+    return null;
+  }
+}
+async function startTunnel() {
+  tunnelStarting = true;
+  const exe = await ensureCloudflared();
+  if (!exe) { tunnelStarting = false; return; }
+  runTunnel(exe);
+}
+let tunnelRetry = 0;
+function runTunnel(exe) {
+  if (!tunnelRetry) console.log("手機掃碼：正在開不用同一個 Wi-Fi 的通道（cloudflared）…");
   tunnelStarting = true;
   let cf;
   try {
     cf = spawn(exe, ["tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${PHONE_PORT}`], { stdio: ["ignore", "pipe", "pipe"] });
-  } catch (e) { tunnelStarting = false; return bad(e.code || e.message); }
+  } catch (e) {
+    tunnelStarting = false;
+    try { renameSync(exe, exe + ".bad"); } catch {}
+    console.log(`手機掃碼：通道程式開不起來（${e.code || e.message}），先用同一個 Wi-Fi；下次啟動會重新下載。`);
+    return;
+  }
   const read = buf => {
     const m = String(buf).match(/https:\/\/(?!api\.)[a-z0-9-]+\.trycloudflare\.com/);
-    if (m && !TUNNEL) { TUNNEL = m[0]; console.log(`手機上傳：通道開好了，手機不用連同一個 Wi-Fi 也能傳（${TUNNEL}）。`); }
+    if (m && !TUNNEL) { TUNNEL = m[0]; tunnelStarting = false; tunnelRetry = 0; console.log(`手機掃碼：通道開好了，手機不用連同一個 Wi-Fi 也能用（${TUNNEL}）。`); }
   };
   cf.stdout.on("data", read); cf.stderr.on("data", read);
-  cf.on("error", e => { tunnelStarting = false; console.log("手機上傳：通道程式開不起來（" + e.message + "），改用同一個 Wi-Fi。"); });
-  cf.on("exit", code => { tunnelStarting = false; if (TUNNEL) console.log("手機上傳：通道斷了，改回只能用同一個 Wi-Fi。"); TUNNEL = null; });
-  process.on("exit", () => cf.kill());
+  cf.on("error", e => { tunnelStarting = false; console.log("手機掃碼：通道程式開不起來（" + e.message + "），先用同一個 Wi-Fi。"); });
+  cf.on("exit", () => {
+    const was = TUNNEL; TUNNEL = null; tunnelStarting = false;
+    if (shuttingDown) return;
+    // 展覽一整天，網路晃一下通道就會斷：等一下自己重開，最多連續試 20 次
+    if (tunnelRetry++ < 20) { if (was) console.log("手機掃碼：通道斷了，10 秒後重新連線…"); setTimeout(() => runTunnel(exe), 10000); }
+    else console.log("手機掃碼：通道一直連不上，先用同一個 Wi-Fi。");
+  });
+  tunnelProc = cf;
 }
+let shuttingDown = false, tunnelProc = null;
+process.on("exit", () => { shuttingDown = true; if (tunnelProc) tunnelProc.kill(); });
 
 async function phoneStart(res) {
   // 通道剛啟動還沒好時，等它最多 12 秒

@@ -22,6 +22,8 @@ if not exist "node_modules\@anthropic-ai\sdk" (
   )
 )
 
+rem 解壓縮到新資料夾時，先把舊版資料夾的 settings.txt 和 data 複製過來
+"%NODE%" server.mjs --migrate
 if not exist "settings.txt" (
   copy /y "settings.example.txt" "settings.txt" >nul
   echo 請在打開的記事本裡貼上 API 金鑰，存檔、關掉記事本後就會繼續。
