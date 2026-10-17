@@ -352,6 +352,7 @@ body.atHome .wrap{padding-top:0}
 
 /* ---------- 首頁作品區：一套＝一支影片＋一張照片，五套輪播；最下面 IG ---------- */
 .works{margin:0;position:relative;width:100vw;margin-left:calc(50% - 50vw)}
+.works[hidden]{display:none}
 /* 首頁：左上小標 → 作品輪播 → 標題。第一屏刻意切到標題，讓人知道下面還有東西 */
 .home-label{text-align:left;margin:28px 0 36px}
 .screen[data-step="home"] .hero{min-height:0;padding:clamp(72px,11vh,130px) 0 24px}
@@ -389,6 +390,7 @@ body.atHome .home-rail{display:flex}
 .rail-thumb{position:absolute;left:0;top:0;width:1px;border-radius:1px;background:var(--ink);transition:height .15s linear}
 .rail-dot{position:absolute;left:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;border:1px solid var(--soft);background:var(--bg);padding:0;cursor:pointer;transition:transform .2s,border-color .2s,background .2s}
 .rail-dot.done{border-color:var(--ink)}
+.rail-dot[hidden]{display:none}
 .rail-dot.on{border-color:var(--ink);background:var(--ink);transform:scale(1.2)}
 .rail-dot span{position:absolute;right:24px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:12px;letter-spacing:.12em;color:var(--soft);opacity:0;transition:opacity .2s;pointer-events:none}
 .rail-dot:hover span,.rail-dot.on span{opacity:1}
@@ -3415,6 +3417,9 @@ const WORKS=[{d:'Day 12–14',alt:'穿搭照片和五指黑底藍白液態設計
     tr.appendChild(el);const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`第 ${n} 套`);b.onclick=()=>show(i);dots.appendChild(b);
     el.querySelector('video').addEventListener('ended',()=>show(cur+1));});
   const sets=[...tr.children],vids=sets.map(e=>e.querySelector('video')),N=WORKS.length;
+  // 作品照片和影片只放在本機版（media 資料夾不進 repo），claude.ai 預覽讀不到：讀不到就整個輪播收起來，不要留空框
+  {const im=sets[0].querySelector('img');im.loading='eager';const gone=()=>{$('#works').hidden=true;vids.forEach(v=>v.pause());dispatchEvent(new Event('resize'));};
+    im.addEventListener('error',gone,{once:true});if(im.complete&&!im.naturalWidth&&im.src)gone();}
   sets.forEach((e,k)=>e.addEventListener('click',()=>{if(k!==cur)show(k);}));
   // 前一套、後一套在兩側壓暗露出來；照片和影片一樣高，高度跟著視窗寬
   function layout(){const W=$('#works').clientWidth||window.innerWidth,h=Math.round(Math.max(220,Math.min(580,(W-(W<1000?60:420))/1.33,innerHeight*(W<1000?.5:.6))));
@@ -3445,7 +3450,7 @@ $('#homeBtn2').onclick=()=>$('#homeBtn').onclick();
     if(max<=4){$('#homeRail').style.visibility='hidden';return;}$('#homeRail').style.visibility='';
     const p=Math.min(1,scrollY/max);th.style.height=T*p+'px';hint.classList.toggle('gone',scrollY>60);
     const st=stops();let cur=0;st.forEach((v,i)=>{if(scrollY>=v-2)cur=i;});
-    dots.forEach(([b],i)=>{b.style.top=T*st[i]/max+'px';b.classList.toggle('on',i===cur);b.classList.toggle('done',scrollY>=st[i]-2);});}
+    dots.forEach(([b,sel],i)=>{const el=document.querySelector(sel);b.hidden=!(el&&el.offsetParent);b.style.top=T*st[i]/max+'px';b.classList.toggle('on',i===cur);b.classList.toggle('done',scrollY>=st[i]-2);});}
   tr.addEventListener('click',e=>{const r=tr.getBoundingClientRect(),H=document.documentElement.scrollHeight;scrollTo({top:(e.clientY-r.top)/r.height*(H-innerHeight),behavior:'smooth'});});
   addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);new ResizeObserver(upd).observe(document.body);setTimeout(upd,300);})();
 // 統一的「上一頁」：照目前在哪一頁決定回去哪裡（原本各頁的返回按鈕留著當動作，畫面上藏起來）
