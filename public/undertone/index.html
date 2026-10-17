@@ -1781,7 +1781,7 @@ function startRecB(){
   const rec={basis:(S.analysis&&S.analysis.basis)||[],newTry:(S.analysis&&S.analysis.newTry)||[],aes:key,els,why,illus:[],focus:'both',shape:a.shape,len:a.len,accent:2,amount:A.amount,pal:a.realPal?[...a.realPal]:[...a.pal],
     say:(S.bRoute==='style'&&S.bTrend?`我保留你要的東西，換成「${S.bTrend}」的做法：「${a.special.name}」，${a.desc}。`:`我照你的${S.imgs.length?'圖':'描述'}整理成「${a.special.name}」：${a.desc}。`)+`${T.length>1?`拆成 ${T.length} 個主題（${T.map(t=>t.name).join('、')}），用「${ARR_NAME[a.special.arrangement]}」的方式排。`:''}`,by:S.bRoute==='style'?'參考＋後台風格':'參考圖'};
   S.rec=rec;S.answers=A;
-  S.choice={arr:null,live:!!SAMPLE&&!SAVE,illus:[],focus:'both',aes:key,els:[...els],shape:rec.shape,len:rec.len,accent:2,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:0};
+  S.choice={arr:null,live:false,illus:[],focus:'both',aes:key,els:[...els],shape:rec.shape,len:rec.len,accent:2,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:0};
   go(3);renderRec();
 }
 
@@ -2190,7 +2190,7 @@ ${illList}
     const conflict=(KB&&KB.avoid||[]).find(x=>(A.colorFam.includes('vivid')&&/霓虹/.test(x.combo)&&/裸色/.test(x.combo)&&/裸|Clean|極簡/.test(rec.aes))||(A.colorFam.includes('pastel')&&/粉彩/.test(x.combo)&&rec.aes==='暗黑'));
     if(conflict)rec.palWarn=`後台提醒：${conflict.combo}（${conflict.why}），還是照你選的做。`;}
   S.rec=rec;S.answers=A;
-  S.choice={y2k:rec.y2k||null,arr:null,live:!!SAMPLE&&!SAVE,illus:[...rec.illus],focus:rec.focus,aes:rec.aes,finish:rec.finish||null,els:[...rec.els],shape:rec.shape,len:rec.len,accent:rec.accent,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:1};
+  S.choice={y2k:rec.y2k||null,arr:null,live:false,illus:[...rec.illus],focus:rec.focus,aes:rec.aes,finish:rec.finish||null,els:[...rec.els],shape:rec.shape,len:rec.len,accent:rec.accent,amount:rec.amount,pal:[...rec.pal],forms:[],freedom:1};
   renderRec();
 }
 function renderRec(){
@@ -2258,7 +2258,7 @@ function renderRec(){
   $('#cIllMore').innerHTML=Object.entries(ILLUS_CAT).map(([cat,ks])=>{const list=ks.filter(k=>!r.illus.includes(k));if(!list.length)return '';
     return `<div class="cat"><h4>${cat}</h4><div class="chips">${list.map(k=>`<label><input type="checkbox" name="cIll" value="${k}" ${c.illus.includes(k)?'checked':''}><span>${ILLUS_NAME[k]}</span></label>`).join('')}</div></div>`;}).join('');
   chips('cFree',['0','1','2'],'cFree',String(c.freedom),'radio',{0:FREEDOM[0],1:FREEDOM[1],2:FREEDOM[2]});
-  chips('cLive',['live','lib'],'cLive',(c.live??(!!SAMPLE&&!SAVE))?'live':'lib','radio',{live:'UNDERTONE 即時手繪',lib:'素材庫'});
+  chips('cLive',['live','lib'],'cLive',c.live?'live':'lib','radio',{live:'UNDERTONE 即時手繪',lib:'素材庫'});
   chips('cShape',Object.keys(SHAPE_NAME),'cShape',c.shape,'radio',lab(SHAPE_NAME,r.shape,v=>v));
   chips('cAcc',['0','1','2','3','4'],'cAcc',String(c.accent),'radio',lab(Object.fromEntries(FINGERS.map((f,i)=>[String(i),f.n])),String(r.accent),v=>v));
   $('#cEls').innerHTML=rec3.map(k=>`<label class="el rec"><input type="checkbox" name="cEls" value="${k}" ${c.els.includes(k)?'checked':''}><span><b>${esc(elLabel(k))}${elSwatch(k)}</b><small>${esc(r.why[k]||EL_WHY[k])}</small></span></label>`).join('');
@@ -3072,7 +3072,7 @@ $('#restart').onclick=()=>location.reload();
 
 /* ---------- 存檔與測試紀錄 ---------- */
 // 生成器版本：每次改版都要跟 kb/backend.md 最後一筆版本紀錄一起改，測試紀錄才看得出是哪一版做的
-const VERSION='雙模式 v64';
+const VERSION='雙模式 v65';
 let DB=null,ASSETS=null,DL=null,CUR=null,SAVE_TOKEN=0,PHOTO={file:null,id:null};
 (async()=>{if(!window.claude||!claude.use)return;
   try{DB=await claude.use('db');}catch(e){DB=null;}
