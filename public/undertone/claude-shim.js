@@ -147,6 +147,8 @@
       return new File([b], `phone-${Date.now()}-${n}.${(b.type.split('/')[1] || 'jpg')}`, { type: b.type });
     },
     async stop(token) { await call('/phone/' + token, { method: 'DELETE' }).catch(() => {}); },
+    // 試戴照片存到手機：送一張圖過去，拿回手機要掃的網址（{url, wifi, remote}）
+    async share(blob) { return call('/share', { method: 'POST', headers: { 'Content-Type': blob.type || 'image/png' }, body: blob }); },
   };
 
   const caps = { sample, db, assets, downloads, expo, phone };

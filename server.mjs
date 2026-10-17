@@ -80,6 +80,7 @@ async function api(req, res, p, url) {
   if (p === "/api/ai" && method === "POST") return ai(req, res);
   if (p === "/api/unlock" && method === "POST") return unlock(req, res);
   if (p === "/api/phone" && method === "POST") return phoneStart(res);
+  if (p === "/api/share" && method === "POST") return shareStart(req, res);
   if ((m0 = p.match(/^\/api\/phone\/([0-9a-f]{32})(?:\/(\d+))?$/))) return phoneRoute(req, res, m0[1], m0[2]);
 
   let m;
@@ -283,6 +284,36 @@ async function phoneRoute(req, res, token, n) {
   res.end(await readFile(it.file));
 }
 
+/* ---------- 試戴照片存到手機 ---------- */
+// 生成器把拍好的試戴照片送來，存成 data/share/<碼>.<副檔名>，QR code 指到手機頁 /d/<碼>（有通道就走通道，不用同一個 Wi-Fi）。
+// 檔名就是碼，重新開伺服器也還在；放 3 天後自動清掉。
+const SHARE_DIR = path.join(DATA, "share"), SHARE_TTL = 3 * 24 * 3600 * 1000;
+async function shareStart(req, res) {
+  const type = (req.headers["content-type"] || "").split(";")[0];
+  if (!/^image\/(jpeg|png|webp)$/.test(type)) return json(res, { error: "bad_type" }, 415);
+  const body = await readBody(req);
+  if (!body.length || body.length > PHONE_MAX_BYTES) return json(res, { error: "too_large" }, 413);
+  for (let i = 0; i < 24 && tunnelStarting && !TUNNEL; i++) await new Promise(r => setTimeout(r, 500));
+  const host = lanAddress();
+  if (!phoneServerUp || (!host && !TUNNEL)) return json(res, { error: "no_lan" }, 503);
+  const token = randomBytes(16).toString("hex");
+  await mkdir(SHARE_DIR, { recursive: true });
+  await writeFile(path.join(SHARE_DIR, `${token}.${type.split("/")[1]}`), body);
+  json(res, { url: TUNNEL ? `${TUNNEL}/d/${token}` : `http://${host}:${PHONE_PORT}/d/${token}`, wifi: TUNNEL ? null : PHONE_WIFI, remote: !!TUNNEL });
+}
+async function shareFile(token) {
+  for (const ext of ["png", "jpeg", "webp"]) { const f = path.join(SHARE_DIR, `${token}.${ext}`); if (existsSync(f)) return { file: f, type: "image/" + ext, ext }; }
+  return null;
+}
+setInterval(async () => {
+  try { for (const f of await readdir(SHARE_DIR)) { const st = await stat(path.join(SHARE_DIR, f)); if (Date.now() - st.mtimeMs > SHARE_TTL) await rm(path.join(SHARE_DIR, f), { force: true }); } } catch {}
+}, 60 * 60 * 1000).unref();
+const SHARE_PAGE = t => `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>UNDERTONE 試戴照片</title>
+<style>body{margin:0;background:#EDEDED;color:#161616;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}main{max-width:560px;margin:0 auto;padding:28px 18px 40px}
+.mark{letter-spacing:.34em;font-size:18px;margin:0 0 20px}img{width:100%;border-radius:16px;display:block;background:#fff}p{color:#6E6E6E;line-height:1.6}
+a{display:flex;align-items:center;justify-content:center;min-height:56px;margin-top:16px;border-radius:14px;background:#161616;color:#fff;text-decoration:none;font-size:17px}</style></head>
+<body><main><p class="mark">UNDERTONE</p><img src="/d/${t}/img" alt="試戴照片"><p>長按照片就能存到相簿，或按下面的按鈕下載。這張照片放 3 天後會刪掉。</p><a href="/d/${t}/img?dl=1">下載照片</a></main></body></html>`;
+
 // 過期的上傳碼和照片定時清掉
 setInterval(() => {
   const now = Date.now();
@@ -294,7 +325,16 @@ let phoneServerUp = false;
 const PHONE_PAGE = path.join(ROOT, "phone", "upload.html");
 const phoneServer = http.createServer(async (req, res) => {
   try {
-    const pn = new URL(req.url, "http://x").pathname;
+    const url = new URL(req.url, "http://x"), pn = url.pathname;
+    const d = pn.match(/^\/d\/([0-9a-f]{32})(\/img)?$/);
+    if (d && req.method === "GET") {
+      const f = await shareFile(d[1]);
+      if (!f) { res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }); return res.end("這張照片已經過期或不存在了。"); }
+      if (!d[2]) { res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }); return res.end(SHARE_PAGE(d[1])); }
+      const h = { "Content-Type": f.type, "Cache-Control": "no-store" };
+      if (url.searchParams.has("dl")) h["Content-Disposition"] = `attachment; filename="UNDERTONE-tryon.${f.ext}"`;
+      res.writeHead(200, h); return res.end(await readFile(f.file));
+    }
     const m = pn.match(/^\/u\/([0-9a-f]{32})$/);
     const ses = m && phoneSessions.get(m[1]);
     if (!m) return notFound(res);

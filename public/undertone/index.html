@@ -150,15 +150,15 @@ details.more{margin-top:12px}details.more summary{cursor:pointer;color:var(--lac
 .card p{margin:4px 0;font-size:14px}
 .card .meta{color:var(--soft);font-size:13px}
 .card .actions{margin-top:12px}.card .btn{padding:9px 14px;font-size:14px}
-#tryStage{position:relative;aspect-ratio:3/4;margin:0 -18px;background:#000;overflow:hidden}
+#tryStage{position:relative;aspect-ratio:16/9;margin:0 -18px;background:#000;overflow:hidden}
 #tryStage canvas{display:block}
 #tryHint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(22,22,22,.72);color:#fff;font-size:13px;padding:6px 14px;border-radius:999px;white-space:nowrap;pointer-events:none}
 #tryHint[hidden]{display:none}
 .trysize{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:14px}
 .trysize input{flex:1;accent-color:var(--ink)}
 .trysize span{min-width:3em;text-align:right;color:var(--soft);font-variant-numeric:tabular-nums}
-.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
-.shots img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;display:block;border:1px solid var(--line)}
+.shots{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.shots img{width:100%;height:auto;border-radius:10px;display:block;border:1px solid var(--line)}
 .shots button{appearance:none;border:0;padding:0;background:none;cursor:pointer}
 .loading{color:var(--soft);font-size:18px;padding:40px 0}
 
@@ -199,7 +199,7 @@ section[data-step="2"]{max-width:760px}
 #stage{margin:0;max-height:calc(100vh - 290px);aspect-ratio:4/3}
 .result .split-side #reviseBox{margin-top:0}
 .result .split-side #saveBox{margin-top:20px}
-.tryon{grid-template-columns:minmax(0,2fr) minmax(300px,1fr)}
+.tryon{grid-template-columns:minmax(0,3fr) minmax(280px,1fr)}
 /* 試戴 */
 .tryon .split-main{position:sticky;top:24px}
 #tryStage{margin:0;border-radius:20px}
@@ -433,6 +433,21 @@ button.addcol{background:none;font:inherit;padding:0;cursor:pointer}
 .pick-now{display:flex;align-items:center;gap:12px;margin-top:16px;font-size:14px;color:var(--soft);font-variant-numeric:tabular-nums}
 .pick-now i{width:44px;height:44px;border-radius:50%;border:1px solid var(--line)}
 .sheet-card:has(.pick-sw){max-width:480px}
+/* 試戴：拍好的照片和存到手機的 QR code */
+.shots button.on img{outline:2px solid var(--ink);outline-offset:2px}
+.share-box{display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.share-box[hidden]{display:none}
+.share-box h3{margin:0 0 4px;font-size:15px;font-weight:500}
+.share-box .stat{margin:0;font-size:13px}
+.share-qr{display:flex;gap:10px;flex:none}
+.share-qr div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--soft)}
+.share-qr svg{width:150px;height:150px;background:#fff;border-radius:8px;display:block}
+/* 測試紀錄：橫的一張一排，左邊成品和試戴照片，右邊內容 */
+.logday-grid{grid-template-columns:1fr}
+.logday-grid>.card{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr);column-gap:32px;align-items:start}
+.log-media .shot{margin:0}
+.log-media .shots{grid-template-columns:repeat(3,1fr)}
+@media (max-width:860px){.logday-grid>.card{grid-template-columns:1fr}}
 /* 等待畫面：實際秒數和每一部分的進度 */
 .loader .wait-t{font-size:13px;color:var(--soft);margin-top:6px;font-variant-numeric:tabular-nums}
 .wait-list{list-style:none;padding:0;margin:14px auto 0;max-width:280px;text-align:left;font-size:14px}
@@ -673,6 +688,7 @@ section[data-step="2"]>.actions .btn.main{min-width:260px}
     <label class="trysize">指甲大小 <input type="range" id="trySize" min="60" max="130" step="5" value="100"><span id="trySizeV">100%</span></label>
     <p class="stat" id="tryTip">離鏡頭遠一點，讓整隻手連手腕都在畫面裡，比較容易抓到。手心朝鏡頭、握拳收起來的手指不會戴。</p>
     <p class="stat" id="tryMsg" style="margin-top:10px"></p>
+    <div class="share-box" id="shareBox" hidden><div class="share-qr" id="shareQr"></div><div><h3>掃 QR code 存到手機</h3><p class="stat" id="shareMsg"></p></div></div>
     <div class="shots" id="tryShots"></div>
     </div></div>
   </section>
@@ -3056,7 +3072,7 @@ $('#restart').onclick=()=>location.reload();
 
 /* ---------- 存檔與測試紀錄 ---------- */
 // 生成器版本：每次改版都要跟 kb/backend.md 最後一筆版本紀錄一起改，測試紀錄才看得出是哪一版做的
-const VERSION='雙模式 v61';
+const VERSION='雙模式 v62';
 let DB=null,ASSETS=null,DL=null,CUR=null,SAVE_TOKEN=0,PHOTO={file:null,id:null};
 (async()=>{if(!window.claude||!claude.use)return;
   try{DB=await claude.use('db');}catch(e){DB=null;}
@@ -3194,10 +3210,10 @@ async function loadLog(){
 }
 function logCard(r,onDel){const d=r.doc,A=d.answers||{},c=d.choice||{},n=d.negotiation||{},g=d.designer||{};
     const card=document.createElement('div');card.className='card';
-    card.innerHTML=`${d.image?`<img class="shot" src="/_blob/${esc(d.image)}" alt="成品圖" loading="lazy">`:'<p class="note quiet">這筆沒有存到圖片</p>'}
+    card.innerHTML=`<div class="log-media">${d.image?`<img class="shot" src="/_blob/${esc(d.image)}" alt="成品圖" loading="lazy">`:'<p class="note quiet">這筆沒有存到圖片</p>'}
+      ${d.tryon&&d.tryon.length?`<p class="meta" style="margin-top:8px">試戴照片 ${d.tryon.length} 張</p><div class="shots">${d.tryon.map(id=>`<img src="/_blob/${esc(id)}" alt="試戴照片" loading="lazy">`).join('')}</div>`:''}</div><div class="log-info">
       <h3>${fmtTime(d.createdAt)}${d.mode?`　模式 ${d.mode}`:''}${d.bRoute?`（${esc(d.bRoute)}）`:''}${d.revise?`　修改第 ${d.revise.round} 輪`:''}</h3>
       <p class="meta">${esc(d.version||'')}・第 ${d.run||1} 版${c.aes?`｜${esc(c.aes)}${c.finish&&FINISH[c.finish]?'＋'+esc(FINISH[c.finish].name):''}／${esc(SHAPE_NAME[c.shape]||c.shape||'')}／${esc(LEN_NAME[c.len]||c.len||'')}`:''}</p>
-      ${d.tryon&&d.tryon.length?`<p class="meta" style="margin-top:8px">試戴照片 ${d.tryon.length} 張</p><div class="shots">${d.tryon.map(id=>`<img src="/_blob/${esc(id)}" alt="試戴照片" loading="lazy">`).join('')}</div>`:''}
       ${d.photo&&d.photo.id?`<img class="photo" src="/_blob/${esc(d.photo.id)}" alt="上傳的照片">`:''}
       <p>照片：${d.photo&&d.photo.given?esc(d.photo.type||'有'):'沒有提供'}${d.photo&&d.photo.summary?'｜'+esc(d.photo.summary):''}</p>
       <p>心情：${esc(A.mood||'')}（${A.intensity||'-'}）｜要做的事：${esc([A.occ,A.occText].filter(Boolean).join('；')||'—')}</p>
@@ -3213,7 +3229,7 @@ function logCard(r,onDel){const d=r.doc,A=d.answers||{},c=d.choice||{},n=d.negot
       <div class="rlabel">像不像你想要的樣子</div>${rateHtml('match',d.match)}
       ${d.special?`<div class="rlabel">有沒有抓到參考圖的風格</div>${rateHtml('catch',d.catch)}`:''}
       <textarea placeholder="感想、想改的地方（會自動存）" style="min-height:60px;margin-top:4px">${esc(d.comment||'')}</textarea>
-      <div class="actions">${DL&&d.image?'<button class="btn ghost" data-a="dl">下載圖片</button>':''}<button class="btn ghost" data-a="del">刪除</button></div>`;
+      <div class="actions">${DL&&d.image?'<button class="btn ghost" data-a="dl">下載圖片</button>':''}<button class="btn ghost" data-a="del">刪除</button></div></div>`;
     bindRating(card,r.ref,d);
     card.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;
       if(b.dataset.a==='dl'){try{const blob=await (await fetch('/_blob/'+d.image)).blob();saveFile(`Undertone_${fileStamp(d.createdAt)}.png`,blob);}catch(err){alert('下載沒有成功');}}
@@ -3372,12 +3388,25 @@ async function usePhoto(file){
   catch(e){console.warn('hands',e);tryHint('');$('#tryMsg').textContent='手部偵測沒有載入成功，請重新整理再試一次。';}
 }
 function renderShots(){
-  $('#tryShots').innerHTML=TRY.shots.map((s,i)=>`<img src="${s.url}" alt="試戴照片 ${i+1}">`).join('');
+  $('#tryShots').innerHTML=TRY.shots.map((s,i)=>`<button type="button" data-shot="${i}" class="${s===TRY.sel?'on':''}" aria-label="試戴照片 ${i+1}，顯示存到手機的 QR code"><img src="${s.url}" alt=""></button>`).join('');
+  $('#tryShots').querySelectorAll('[data-shot]').forEach(b=>b.onclick=()=>showShare(TRY.shots[+b.dataset.shot]));
+}
+// 拍好的照片做成 QR code：手機掃了就能存（走 cloudflared 通道，不用同一個 Wi-Fi）。claude.ai 預覽沒有這個功能就不顯示
+async function showShare(shot){
+  if(!shot||!PHONE||!PHONE.share){$('#shareBox').hidden=true;return;}
+  TRY.sel=shot;renderShots();$('#shareBox').hidden=false;
+  if(!shot.share){$('#shareQr').innerHTML='';$('#shareMsg').textContent='準備 QR code…';
+    try{const jpg=await new Promise(r=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);c.toBlob(r,'image/jpeg',.92);};im.onerror=()=>r(shot.blob);im.src=shot.url;});
+      shot.share=await PHONE.share(jpg||shot.blob);}
+    catch(e){if(TRY.sel===shot)$('#shareMsg').textContent=e&&e.code==='no_lan'?'這台電腦沒有連上網路，沒辦法做 QR code。':'QR code 沒有做成功，再按一次照片試試。';return;}}
+  if(TRY.sel!==shot)return;const sh=shot.share;
+  $('#shareQr').innerHTML=(sh.wifi&&sh.wifi.ssid?`<div>${qrSvg(`WIFI:T:${sh.wifi.pass?'WPA':'nopass'};S:${sh.wifi.ssid};${sh.wifi.pass?`P:${sh.wifi.pass};`:''};`)}<span>先連 Wi-Fi</span></div>`:'')+`<div>${qrSvg(sh.url)}<span>${sh.wifi&&sh.wifi.ssid?'再掃這個':'用手機相機掃'}</span></div>`;
+  $('#shareMsg').textContent=sh.remote?'用手機相機掃，打開後長按照片存到相簿。手機用自己的網路就可以，照片放 3 天。':'手機要連上和這台電腦一樣的 Wi-Fi 才打得開（通道沒有開成）。打開後長按照片存到相簿。';
 }
 function captureTry(){return new Promise(res=>{const cv=document.querySelector('#tryStage canvas');if(!cv){res(null);return;}cv.toBlob(b=>res(b),'image/png');});}
 async function tryShot(){
   const b=await captureTry();if(!b)return;
-  const shot={blob:b,url:URL.createObjectURL(b),t:Date.now()};TRY.shots.unshift(shot);renderShots();
+  const shot={blob:b,url:URL.createObjectURL(b),t:Date.now()};TRY.shots.unshift(shot);renderShots();showShare(shot);
   if(!CUR&&ASSETS){$('#tryMsg').textContent='等成品存檔…';for(let i=0;i<40&&!CUR;i++)await new Promise(r=>setTimeout(r,500));}
   if(!CUR||!ASSETS){$('#tryMsg').textContent=DL?'拍好了，點照片可以下載。這張沒有存進測試紀錄（這次成品沒有存檔成功）。':'拍好了。這個畫面沒辦法存檔，可以先截圖保存。';return;}
   $('#tryMsg').textContent='存進測試紀錄中…';
@@ -3392,7 +3421,7 @@ function openTry(){
   $('#openLog').style.visibility='hidden';
   window.scrollTo({top:0,behavior:'instant'});
   TRY.on=true;TRY.shots=[];renderShots();$('#tryShot').disabled=true;$('#tryCam').hidden=true;
-  placeCanvas('tryStage');$('#tryStage').style.aspectRatio='3/4';windowResized();loop();requestAnimationFrame(placeBack);
+  placeCanvas('tryStage');$('#tryStage').style.aspectRatio='16/9';$('#shareBox').hidden=true;windowResized();loop();requestAnimationFrame(placeBack);
   startCam();
 }
 function closeTry(){
