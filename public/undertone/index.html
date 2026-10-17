@@ -3072,7 +3072,7 @@ $('#restart').onclick=()=>location.reload();
 
 /* ---------- 存檔與測試紀錄 ---------- */
 // 生成器版本：每次改版都要跟 kb/backend.md 最後一筆版本紀錄一起改，測試紀錄才看得出是哪一版做的
-const VERSION='雙模式 v63';
+const VERSION='雙模式 v64';
 let DB=null,ASSETS=null,DL=null,CUR=null,SAVE_TOKEN=0,PHOTO={file:null,id:null};
 (async()=>{if(!window.claude||!claude.use)return;
   try{DB=await claude.use('db');}catch(e){DB=null;}
@@ -3391,18 +3391,17 @@ function renderShots(){
   $('#tryShots').innerHTML=TRY.shots.map((s,i)=>`<button type="button" data-shot="${i}" class="${s===TRY.sel?'on':''}" aria-label="試戴照片 ${i+1}，顯示存到手機的 QR code"><img src="${s.url}" alt=""></button>`).join('');
   $('#tryShots').querySelectorAll('[data-shot]').forEach(b=>b.onclick=()=>showShare(TRY.shots[+b.dataset.shot]));
 }
-// 拍好的照片做成 QR code：手機掃了就能存（走 cloudflared 通道，不用同一個 Wi-Fi）。claude.ai 預覽沒有這個功能就不顯示
+// 拍好的照片做成 QR code，手機一掃就能存（走 cloudflared 通道）。畫面上不提網路；通道還沒好就安靜地等一下再做。claude.ai 預覽沒有這個功能就不顯示
 async function showShare(shot){
   if(!shot||!PHONE||!PHONE.share){$('#shareBox').hidden=true;return;}
   TRY.sel=shot;renderShots();$('#shareBox').hidden=false;
-  // 只有走通道（不用同一個 Wi-Fi）的 QR code 才留著；同一個 Wi-Fi 的下次點照片會再試一次通道
   if(!shot.share||!shot.share.remote){$('#shareQr').innerHTML='';$('#shareMsg').textContent='準備 QR code…';
     try{const jpg=await new Promise(r=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);c.toBlob(r,'image/jpeg',.92);};im.onerror=()=>r(shot.blob);im.src=shot.url;});
-      shot.share=await PHONE.share(jpg||shot.blob);}
-    catch(e){if(TRY.sel===shot)$('#shareMsg').textContent=e&&e.code==='no_lan'?'這台電腦沒有連上網路，沒辦法做 QR code。':e&&(e.code==='not_found'||e.status===404)?'伺服器還是舊版：關掉黑色視窗，重新點兩下啟動檔再試。':`QR code 沒有做成功（${e&&(e.code||e.message)||'不明原因'}），再按一次照片試試。`;return;}}
-  if(TRY.sel!==shot)return;const sh=shot.share;
-  $('#shareQr').innerHTML=(sh.wifi&&sh.wifi.ssid?`<div>${qrSvg(`WIFI:T:${sh.wifi.pass?'WPA':'nopass'};S:${sh.wifi.ssid};${sh.wifi.pass?`P:${sh.wifi.pass};`:''};`)}<span>先連 Wi-Fi</span></div>`:'')+`<div>${qrSvg(sh.url)}<span>${sh.wifi&&sh.wifi.ssid?'再掃這個':'用手機相機掃'}</span></div>`;
-  $('#shareMsg').textContent=sh.remote?'用手機相機掃，打開後長按照片存到相簿，或按「下載照片」。手機用自己的網路就可以，照片放 3 天。':'通道還沒開好，這個 QR code 要連同一個 Wi-Fi 才打得開。等一下再點一次照片，通道好了就會換成不用同一個 Wi-Fi 的。';
+      for(let i=0;i<8;i++){shot.share=await PHONE.share(jpg||shot.blob);if(shot.share.remote||TRY.sel!==shot)break;await new Promise(r=>setTimeout(r,4000));}}
+    catch(e){if(TRY.sel===shot)$('#shareMsg').textContent=e&&(e.code==='not_found'||e.status===404)?'伺服器還是舊版：關掉黑色視窗，重新點兩下啟動檔再試。':'QR code 現在做不出來，再按一次照片試試。';return;}}
+  if(TRY.sel!==shot)return;
+  $('#shareQr').innerHTML=`<div>${qrSvg(shot.share.url)}</div>`;
+  $('#shareMsg').textContent='用手機相機掃，長按照片存到相簿，或按「下載照片」。';
 }
 function captureTry(){return new Promise(res=>{const cv=document.querySelector('#tryStage canvas');if(!cv){res(null);return;}cv.toBlob(b=>res(b),'image/png');});}
 async function tryShot(){
@@ -3607,14 +3606,11 @@ async function phoneStart(){
   if(!PHONE||PH||S.step!==1)return;
   const ph=PH={ses:null,timer:null,got:0};const msg=$('#phonePanel .phone-msg');
   $('#qrUp').innerHTML='<p class="stat">準備中…</p>';$('#qrWifi').hidden=true;msg.textContent='';
-  try{ph.ses=await PHONE.start();}catch(e){if(PH===ph)PH=null;$('#qrUp').innerHTML='';msg.textContent=e.code==='no_lan'?'這台電腦沒有連上網路，手機傳不上來。可以先跳過照片。':'手機上傳現在不能用，可以先跳過照片。';return;}
+  try{ph.ses=await PHONE.start();}catch(e){if(PH===ph)PH=null;$('#qrUp').innerHTML='';msg.textContent='手機上傳現在不能用，可以先跳過照片。';return;}
   if(PH!==ph){PHONE.stop(ph.ses.token);return;}
   const ses=ph.ses;
-  $('#phonePanel .phone-how').textContent=ses.remote?'打開手機相機掃左邊的 QR code，選照片傳上來，最多 3 張。用手機自己的網路就可以，不用連 Wi-Fi。'
-    :(ses.wifi?'先掃左邊的 QR code 連上 Wi-Fi，再掃右邊的 QR code 選照片傳上來，最多 3 張。':'手機要連上和這台電腦一樣的 Wi-Fi，再掃左邊的 QR code 選照片傳上來，最多 3 張。');
-  $('#qrUp').innerHTML=qrSvg(ses.url)+`<p class="stat">${ses.wifi?'再掃這個傳照片':'掃這個傳照片'}</p>`;
-  if(ses.wifi){const w=$('#qrWifi'),esc2=v=>String(v).replace(/([\\;,:"])/g,'\\$1');w.hidden=false;
-    w.innerHTML=qrSvg(`WIFI:T:${ses.wifi.pass?'WPA':'nopass'};S:${esc2(ses.wifi.ssid)};${ses.wifi.pass?`P:${esc2(ses.wifi.pass)};`:''};`)+`<p class="stat">先掃這個連 Wi-Fi（${esc(ses.wifi.ssid)}）</p>`;}
+  $('#phonePanel .phone-how').textContent='打開手機相機掃左邊的 QR code，選照片傳上來，最多 3 張。';
+  $('#qrUp').innerHTML=qrSvg(ses.url)+'<p class="stat">掃這個傳照片</p>';
   ph.timer=setInterval(async()=>{
     if(PH!==ph){clearInterval(ph.timer);return;}
     try{const items=await PHONE.list(ses.token);

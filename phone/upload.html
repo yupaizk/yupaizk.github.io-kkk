@@ -69,7 +69,7 @@ $('#file').addEventListener('change', async e => {
     } catch (err) {
       cap.textContent = '沒傳成功';
       $('#msg').textContent = String(err.message) === 'expired' ? '這個 QR code 過期了，請在電腦上重新按「用手機上傳」。'
-        : String(err.message) === 'full' ? '已經傳滿 3 張了。' : '沒有傳成功，確認手機和電腦連在同一個 Wi-Fi 再試一次。';
+        : String(err.message) === 'full' ? '已經傳滿 3 張了。' : '沒有傳成功，再試一次。';
     }
   }
   if (sent >= MAX) { $('#pick').setAttribute('aria-disabled', 'true'); $('#msg').textContent = '傳好了，回到電腦前面繼續。'; }
