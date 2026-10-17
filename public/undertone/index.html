@@ -205,9 +205,28 @@ section[data-step="2"]{max-width:760px}
 #tryStage{margin:0;border-radius:20px}
 .tryon .split-side .actions:first-child{margin-top:0}
 /* 紀錄：卡片排成格狀 */
-#logList{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px;align-items:start;margin-top:20px}
-#logList>.card{margin-top:0}
-#logList>p{grid-column:1/-1}
+#logList{margin-top:20px}
+.logday-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px;align-items:start;padding:8px 0 28px}
+.logday-grid>.card{margin-top:0}
+/* 測試紀錄：總數、日期捷徑、每天一組 */
+.log-sum{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.log-sum div{flex:1 1 120px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 18px;display:flex;flex-direction:column;gap:2px}
+.log-sum b{font-size:30px;font-weight:500;line-height:1.1;font-variant-numeric:tabular-nums}
+.log-sum span{font-size:13px;color:var(--soft)}
+.log-sum div:first-child{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.log-sum div:first-child span{color:inherit;opacity:.7}
+.log-days{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.log-days button{font:inherit;font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;display:inline-flex;gap:6px;align-items:center;font-variant-numeric:tabular-nums}
+.log-days button span{color:var(--soft)}
+.log-days button[hidden],details.logday[hidden]{display:none}
+details.logday{border-top:1px solid var(--line);scroll-margin-top:110px}
+details.logday>summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:14px;padding:18px 0 10px}
+details.logday>summary::-webkit-details-marker{display:none}
+details.logday>summary::before{content:'＋';color:var(--soft);font-size:14px;width:1em}
+details.logday[open]>summary::before{content:'－'}
+details.logday>summary b{font-size:19px;font-weight:500;font-variant-numeric:tabular-nums}
+.logday-n{color:var(--soft);font-size:14px}
+@media (max-width:760px){.log-sum{gap:8px}.log-sum div{flex:1 1 28%;padding:10px 12px;border-radius:12px}.log-sum b{font-size:22px}.log-sum span{font-size:12px}}
 /* 視窗太窄時退回單欄 */
 @media (max-width:999px){
   .wrap{padding:0 18px 48px}
@@ -3037,7 +3056,7 @@ $('#restart').onclick=()=>location.reload();
 
 /* ---------- 存檔與測試紀錄 ---------- */
 // 生成器版本：每次改版都要跟 kb/backend.md 最後一筆版本紀錄一起改，測試紀錄才看得出是哪一版做的
-const VERSION='雙模式 v60';
+const VERSION='雙模式 v61';
 let DB=null,ASSETS=null,DL=null,CUR=null,SAVE_TOKEN=0,PHOTO={file:null,id:null};
 (async()=>{if(!window.claude||!claude.use)return;
   try{DB=await claude.use('db');}catch(e){DB=null;}
@@ -3143,6 +3162,7 @@ async function countLog(add){
 }
 let LOG=[];
 function openLog(){
+  document.body.classList.remove('atHome');
   document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.dataset.step==='log'));
   document.querySelector('nav.steps').style.display='none';$('#openLog').style.visibility='hidden';
   if(typeof noLoop==='function')noLoop();window.scrollTo({top:0,behavior:'instant'});loadLog();requestAnimationFrame(placeBack);
@@ -3157,8 +3177,22 @@ async function loadLog(){
   catch(e){list.innerHTML='<p class="note quiet">讀取失敗，請稍後再試。</p>';return;}
   $('#logN').textContent=`(${LOG.length})`;$('#logN').dataset.n=LOG.length;
   if(!LOG.length){list.innerHTML='<p class="note quiet">還沒有紀錄。生成一組指甲之後就會出現在這裡。</p>';return;}
-  list.innerHTML='';
-  LOG.forEach((r,i)=>{const d=r.doc,A=d.answers||{},c=d.choice||{},n=d.negotiation||{},g=d.designer||{};
+  // 依日期分組：最上面是總數，接著是每一天的捷徑；最新的那天先打開，其他天點開才畫卡片（紀錄多也不會卡）
+  const dayOf=t=>{const x=new Date(t||0);return `${x.getFullYear()}/${String(x.getMonth()+1).padStart(2,'0')}/${String(x.getDate()).padStart(2,'0')}`;};
+  const wk=t=>'日一二三四五六'[new Date(t||0).getDay()];
+  const days=[];LOG.forEach(r=>{const k=dayOf(r.doc.createdAt);let g=days[days.length-1];if(!g||g.k!==k){g={k,t:r.doc.createdAt,rows:[]};days.push(g);}g.rows.push(r);});
+  list.innerHTML=`<div class="log-sum" id="logSum"></div><nav class="log-days" aria-label="跳到某一天">${days.map((g,i)=>`<button type="button" data-day="${i}">${g.k.slice(5)}<span>${g.rows.length}</span></button>`).join('')}</nav>`
+    +days.map((g,i)=>`<details class="logday" data-day="${i}" ${i===0?'open':''}><summary><b>${g.k}（${wk(g.t)}）</b><span class="logday-n">${g.rows.length} 組</span></summary><div class="logday-grid"></div></details>`).join('');
+  const sum=()=>{const nA=LOG.filter(r=>r.doc.mode==='A').length,nB=LOG.filter(r=>r.doc.mode==='B').length,live=days.filter(g=>g.rows.length);
+    $('#logSum').innerHTML=`<div><b>${LOG.length}</b><span>總共測試</span></div><div><b>${live.length}</b><span>天</span></div><div><b>${live[0]&&live[0].k===dayOf(Date.now())?live[0].rows.length:0}</b><span>今天</span></div><div><b>${nA}</b><span>交給感覺</span></div><div><b>${nB}</b><span>我有想要的</span></div>`;
+    days.forEach((g,i)=>{const n=g.rows.length,dt=list.querySelector(`details[data-day="${i}"]`),bt=list.querySelector(`button[data-day="${i}"]`);
+      if(dt){dt.querySelector('.logday-n').textContent=`${n} 組`;dt.hidden=!n;}if(bt){bt.querySelector('span').textContent=n;bt.hidden=!n;}});};
+  list.querySelectorAll('.log-days button').forEach(b=>b.onclick=()=>{const dt=list.querySelector(`details[data-day="${b.dataset.day}"]`);dt.open=true;dt.scrollIntoView({behavior:'smooth',block:'start'});});
+  list.querySelectorAll('details.logday').forEach(dt=>{const fill=()=>{if(dt.dataset.done)return;dt.dataset.done=1;days[+dt.dataset.day].rows.forEach(r=>dt.querySelector('.logday-grid').appendChild(logCard(r,()=>{const g=days[+dt.dataset.day];g.rows.splice(g.rows.indexOf(r),1);sum();})));};
+    if(dt.open)fill();dt.addEventListener('toggle',()=>{if(dt.open)fill();});});
+  sum();
+}
+function logCard(r,onDel){const d=r.doc,A=d.answers||{},c=d.choice||{},n=d.negotiation||{},g=d.designer||{};
     const card=document.createElement('div');card.className='card';
     card.innerHTML=`${d.image?`<img class="shot" src="/_blob/${esc(d.image)}" alt="成品圖" loading="lazy">`:'<p class="note quiet">這筆沒有存到圖片</p>'}
       <h3>${fmtTime(d.createdAt)}${d.mode?`　模式 ${d.mode}`:''}${d.bRoute?`（${esc(d.bRoute)}）`:''}${d.revise?`　修改第 ${d.revise.round} 輪`:''}</h3>
@@ -3184,8 +3218,8 @@ async function loadLog(){
     card.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;
       if(b.dataset.a==='dl'){try{const blob=await (await fetch('/_blob/'+d.image)).blob();saveFile(`Undertone_${fileStamp(d.createdAt)}.png`,blob);}catch(err){alert('下載沒有成功');}}
       if(b.dataset.a==='del'&&confirm('確定刪除這筆紀錄？刪除後無法復原。')){
-        try{await r.ref.delete();if(ASSETS&&d.image)ASSETS.delete(d.image).catch(()=>{});card.remove();LOG.splice(LOG.indexOf(r),1);$('#logN').textContent=`(${LOG.length})`;$('#logN').dataset.n=LOG.length;}catch(err){alert('刪除失敗');}}});
-    list.appendChild(card);});
+        try{await r.ref.delete();if(ASSETS&&d.image)ASSETS.delete(d.image).catch(()=>{});card.remove();LOG.splice(LOG.indexOf(r),1);$('#logN').textContent=`(${LOG.length})`;$('#logN').dataset.n=LOG.length;onDel&&onDel();}catch(err){alert('刪除失敗');}}});
+    return card;
 }
 $('#exportCsv').onclick=async()=>{
   if(!LOG.length){alert('還沒有紀錄可以匯出');return;}
@@ -3459,7 +3493,7 @@ $('#pageBack').onclick=()=>{const st=S.step,c=id=>{const b=$(id);if(b)b.click();
   const on=(document.querySelector('.screen.on')||{dataset:{}}).dataset.step;if(on==='try')return c('#tryBack');if(on==='log')return c('#logBack');
   ({0:()=>$('#homeBtn').onclick(),1:()=>c('#toMode'),2:()=>c('#qBack'),3:()=>c('#back2'),4:()=>c('#back3')}[st]||(()=>{}))();};
 function placeBack(){const b=$('#pageBack'),sc=document.querySelector('.screen.on'),wrap=b.parentElement;
-  if(!sc||S.step==='home'||sc.dataset.step==='home'){b.hidden=true;return;}b.hidden=false;
+  if(!sc||sc.dataset.step==='home'){b.hidden=true;return;}b.hidden=false;
   document.querySelectorAll('.screen.backpad').forEach(e=>{if(e!==sc)e.classList.remove('backpad');});
   const wr=wrap.getBoundingClientRect(),pl=parseFloat(getComputedStyle(wrap).paddingLeft)||0,x0=wr.left+pl,bw=b.offsetWidth,bh=b.offsetHeight;
   sc.classList.remove('backpad');const st=sc.getBoundingClientRect().top;
