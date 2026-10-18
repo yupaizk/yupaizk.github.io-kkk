@@ -449,8 +449,39 @@ button.addcol{background:none;font:inherit;padding:0;cursor:pointer}
 .log-media .shots{grid-template-columns:repeat(3,1fr)}
 @media (max-width:860px){.logday-grid>.card{grid-template-columns:1fr}}
 /* 公開版：沒有測試紀錄入口；放大存圖 */
-body.pub #openLog,body.pub #homeLog,body.pub .tech{display:none}
-.done-btn{width:100%;margin-top:10px}
+body.pub #openLog,body.pub #homeLog,body.pub .tech,body.pub #saveBox .saved,body.pub #saveBox textarea{display:none}
+/* 公開版：字小一點、東西之間的間隔大一點 */
+body.pub{font-size:15px}
+body.pub h2{font-size:28px;margin-bottom:12px}
+body.pub .lead{font-size:14px;line-height:1.75;margin-bottom:36px}
+body.pub .block{margin-top:36px}
+body.pub .block h3{margin-bottom:12px}
+body.pub .stat{font-size:13px;line-height:1.7}
+body.pub .actions{gap:12px;margin-top:32px}
+body.pub .chips{gap:10px}
+body.pub .btn{font-size:15px}
+body.pub .hero-lead{font-size:15px}
+body.pub .hero-steps{gap:40px}
+body.pub .hero-steps b{font-size:16px}
+body.pub .hero-steps span{font-size:14px}
+body.pub .result-actions{gap:12px}
+body.pub .split{gap:48px}
+body.pub .card,body.pub .pitch{line-height:1.75}
+@media (max-width:760px){
+  body.pub{font-size:14px}
+  body.pub h2{font-size:22px}
+  body.pub .lead{font-size:13.5px;margin-bottom:28px}
+  body.pub .block{margin-top:32px}
+  body.pub .btn{font-size:14px}
+  body.pub .hero-lead{font-size:14px}
+  body.pub .hero-steps{gap:28px}
+  body.pub .masthead{margin-bottom:28px}
+  body.pub details.tune>summary{flex-wrap:wrap;row-gap:2px;border-radius:20px;padding:12px 20px}
+  body.pub details.tune>summary small{flex-basis:100%;padding-left:28px}
+}
+.fb-box{margin-top:56px;padding-top:32px;border-top:1px solid var(--line);max-width:720px}
+.fb-box h3{font-size:18px;font-weight:500;margin:0 0 8px}
+.fb-box textarea{min-height:120px;margin-top:16px}
 .tag-pub{font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px;background:var(--ink);color:var(--bg);vertical-align:2px}
 .fb-note{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .save-img{display:block;width:100%;max-height:62vh;object-fit:contain;border-radius:14px;background:#fff;margin-top:12px;-webkit-touch-callout:default;user-select:auto}
@@ -1881,7 +1912,7 @@ function renderImgs(){
   if(!S.imgs.length)$('#pickView').hidden=true;
   S.imgs.forEach((x,i)=>document.querySelectorAll(`input[name="role${i}"]`).forEach(r=>r.onchange=()=>{x.roles=[...document.querySelectorAll(`input[name="role${i}"]:checked`)].map(e=>e.value);imgsChanged();}));
   const left=3-S.imgs.length;drop.hidden=left<=0||!$('#phonePanel').hidden;drop.classList.toggle('small',S.imgs.length>0);
-  $('#dropTxt').textContent=S.imgs.length?`再加一張（還可以 ${left} 張）`:'點這裡加照片';
+  $('#dropTxt').textContent=S.imgs.length?`再加一張（還可以 ${left} 張）`:(window.UT_PUBLIC===true?'點這裡選照片或拍照':'點這裡加照片');
   renderPal();
 }
 $('#openDesc').onclick=()=>{$('#descBox').hidden=false;$('#openDesc').hidden=true;$('#imgDesc').focus();};
@@ -3081,7 +3112,7 @@ $('#restart').onclick=()=>location.reload();
 
 /* ---------- 存檔與測試紀錄 ---------- */
 // 生成器版本：每次改版都要跟 kb/backend.md 最後一筆版本紀錄一起改，測試紀錄才看得出是哪一版做的
-const VERSION='雙模式 v66';
+const VERSION='雙模式 v67';
 let DB=null,ASSETS=null,DL=null,CUR=null,SAVE_TOKEN=0,PHOTO={file:null,id:null};
 (async()=>{if(!window.claude||!claude.use)return;
   try{DB=await claude.use('db');}catch(e){DB=null;}
@@ -3530,7 +3561,6 @@ $('#homeBtn2').onclick=()=>$('#homeBtn').onclick();
 // 統一的「上一頁」：照目前在哪一頁決定回去哪裡（原本各頁的返回按鈕留著當動作，畫面上藏起來）
 $('#pageBack').onclick=()=>{const st=S.step,c=id=>{const b=$(id);if(b)b.click();};
   const on=(document.querySelector('.screen.on')||{dataset:{}}).dataset.step;if(on==='try')return c('#tryBack');if(on==='log')return c('#logBack');
-  if(on==='thanks'){document.querySelector('nav.steps').style.display='';go(4);return;}
   ({0:()=>$('#homeBtn').onclick(),1:()=>c('#toMode'),2:()=>c('#qBack'),3:()=>c('#back2'),4:()=>c('#back3')}[st]||(()=>{}))();};
 function placeBack(){const b=$('#pageBack'),sc=document.querySelector('.screen.on'),wrap=b.parentElement;
   if(!sc||sc.dataset.step==='home'){b.hidden=true;return;}b.hidden=false;
@@ -3675,36 +3705,24 @@ if(UT_PUBLIC){
     <div class="actions"><a class="btn main" href="${src}" download="${esc(name||'UNDERTONE')}.png">下載圖片</a><button type="button" class="btn ghost" data-k="x">關掉</button></div>`);
     d.el.querySelector('[data-k="x"]').onclick=d.close;d.el.addEventListener('click',e=>{if(e.target===d.el)d.close();});};
   const stageShot=()=>new Promise(r=>{const cv=document.querySelector('#stage canvas');if(!cv)return r(null);cv.toBlob(b=>r(b),'image/png');});
-  {const ra=document.querySelector('.result-actions');
-    $('#toTry').insertAdjacentHTML('afterend','<button class="btn ghost" id="saveImg">存成圖片</button>');
-    ra.insertAdjacentHTML('afterend','<button class="btn ghost done-btn" id="doneBtn">完成，留句話給 UNDERTONE</button>');
-    $('#saveImg').onclick=async()=>{const b=await stageShot();if(b)showImage(URL.createObjectURL(b),'UNDERTONE');};
-    $('#doneBtn').onclick=()=>goThanks();}
+  {$('#toTry').insertAdjacentHTML('afterend','<button class="btn ghost" id="saveImg">存成圖片</button>');
+    $('#saveImg').onclick=async()=>{const b=await stageShot();if(b)showImage(URL.createObjectURL(b),'UNDERTONE');};}
   // 試戴照片：點一下放大，長按存
   showShare=async shot=>{$('#shareBox').hidden=true;if(shot)showImage(shot.url,'UNDERTONE-tryon');};
   {const tip=$('#tryTip');if(tip)tip.insertAdjacentHTML('afterend','<p class="stat">拍好的照片點一下會放大，長按就能存到手機。</p>');}
-  // 留言頁：做完一定會經過這一頁，不寫也可以
-  document.querySelector('section[data-step="log"]').insertAdjacentHTML('afterend',`<section class="screen" data-step="thanks">
-    <h2>謝謝你來玩</h2>
-    <p class="lead">有什麼想對 UNDERTONE 說的嗎？喜歡哪裡、哪裡怪怪的、想要它多會什麼，都可以寫。不寫也沒關係。</p>
-    <textarea id="fbText" maxlength="2000" placeholder="想說的話（可以不寫）" style="min-height:140px"></textarea>
-    <div class="actions"><button class="btn main" id="fbSend">送出</button><button class="btn ghost" id="fbSkip">不寫了，回首頁</button></div>
-    <p class="stat" id="fbMsg" role="status"></p></section>`);
-  let fbShown=false;
-  window.goThanks=()=>{fbShown=true;if(TRY.on)closeTry();
-    document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.dataset.step==='thanks'));
-    document.querySelector('nav.steps').style.display='none';document.body.classList.remove('atHome');window.scrollTo({top:0,behavior:'instant'});
-    if(typeof noLoop==='function')noLoop();requestAnimationFrame(placeBack);setTimeout(()=>$('#fbText').focus({preventScroll:true}),300);};
-  $('#fbSkip').onclick=()=>location.reload();
-  $('#fbSend').onclick=async()=>{const t=$('#fbText').value.trim();if(!t){location.reload();return;}
+  // 留言：放在成品頁最下面，不另開頁面；不寫也可以
+  document.querySelector('section[data-step="4"]').insertAdjacentHTML('beforeend',`<div class="fb-box" id="fbBox">
+    <h3>想對 UNDERTONE 說的話</h3>
+    <p class="stat">喜歡哪裡、哪裡怪怪的、想要它多會什麼，都可以寫。不寫也沒關係。</p>
+    <textarea id="fbText" maxlength="2000" placeholder="想說的話（可以不寫）"></textarea>
+    <div class="actions"><button class="btn main" id="fbSend">送出</button></div>
+    <p class="stat" id="fbMsg" role="status"></p></div>`);
+  $('#fbSend').onclick=async()=>{const t=$('#fbText').value.trim();if(!t){$('#fbMsg').textContent='還沒寫字喔，不寫也沒關係。';return;}
     $('#fbSend').disabled=true;$('#fbMsg').textContent='送出中…';
     try{if(DB)await DB.collection('feedback').add({text:t,record:CUR&&CUR.ref?CUR.ref.id:null});if(CUR&&CUR.ref)await CUR.ref.update({feedback:t,feedbackAt:Date.now()}).catch(()=>{});
-      $('#fbText').disabled=true;$('#fbMsg').textContent='收到了，謝謝你！';$('#fbSend').hidden=true;$('#fbSkip').textContent='回首頁';}
-    catch(e){$('#fbSend').disabled=false;$('#fbMsg').textContent='沒有送出去，再按一次試試。';}};
-  // 做好一組之後，要離開（回首頁、重新開始）都先到留言頁
-  const leave=()=>{if(S.plan&&!fbShown){goThanks();return true;}return false;};
-  {const h=$('#homeBtn').onclick;$('#homeBtn').onclick=()=>{if(S.step==='home')return;if(!leave())h();};}
-  $('#restart').onclick=()=>{if(!leave())location.reload();};
+      $('#fbText').value='';$('#fbMsg').textContent='收到了，謝謝你！還想說可以再寫。';}
+    catch(e){$('#fbMsg').textContent='沒有送出去，再按一次試試。';}
+    $('#fbSend').disabled=false;};
 }
 </script>
 </body>
