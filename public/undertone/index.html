@@ -448,6 +448,13 @@ button.addcol{background:none;font:inherit;padding:0;cursor:pointer}
 .log-media .shot{margin:0}
 .log-media .shots{grid-template-columns:repeat(3,1fr)}
 @media (max-width:860px){.logday-grid>.card{grid-template-columns:1fr}}
+/* 公開版：沒有測試紀錄入口；放大存圖 */
+body.pub #openLog,body.pub #homeLog,body.pub .tech{display:none}
+.done-btn{width:100%;margin-top:10px}
+.tag-pub{font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px;background:var(--ink);color:var(--bg);vertical-align:2px}
+.fb-note{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.save-img{display:block;width:100%;max-height:62vh;object-fit:contain;border-radius:14px;background:#fff;margin-top:12px;-webkit-touch-callout:default;user-select:auto}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 /* 等待畫面：實際秒數和每一部分的進度 */
 .loader .wait-t{font-size:13px;color:var(--soft);margin-top:6px;font-variant-numeric:tabular-nums}
 .wait-list{list-style:none;padding:0;margin:14px auto 0;max-width:280px;text-align:left;font-size:14px}
@@ -1919,7 +1926,9 @@ function loader(msg,extra){return `<div class="loader" role="status"><div class=
 setInterval(()=>document.querySelectorAll('.wait-t[data-t0]').forEach(e=>{if(!e.offsetParent)return;const n=Math.floor((Date.now()+0-e.dataset.t0)/1000),lim=+e.dataset.lim||0;
   e.textContent=`已經等了 ${n} 秒`+(lim?`｜最多等 ${lim} 秒，來不及的部分先用素材庫的樣式`:'');}),500);
 // 即時手繪的時間上限：到了就停掉還沒回來的，用素材庫的樣式代替，不讓人一直等
-const DRAW_LIMIT=30;
+// 公開版（play.html，window.UT_PUBLIC）多給一點時間
+const UT_PUBLIC=window.UT_PUBLIC===true;
+const DRAW_LIMIT=UT_PUBLIC?60:30;
 const LIVEDRAW={ac:null,t0:0,left(){return this.ac?DRAW_LIMIT-(Date.now()-this.t0)/1000:DRAW_LIMIT;}};
 function drawOpts(task){return {cache:false,effort:'low',task,signal:LIVEDRAW.ac?LIVEDRAW.ac.signal:undefined};}
 function renderAiBox(){
@@ -2212,9 +2221,9 @@ function renderRec(){
         ${(r.els||[]).length?`<div class="wide"><dt>元素</dt><dd>${esc(r.els.map(k=>EL_NAME[k]||k).join('、'))}</dd></div>`:''}
       </dl>
     </div>
-    ${KB_USED.size?`<p class="stat" style="margin:4px 0 0">這次送給 Claude 的後台：${esc([...KB_USED].join('｜'))}</p>`:''}
+    ${KB_USED.size?`<p class="stat tech" style="margin:4px 0 0">這次送給 Claude 的後台：${esc([...KB_USED].join('｜'))}</p>`:''}
     ${r.palFrom?`<p class="stat" style="margin:8px 0 0">配色照${esc(r.palFrom)}${r.palWarn?'｜'+esc(r.palWarn):''}</p>`:''}
-    <p class="stat" style="margin:8px 0 0">${KB?`依據：${esc(((r.basis&&r.basis.length)?r.basis:['後台・'+kbName(c.aes)]).join('、'))}${r.newTry&&r.newTry.length?`｜<b>新嘗試（後台沒有）</b>：${esc(r.newTry.join('、'))}`:''}`:'後台資料讀取中…'}</p>
+    <p class="stat tech" style="margin:8px 0 0">${KB?`依據：${esc(((r.basis&&r.basis.length)?r.basis:['後台・'+kbName(c.aes)]).join('、'))}${r.newTry&&r.newTry.length?`｜<b>新嘗試（後台沒有）</b>：${esc(r.newTry.join('、'))}`:''}`:'後台資料讀取中…'}</p>
     ${S.mode==='B'?palBlock:''}
     <details class="tune" id="tune" ${TUNE_OPEN?'open':''}><summary>想自己調整細節<small>風格、元素、顏色、甲型都可以改</small></summary><div class="tune-body">
     <div class="block" data-mb-hide><h3>風格</h3><div id="cAes"></div></div>
@@ -3072,7 +3081,7 @@ $('#restart').onclick=()=>location.reload();
 
 /* ---------- 存檔與測試紀錄 ---------- */
 // 生成器版本：每次改版都要跟 kb/backend.md 最後一筆版本紀錄一起改，測試紀錄才看得出是哪一版做的
-const VERSION='雙模式 v65';
+const VERSION='雙模式 v66';
 let DB=null,ASSETS=null,DL=null,CUR=null,SAVE_TOKEN=0,PHOTO={file:null,id:null};
 (async()=>{if(!window.claude||!claude.use)return;
   try{DB=await claude.use('db');}catch(e){DB=null;}
@@ -3212,13 +3221,14 @@ function logCard(r,onDel){const d=r.doc,A=d.answers||{},c=d.choice||{},n=d.negot
     const card=document.createElement('div');card.className='card';
     card.innerHTML=`<div class="log-media">${d.image?`<img class="shot" src="/_blob/${esc(d.image)}" alt="成品圖" loading="lazy">`:'<p class="note quiet">這筆沒有存到圖片</p>'}
       ${d.tryon&&d.tryon.length?`<p class="meta" style="margin-top:8px">試戴照片 ${d.tryon.length} 張</p><div class="shots">${d.tryon.map(id=>`<img src="/_blob/${esc(id)}" alt="試戴照片" loading="lazy">`).join('')}</div>`:''}</div><div class="log-info">
-      <h3>${fmtTime(d.createdAt)}${d.mode?`　模式 ${d.mode}`:''}${d.bRoute?`（${esc(d.bRoute)}）`:''}${d.revise?`　修改第 ${d.revise.round} 輪`:''}</h3>
+      <h3>${fmtTime(d.createdAt)}${d.source==='public'?'　<span class="tag-pub">線上</span>':''}${d.mode?`　模式 ${d.mode}`:''}${d.bRoute?`（${esc(d.bRoute)}）`:''}${d.revise?`　修改第 ${d.revise.round} 輪`:''}</h3>
       <p class="meta">${esc(d.version||'')}・第 ${d.run||1} 版${c.aes?`｜${esc(c.aes)}${c.finish&&FINISH[c.finish]?'＋'+esc(FINISH[c.finish].name):''}／${esc(SHAPE_NAME[c.shape]||c.shape||'')}／${esc(LEN_NAME[c.len]||c.len||'')}`:''}</p>
       ${d.photo&&d.photo.id?`<img class="photo" src="/_blob/${esc(d.photo.id)}" alt="上傳的照片">`:''}
       <p>照片：${d.photo&&d.photo.given?esc(d.photo.type||'有'):'沒有提供'}${d.photo&&d.photo.summary?'｜'+esc(d.photo.summary):''}</p>
       <p>心情：${esc(A.mood||'')}（${A.intensity||'-'}）｜要做的事：${esc([A.occ,A.occText].filter(Boolean).join('；')||'—')}</p>
       <p>方向：${esc(A.dir||'—')}｜感覺：${esc((A.feel||[]).join('、')||'—')}｜繁複：${esc(AMOUNTS[A.amount]??'—')}</p>
       ${A.note?`<p>想說的話：${esc(A.note)}</p>`:''}
+      ${d.feedback?`<p class="fb-note"><b>訪客留言</b>：${esc(d.feedback)}</p>`:''}
       <p>協商：推薦 ${n.total??'-'} 項，你改了 ${n.changed??'-'} 項${n.added?`，自己加了 ${n.added} 個`:''}</p>
       ${d.detail?`${d.detail.user&&d.detail.user.length?`<p style="margin-top:10px"><b>你做了什麼</b></p><ul class="maplist">${d.detail.user.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
         ${d.detail.sys&&d.detail.sys.length?`<p style="margin-top:10px"><b>系統做了什麼</b></p><ul class="maplist">${d.detail.sys.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
@@ -3520,6 +3530,7 @@ $('#homeBtn2').onclick=()=>$('#homeBtn').onclick();
 // 統一的「上一頁」：照目前在哪一頁決定回去哪裡（原本各頁的返回按鈕留著當動作，畫面上藏起來）
 $('#pageBack').onclick=()=>{const st=S.step,c=id=>{const b=$(id);if(b)b.click();};
   const on=(document.querySelector('.screen.on')||{dataset:{}}).dataset.step;if(on==='try')return c('#tryBack');if(on==='log')return c('#logBack');
+  if(on==='thanks'){document.querySelector('nav.steps').style.display='';go(4);return;}
   ({0:()=>$('#homeBtn').onclick(),1:()=>c('#toMode'),2:()=>c('#qBack'),3:()=>c('#back2'),4:()=>c('#back3')}[st]||(()=>{}))();};
 function placeBack(){const b=$('#pageBack'),sc=document.querySelector('.screen.on'),wrap=b.parentElement;
   if(!sc||sc.dataset.step==='home'){b.hidden=true;return;}b.hidden=false;
@@ -3646,6 +3657,54 @@ function draw(){
     drawNail2D(f,g,P,T,i);drawLines(f,g,P,T);if(f.sculpt)drawSculpt(f,g);drawDecos(f,g,P,T);
     pop();
   });
+}
+
+/* ---------- 公開版（play.html）：給不能來展場的人在網路上玩 ----------
+   照片直接在網頁上選（手機可以拍照或從相簿選）；看不到測試紀錄；成品和試戴照片點一下放大，長按就能存；
+   做完一定會看到留言頁（不寫也可以）。展覽版（index.html）不受影響。 */
+if(UT_PUBLIC){
+  document.body.classList.add('pub');
+  openLog=()=>{};
+  const _setMode=setMode;
+  setMode=m=>{_setMode(m);
+    $('#s1lead').textContent=m==='B'?'上傳 1 到 3 張參考圖（手機可以直接拍照或從相簿選），或直接寫下想要的元素。':'上傳一張今天的穿搭照片（手機可以直接拍照或從相簿選），UNDERTONE 會從裡面挑出今天的顏色。沒有也可以先跳過。';};
+  $('#dropTxt').textContent='點這裡選照片或拍照';$('#dropSub').textContent='最多 3 張';
+  {const pv=document.querySelector('.privacy');if(pv)pv.textContent='你上傳的照片和做好的指甲會存給作者當作研究紀錄，不會公開。';}
+  // 放大圖片：長按就能存到手機，電腦上按下載
+  window.showImage=(src,name)=>{const d=sheet(`<h3>存到手機</h3><p class="stat">長按圖片，選「儲存影像」或「下載圖片」。</p><img class="save-img" src="${src}" alt="${esc(name||'UNDERTONE')}">
+    <div class="actions"><a class="btn main" href="${src}" download="${esc(name||'UNDERTONE')}.png">下載圖片</a><button type="button" class="btn ghost" data-k="x">關掉</button></div>`);
+    d.el.querySelector('[data-k="x"]').onclick=d.close;d.el.addEventListener('click',e=>{if(e.target===d.el)d.close();});};
+  const stageShot=()=>new Promise(r=>{const cv=document.querySelector('#stage canvas');if(!cv)return r(null);cv.toBlob(b=>r(b),'image/png');});
+  {const ra=document.querySelector('.result-actions');
+    $('#toTry').insertAdjacentHTML('afterend','<button class="btn ghost" id="saveImg">存成圖片</button>');
+    ra.insertAdjacentHTML('afterend','<button class="btn ghost done-btn" id="doneBtn">完成，留句話給 UNDERTONE</button>');
+    $('#saveImg').onclick=async()=>{const b=await stageShot();if(b)showImage(URL.createObjectURL(b),'UNDERTONE');};
+    $('#doneBtn').onclick=()=>goThanks();}
+  // 試戴照片：點一下放大，長按存
+  showShare=async shot=>{$('#shareBox').hidden=true;if(shot)showImage(shot.url,'UNDERTONE-tryon');};
+  {const tip=$('#tryTip');if(tip)tip.insertAdjacentHTML('afterend','<p class="stat">拍好的照片點一下會放大，長按就能存到手機。</p>');}
+  // 留言頁：做完一定會經過這一頁，不寫也可以
+  document.querySelector('section[data-step="log"]').insertAdjacentHTML('afterend',`<section class="screen" data-step="thanks">
+    <h2>謝謝你來玩</h2>
+    <p class="lead">有什麼想對 UNDERTONE 說的嗎？喜歡哪裡、哪裡怪怪的、想要它多會什麼，都可以寫。不寫也沒關係。</p>
+    <textarea id="fbText" maxlength="2000" placeholder="想說的話（可以不寫）" style="min-height:140px"></textarea>
+    <div class="actions"><button class="btn main" id="fbSend">送出</button><button class="btn ghost" id="fbSkip">不寫了，回首頁</button></div>
+    <p class="stat" id="fbMsg" role="status"></p></section>`);
+  let fbShown=false;
+  window.goThanks=()=>{fbShown=true;if(TRY.on)closeTry();
+    document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.dataset.step==='thanks'));
+    document.querySelector('nav.steps').style.display='none';document.body.classList.remove('atHome');window.scrollTo({top:0,behavior:'instant'});
+    if(typeof noLoop==='function')noLoop();requestAnimationFrame(placeBack);setTimeout(()=>$('#fbText').focus({preventScroll:true}),300);};
+  $('#fbSkip').onclick=()=>location.reload();
+  $('#fbSend').onclick=async()=>{const t=$('#fbText').value.trim();if(!t){location.reload();return;}
+    $('#fbSend').disabled=true;$('#fbMsg').textContent='送出中…';
+    try{if(DB)await DB.collection('feedback').add({text:t,record:CUR&&CUR.ref?CUR.ref.id:null});if(CUR&&CUR.ref)await CUR.ref.update({feedback:t,feedbackAt:Date.now()}).catch(()=>{});
+      $('#fbText').disabled=true;$('#fbMsg').textContent='收到了，謝謝你！';$('#fbSend').hidden=true;$('#fbSkip').textContent='回首頁';}
+    catch(e){$('#fbSend').disabled=false;$('#fbMsg').textContent='沒有送出去，再按一次試試。';}};
+  // 做好一組之後，要離開（回首頁、重新開始）都先到留言頁
+  const leave=()=>{if(S.plan&&!fbShown){goThanks();return true;}return false;};
+  {const h=$('#homeBtn').onclick;$('#homeBtn').onclick=()=>{if(S.step==='home')return;if(!leave())h();};}
+  $('#restart').onclick=()=>{if(!leave())location.reload();};
 }
 </script>
 </body>

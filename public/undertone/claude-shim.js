@@ -152,6 +152,8 @@
   };
 
   const caps = { sample, db, assets, downloads, expo, phone };
+  // 公開版（play.html）沒有展覽安全碼和手機掃碼上傳：照片直接在網頁上選
+  if (window.UT_PUBLIC) { delete caps.expo; delete caps.phone; }
   window.claude = {
     async use(name) {
       if (!caps[name]) throw apiError('not_granted');

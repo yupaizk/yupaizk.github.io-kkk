@@ -14,6 +14,8 @@
 - `window.claude.use(...)` 由 `public/undertone/claude-shim.js` 提供，介面和 claude.ai 的一樣（sample.json、db.collection().doc()/add()/orderBy()、assets.upload/delete、downloads.save）。新功能需要新的介面時，加在 shim 和 `server.mjs`，不要改生成器去配合後端。
 - p5.js 和 MediaPipe Hands 放在 `public/undertone/vendor/`，展場沒有穩定網路也能載入。
 - 圖片網址是 `/_blob/<id>`，由 `server.mjs` 從 `data/blobs/` 讀出來。
+- 公開版 `public/undertone/play.html` 是從 `index.html` 產生的（只多 `window.UT_PUBLIC=true`），不要直接改：改完 `index.html` 一定要跑 `node tools/build-play.mjs`，兩版才會同步。公開版專用的行為寫在 `index.html` 的 `if(UT_PUBLIC){…}` 裡。
+- 公開模式（`公開網頁.bat` → `server.mjs --public`）另開對外伺服器（PUBLIC_PORT，預設 8789）走 cloudflared 通道，只放 play.html 和生成需要的 API，不能讀紀錄、不能刪改別人的資料。
 
 ## 執行方式
 

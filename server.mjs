@@ -62,11 +62,17 @@ const DAILY_LIMIT = parseInt(settings.DAILY_AI_LIMIT || "300", 10);
 // 展覽安全碼：展覽時打開測試紀錄、離開展覽模式都要輸入
 const EXPO_PIN = (settings.EXPO_PIN || "1829").trim();
 const KIOSK = process.argv.includes("--kiosk");
+// 公開模式（公開網頁.bat）：展覽結束後讓不能來的人在網路上玩。另開一個只對外的伺服器（PUBLIC_PORT），
+// 只給公開版頁面 play.html 和生成需要的 API；看不到測試紀錄、別人的照片，也不能刪改東西。用 cloudflared 通道對外。
+const PUBLIC_MODE = process.argv.includes("--public");
+const PUBLIC_PORT = parseInt(settings.PUBLIC_PORT || "8789", 10);
+// 每個人（IP）每天最多呼叫 Claude 幾次（一組大約 2～5 次），免得儲值金被少數人用光；全部人的上限還是 DAILY_AI_LIMIT
+const PUBLIC_PER_IP = parseInt(settings.PUBLIC_PER_IP || "40", 10);
 // 示範模式：不呼叫 Claude、不花錢，回假的設計結果，用來調介面。用「調介面（不花錢）.bat」開，或 settings.txt 寫 AI_MODE=demo
 const DEMO = process.argv.includes("--demo") || /^demo$/i.test((settings.AI_MODE || "").trim());
 // 省錢模式：展覽用（展覽啟動.bat 預設開）。生成器的提案改用規則、元素用素材庫，只有讀照片和用說的修改才呼叫 Claude，
 // 而且思考深度用 SAVE_EFFORT（預設 low）。settings.txt 寫 AI_MODE=full 可以關掉。
-const SAVE = !DEMO && (process.argv.includes("--save") || /^save$/i.test((settings.AI_MODE || "").trim())) && !/^full$/i.test((settings.AI_MODE || "").trim());
+const SAVE = !DEMO && !process.argv.includes("--public") && (process.argv.includes("--save") || /^save$/i.test((settings.AI_MODE || "").trim())) && !/^full$/i.test((settings.AI_MODE || "").trim());
 const SAVE_EFFORT = settings.SAVE_EFFORT || "low";
 // 手機上傳：用哪個埠、電腦的區網位址（不填就自動找）、要不要在 QR 旁邊放 Wi-Fi 的 QR
 const PHONE_PORT = parseInt(settings.PHONE_PORT || "8788", 10);
@@ -114,6 +120,60 @@ async function api(req, res, p, url) {
   }
   return json(res, { error: "not_found" }, 404);
 }
+
+/* ---------- 公開模式的對外伺服器 ---------- */
+const PUB_FIELDS = new Set(["like", "match", "catch", "comment", "tryon", "feedback", "feedbackAt"]);
+const pubCalls = new Map();
+const visitor = req => String(req.headers["cf-connecting-ip"] || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").split(",")[0].trim();
+const publicServer = http.createServer(async (req, res) => {
+  try {
+    const url = new URL(req.url, "http://localhost");
+    const p = decodeURIComponent(url.pathname), method = req.method;
+    res.setHeader("X-Robots-Tag", "noindex");
+    if (p === "/" || p === "/undertone" || p === "/undertone/" || p === "/undertone/index.html") { res.writeHead(302, { Location: "/undertone/play.html" }); return res.end(); }
+    if (method === "GET" && (p === "/undertone/play.html" || p === "/undertone/claude-shim.js" || p === "/undertone/kb/backend.json" || /^\/undertone\/(vendor|media)\//.test(p))) return await serveStatic(res, p);
+    if (method === "GET" && p.startsWith("/_blob/")) return await getBlob(res, p.slice(7));
+    if (p === "/api/me" || p === "/api/limits") return api(req, res, p, url);
+    if (p === "/api/ai" && method === "POST") {
+      const ip = visitor(req), day = new Date().toISOString().slice(0, 10), k = day + "|" + ip, n = (pubCalls.get(k) || 0) + 1;
+      if (pubCalls.size > 50000) pubCalls.clear();
+      pubCalls.set(k, n);
+      if (n > PUBLIC_PER_IP) return json(res, { error: "daily_limit" }, 429);
+      return ai(req, res);
+    }
+    if (p === "/api/blob" && method === "POST") {
+      if (+(req.headers["content-length"] || 0) > 12 * 1024 * 1024) return json(res, { error: "too_large" }, 413);
+      return putBlob(req, res, randomBytes(16).toString("hex"));
+    }
+    if (p === "/api/db/records" && method === "POST") {
+      const data = JSON.parse((await readBody(req)).toString("utf8") || "{}");
+      const id = [...randomBytes(20)].map(x => "abcdefghijklmnopqrstuvwxyz0123456789"[x % 36]).join("");
+      await writeJson(docFile("records", id), { ...data, source: "public", createdAt: Date.now() });
+      return json(res, { id });
+    }
+    let m;
+    if ((m = p.match(/^\/api\/db\/records\/([a-z0-9]{20})$/)) && method === "PATCH") {
+      // 只能改自己剛做的那一組（6 小時內、公開版做的），而且只能改評分、感想、試戴照片、留言
+      const f = docFile("records", m[1]), data = await readJson(f, null);
+      if (!data || data.source !== "public" || Date.now() - (data.createdAt || 0) > 6 * 3600 * 1000) return json(res, { error: "forbidden" }, 403);
+      const patch = JSON.parse((await readBody(req)).toString("utf8") || "{}"), ok = {};
+      for (const [key, v] of Object.entries(patch)) if (PUB_FIELDS.has(key)) ok[key] = typeof v === "string" ? v.slice(0, 2000) : v;
+      await writeJson(f, { ...data, ...ok });
+      return json(res, { id: m[1] });
+    }
+    if (p === "/api/db/feedback" && method === "POST") {
+      const d = JSON.parse((await readBody(req)).toString("utf8") || "{}");
+      const id = [...randomBytes(20)].map(x => "abcdefghijklmnopqrstuvwxyz0123456789"[x % 36]).join("");
+      await writeJson(docFile("feedback", id), { text: String(d.text || "").slice(0, 2000), record: /^[a-z0-9]{20}$/.test(d.record || "") ? d.record : null, createdAt: Date.now() });
+      return json(res, { id });
+    }
+    if (p.startsWith("/api/")) return json(res, { error: "forbidden" }, 403);
+    return notFound(res);
+  } catch (e) {
+    console.error("公開網頁：", e.message);
+    if (!res.headersSent) json(res, { error: "server_error" }, 500);
+  }
+});
 
 /* ---------- Claude ---------- */
 
@@ -301,7 +361,7 @@ function runTunnel(exe) {
   tunnelStarting = true;
   let cf;
   try {
-    cf = spawn(exe, ["tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${PHONE_PORT}`], { stdio: ["ignore", "pipe", "pipe"] });
+    cf = spawn(exe, ["tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${PUBLIC_MODE ? PUBLIC_PORT : PHONE_PORT}`], { stdio: ["ignore", "pipe", "pipe"] });
   } catch (e) {
     tunnelStarting = false;
     try { renameSync(exe, exe + ".bad"); } catch {}
@@ -310,7 +370,14 @@ function runTunnel(exe) {
   }
   const read = buf => {
     const m = String(buf).match(/https:\/\/(?!api\.)[a-z0-9-]+\.trycloudflare\.com/);
-    if (m && !TUNNEL) { TUNNEL = m[0]; tunnelStarting = false; tunnelRetry = 0; console.log(`手機掃碼：通道開好了，手機不用連同一個 Wi-Fi 也能用（${TUNNEL}）。`); }
+    if (m && !TUNNEL) {
+      TUNNEL = m[0]; tunnelStarting = false; tunnelRetry = 0;
+      if (PUBLIC_MODE) {
+        const link = `${TUNNEL}/undertone/play.html`;
+        console.log(`\n================================================\n  公開網頁開好了，把這個網址分享出去：\n  ${link}\n================================================\n（網址也存在「公開網址.txt」。關掉這個視窗、或電腦睡著，網頁就打不開；重新開會換一個新網址。）\n`);
+        writeFile(path.join(ROOT, "公開網址.txt"), link + "\r\n").catch(() => {});
+      } else console.log(`手機掃碼：通道開好了，手機不用連同一個 Wi-Fi 也能用（${TUNNEL}）。`);
+    }
   };
   cf.stdout.on("data", read); cf.stderr.on("data", read);
   cf.on("error", e => { tunnelStarting = false; console.log("手機掃碼：通道程式開不起來（" + e.message + "），先用同一個 Wi-Fi。"); });
@@ -653,6 +720,16 @@ server.listen(PORT, "127.0.0.1", () => {
       ? `✗ API 金鑰不對或已失效（開頭 ${API_KEY.slice(0, 10)}…，共 ${API_KEY.length} 個字）。到 https://console.anthropic.com/settings/keys 重新建立一把，貼進 settings.txt 後重新啟動。`
       : e instanceof Anthropic.NotFoundError ? `✗ 找不到模型 ${MODEL}，檢查 settings.txt 的 CLAUDE_MODEL。`
       : `✗ 檢查金鑰時出錯：${e.message}`));
+  if (PUBLIC_MODE) {
+    publicServer.listen(PUBLIC_PORT, "127.0.0.1", () => {
+      console.log(`公開模式：每個人每天最多呼叫 Claude ${PUBLIC_PER_IP} 次，全部人加起來每天最多 ${DAILY_LIMIT} 次（settings.txt 的 PUBLIC_PER_IP、DAILY_AI_LIMIT 可以改）。`);
+      console.log(`自己看測試紀錄和訪客留言：${link}`);
+      startTunnel();
+    });
+    publicServer.on("error", e => console.log(`公開網頁沒有開成（${e.code}）。`));
+    console.log("要關掉時，直接關這個視窗。\n");
+    return;
+  }
   rm(PHONE_DIR, { recursive: true, force: true }).catch(() => {});
   phoneServer.listen(PHONE_PORT, "0.0.0.0", () => {
     phoneServerUp = true;
